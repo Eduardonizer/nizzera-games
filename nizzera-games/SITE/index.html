@@ -889,6 +889,7 @@ refreshAll();
     theme:'<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 010 16z" fill="currentColor"/>',
     monitor:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
     ticket:'<path d="M4 8a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 000 4v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2a2 2 0 000-4z"/><path d="M14 6v12"/>',
+    lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>',
     chev:'<path d="M15 6l-6 6 6 6"/>'
   };
   var CATICON={"Todas":"news","Lançamentos":"rocket","Nintendo":"pad","Serviços":"cloud","Steam":"monitor","Game Pass":"ticket","Esports":"trophy","Eventos":"cal"};
@@ -906,6 +907,7 @@ refreshAll();
   h+='<div class="grp">Ferramentas</div>'
    +'<button class="item" type="button" data-act="search" title="Buscar notícia">'+svg("search")+'<span class="lbl">Buscar</span></button>'
    +'<button class="item" type="button" data-act="theme" title="Alternar tema claro/escuro">'+svg("theme")+'<span class="lbl">Tema claro/escuro</span></button>'
+   +'<button class="item" type="button" data-act="admin" title="Entrar na área admin">'+svg("lock")+'<span class="lbl">Login admin</span></button>'
    +'<div style="flex:1"></div><div class="foot"><button class="item collapse" type="button" data-act="collapse" title="Recolher ou expandir menu">'+svg("chev")+'<span class="lbl">Recolher menu</span></button></div>';
   list.innerHTML=h;
   items=[].slice.call(list.querySelectorAll(".item"));
@@ -937,6 +939,7 @@ refreshAll();
     else if(it.dataset.cat){setCat(it.dataset.cat);go("noticias");closeMenu()}
     else if(it.dataset.act==="search"){closeMenu();go("noticias");setTimeout(function(){var q=document.querySelector(".search");if(q)q.focus({preventScroll:true})},smooth?450:0)}
     else if(it.dataset.act==="theme"){document.getElementById("theme").click()}
+    else if(it.dataset.act==="admin"){closeMenu();if(location.hash==="#admin")dispatchEvent(new Event("hashchange"));else location.hash="admin"}
     else if(it.dataset.act==="collapse"){var c=html.classList.toggle("nav-collapsed");try{localStorage.setItem("nz-nav",c?"1":"0")}catch(_){}}
   });
   mbtn.onclick=function(){openMenu(true)};
@@ -974,13 +977,11 @@ refreshAll();
   function idx(id){for(var i=0;i<DATA.news.length;i++)if(DATA.news[i].id===id)return i;return -1}
   function fld(label,id,val,type){return '<label for="'+id+'">'+label+'</label><input class="a-in" id="'+id+'" type="'+(type||"text")+'" value="'+esc(val==null?"":val)+'">'}
   function area(label,id,val,rows){return '<label for="'+id+'">'+label+'</label><textarea class="a-in" id="'+id+'" rows="'+rows+'">'+esc(val==null?"":val)+'</textarea>'}
-  function hashPw(p){
-    if(window.crypto&&crypto.subtle&&window.TextEncoder)return crypto.subtle.digest("SHA-256",new TextEncoder().encode("nz:"+p)).then(function(b){return [].map.call(new Uint8Array(b),function(x){return ("0"+x.toString(16)).slice(-2)}).join("")});
-    var h=5381;for(var i=0;i<p.length;i++)h=((h<<5)+h+p.charCodeAt(i))|0;return Promise.resolve("d"+h);
+  function authed(){return authOk}
+  function api(method,path,body){
+    return fetch(path,{method:method,credentials:"same-origin",headers:{"Content-Type":"application/json"},body:body===undefined?undefined:JSON.stringify(body)})
+      .then(function(r){return r.json().catch(function(){return {}}).then(function(j){j.status=r.status;return j})});
   }
-  var fails=0,lockUntil=0;
-  function authed(){if(authOk)return true;try{return sessionStorage.getItem(SKEY)==="1"}catch(_){return false}}
-  function login(){authOk=true;try{sessionStorage.setItem(SKEY,"1")}catch(_){}}
 
   /* ---- salvar (com reversão se o navegador não deixar gravar) ---- */
   function persist(){
@@ -995,7 +996,12 @@ refreshAll();
   function status(){var c=$("#a-status");if(!c)return;var u=lsGet(UKEY)==="1";c.className="a-chip"+(u?" warn":"");c.textContent=u?"● Alterações ainda não publicadas":"✓ Tudo publicado"}
 
   /* ---- abrir / fechar ---- */
-  function openAdmin(){adm.hidden=false;html.classList.add("adm-open");paint();adm.scrollTop=0}
+  function openAdmin(){
+    adm.hidden=false;html.classList.add("adm-open");adm.scrollTop=0;
+    if(authOk){paint();return}
+    adm.innerHTML='<div class="a-login"><div class="a-card"><p class="a-hint">Verificando acesso…</p></div></div>';
+    api("GET","/api/me").then(function(r){authOk=!!r.ok;paint()},function(){authOk=false;paint()});
+  }
   function closeAdmin(skip){
     if(!adm.hidden&&st.dirty&&!skip&&!confirm("Há alterações não salvas. Sair mesmo assim?"))return false;
     st.dirty=false;st.draft=null;st.isNew=false;st.sel=null;adm.hidden=true;html.classList.remove("adm-open");
@@ -1006,12 +1012,9 @@ refreshAll();
 
   /* ---- login ---- */
   function loginView(){
-    var has=!!lsGet(AKEY);
-    adm.innerHTML='<div class="a-login"><form id="a-lf" class="a-card" novalidate><h2>'+(has?"Entrar na área admin":"Criar senha do admin")+'</h2><p class="a-hint">'+(has?"Digite a senha deste painel.":"Defina uma senha para abrir este painel neste navegador.")+'</p>'
-      +'<label for="l-pw">Senha</label><input class="a-in" id="l-pw" type="password" autocomplete="'+(has?"current-password":"new-password")+'">'
-      +(has?"":'<label for="l-pw2">Repita a senha</label><input class="a-in" id="l-pw2" type="password" autocomplete="new-password">')
-      +'<div class="a-err" id="l-err" role="alert"></div><div class="a-act"><button class="a-btn pri" type="submit">'+(has?"Entrar":"Criar senha e entrar")+'</button><button class="a-btn" type="button" id="l-back">Voltar ao site</button></div>'
-      +'<p class="a-hint">Atenção: esta senha só tranca o painel neste navegador. Ela não protege o arquivo do site.</p></form></div>';
+    adm.innerHTML='<div class="a-login"><form id="a-lf" class="a-card" novalidate><h2>Entrar na área admin</h2><p class="a-hint">Digite a senha do administrador.</p>'
+      +'<label for="l-pw">Senha</label><input class="a-in" id="l-pw" type="password" autocomplete="current-password">'
+      +'<div class="a-err" id="l-err" role="alert"></div><div class="a-act"><button class="a-btn pri" type="submit" id="l-go">Entrar</button><button class="a-btn" type="button" id="l-back">Voltar ao site</button></div></form></div>';
     setTimeout(function(){var i=$("#l-pw");if(i)i.focus()},30);
   }
 
@@ -1156,11 +1159,9 @@ refreshAll();
   /* ---- aba Publicar e backup ---- */
   function backView(){
     $("#a-body").innerHTML='<div class="a-wrap">'
-      +'<div class="a-card"><h2>Publicar suas alterações</h2><ol class="a-steps"><li>Edite as notícias e os textos (as mudanças já aparecem neste navegador).</li><li>Clique em <b>Baixar site atualizado</b>.</li><li>Troque o arquivo antigo por esse novo no lugar onde o site está hospedado.</li></ol><p class="a-hint">Até você fazer isso, só você vê as alterações, e só neste navegador.</p><div class="a-act"><button class="a-btn pri" type="button" id="a-dl">Baixar site atualizado (.html)</button></div></div>'
+      +'<div class="a-card"><h2>Publicar no site</h2><p class="a-hint">Suas alterações já aparecem aqui no painel. Para valerem para todo mundo, clique em publicar: o arquivo é gravado no GitHub e a Vercel atualiza o site em cerca de 1 minuto.</p><div class="a-act"><button class="a-btn pri" type="button" id="a-pub">Publicar no site agora</button><button class="a-btn" type="button" id="a-dl">Baixar site atualizado (.html)</button></div></div>'
       +'<div class="a-card"><h2>Backup das notícias</h2><p class="a-hint">Um arquivo .json com todas as notícias, categorias e textos. Serve para guardar uma cópia ou levar para outro navegador.</p><div class="a-act"><button class="a-btn" type="button" id="a-json">Baixar notícias (.json)</button><button class="a-btn" type="button" id="a-imp">Importar notícias (.json)</button></div><input type="file" id="a-impf" accept=".json,application/json" hidden></div>'
-      +'<form id="a-pwf" class="a-card" novalidate><h2>Senha do painel</h2>'+fld("Nova senha","p-new","","password")+fld("Repita a nova senha","p-new2","","password")+'<div class="a-err" id="p-err" role="alert"></div><div class="a-act"><button class="a-btn" type="submit">Trocar senha</button></div></form>'
-      +'<div class="a-card"><h2>Voltar ao original</h2><p class="a-hint">Apaga as alterações feitas neste navegador e volta ao conteúdo que está dentro do arquivo do site.</p><div class="a-act"><button class="a-btn dan" type="button" id="a-reset">Descartar alterações deste navegador</button></div></div></div>';
-    var f=$("#p-new");if(f)f.setAttribute("autocomplete","new-password");
+      +'<div class="a-card"><h2>Voltar ao original</h2><p class="a-hint">Apaga as alterações ainda não publicadas deste navegador e volta ao conteúdo que está no site publicado.</p><div class="a-act"><button class="a-btn dan" type="button" id="a-reset">Descartar alterações deste navegador</button></div></div></div>';
   }
   function norm(d){
     if(!d||!Array.isArray(d.news))return null;
@@ -1202,7 +1203,7 @@ refreshAll();
     if(ds.cm!==undefined){var i=+ds.ci,j=i+(+ds.cm);if(j>=0&&j<st.cats.length){var x=st.cats[i];st.cats[i]=st.cats[j];st.cats[j]=x;catRows()}return}
     if(ds.cd!==undefined){st.cats.splice(+ds.cd,1);catRows();return}
     if(id==="l-back"||id==="a-view"){closeAdmin();return}
-    if(id==="a-out"){if(closeAdmin()){authOk=false;try{sessionStorage.removeItem(SKEY)}catch(_){}}return}
+    if(id==="a-out"){if(closeAdmin()){authOk=false;api("POST","/api/logout")}return}
     if(id==="a-new"){addNew();return}
     if(id==="a-sort"){mutate(function(){DATA.news.sort(function(a,b){return String(b.date).localeCompare(String(a.date))})},"Ordenado por data (mais recentes primeiro).");items();return}
     if(id==="a-up"){$("#a-file").click();return}
@@ -1211,6 +1212,17 @@ refreshAll();
     if(id==="a-del"){delNews();return}
     if(id==="a-addcat"){st.cats.push({orig:null,name:""});catRows();var ins=adm.querySelectorAll(".a-crow input[data-ci]");var li=ins[ins.length-1];if(li)li.focus();return}
     if(id==="a-savecats"){saveCats();return}
+    if(id==="a-pub"){
+      if(!confirm("Publicar as alterações no site agora?"))return;
+      t.disabled=true;t.textContent="Publicando…";
+      api("POST","/api/publish",{html:buildHtml()}).then(function(r){
+        t.disabled=false;t.textContent="Publicar no site agora";
+        if(r.ok){lsDel(UKEY);status();toast("Publicado! O site atualiza em cerca de 1 minuto.")}
+        else if(r.status===401){authOk=false;toast("Sua sessão expirou. Entre de novo.",true);paint()}
+        else toast(r.error||"Não consegui publicar.",true);
+      },function(){t.disabled=false;t.textContent="Publicar no site agora";toast("Não consegui falar com o servidor.",true)});
+      return;
+    }
     if(id==="a-dl"){download(FILE,"text/html",buildHtml());lsDel(UKEY);status();toast("Arquivo baixado. Agora é só trocar pelo arquivo antigo no seu site.");return}
     if(id==="a-json"){download("nizzera-noticias.json","application/json",JSON.stringify(DATA,null,1));toast("Backup baixado.");return}
     if(id==="a-imp"){$("#a-impf").click();return}
@@ -1219,24 +1231,17 @@ refreshAll();
   adm.addEventListener("submit",function(e){
     e.preventDefault();var id=e.target.id;
     if(id==="a-lf"){
-      var pw=$("#l-pw").value,has=!!lsGet(AKEY),err=$("#l-err");
-      if(has){
-        if(Date.now()<lockUntil){err.textContent="Muitas tentativas. Aguarde "+Math.ceil((lockUntil-Date.now())/1000)+"s e tente de novo.";return}
-        hashPw(pw).then(function(h){if(h===lsGet(AKEY)){fails=0;login();paint()}else{fails++;if(fails>=5){fails=0;lockUntil=Date.now()+60000;err.textContent="Muitas tentativas. Aguarde 60s."}else err.textContent="Senha incorreta."}})}
-      else{
-        if(pw.length<8){err.textContent="Use pelo menos 8 caracteres.";return}
-        if(pw!==$("#l-pw2").value){err.textContent="As senhas não conferem.";return}
-        hashPw(pw).then(function(h){if(!lsSet(AKEY,h)){err.textContent="Este navegador bloqueou o armazenamento, então não dá para criar a senha.";return}login();paint()});
-      }
+      var pw=$("#l-pw").value,err=$("#l-err"),go=$("#l-go");err.textContent="";
+      if(!pw){err.textContent="Digite a senha.";return}
+      go.disabled=true;
+      api("POST","/api/login",{password:pw}).then(function(r){
+        if(r.ok){authOk=true;paint()}
+        else{go.disabled=false;err.textContent=r.error||"Não consegui entrar."}
+      },function(){go.disabled=false;err.textContent="Não consegui falar com o servidor. Confira sua internet."});
     }
     else if(id==="a-form")saveNews();
     else if(id==="a-site")saveSite();
-    else if(id==="a-pwf"){
-      var p=$("#p-new").value,er=$("#p-err");er.textContent="";
-      if(p.length<8){er.textContent="Use pelo menos 8 caracteres.";return}
-      if(p!==$("#p-new2").value){er.textContent="As senhas não conferem.";return}
-      hashPw(p).then(function(h){if(lsSet(AKEY,h)){$("#p-new").value="";$("#p-new2").value="";toast("Senha alterada.")}else er.textContent="Não consegui gravar a nova senha neste navegador."});
-    }
+
   });
   adm.addEventListener("input",function(e){
     var t=e.target;
