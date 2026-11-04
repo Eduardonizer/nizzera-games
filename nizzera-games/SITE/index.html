@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<title>Nizzera Games – notícias de games</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cobalt:#2433f0; --ink:#0e1033; --paper:#f2f0ff; --sun:#ffd23f; --coral:#ff5c7a;
+  --bg:var(--paper); --fg:var(--ink); --card:#fff; --muted:#55597f; --line:#d9d6f5;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#0b0d2b;--fg:#f2f0ff;--card:#15184a;--muted:#a4a8d6;--line:#2a2f75}
+}
+:root[data-theme="dark"]{--bg:#0b0d2b;--fg:#f2f0ff;--card:#15184a;--muted:#a4a8d6;--line:#2a2f75}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 1rem/1.6 "DM Sans",system-ui,sans-serif}
+h1,h2,h3{font-family:"Bricolage Grotesque","DM Sans",system-ui,sans-serif;line-height:1.05;margin:0}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+
+/* topo */
+.hero{position:relative;background:var(--cobalt);color:#fff;overflow:hidden}
+#grid{position:absolute;inset:0;width:100%;height:100%}
+.wrap{position:relative;max-width:1120px;margin:0 auto;padding:0 20px}
+nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0}
+.logo{font:800 1.5rem "Bricolage Grotesque",sans-serif;text-decoration:none;display:flex;gap:10px;align-items:center}
+.logo i{width:18px;height:18px;background:var(--sun);display:inline-block;box-shadow:6px 6px 0 var(--coral);animation:blink 2.4s steps(2) infinite}
+@keyframes blink{50%{transform:translate(2px,2px);box-shadow:4px 4px 0 var(--coral)}}
+.tbtn{background:rgba(255,255,255,.15);color:#fff;border:0;border-radius:99px;padding:8px 16px;font:inherit;cursor:pointer}
+.tbtn:hover{background:rgba(255,255,255,.28)}
+.heroin{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:48px 0 72px}
+.heroin h1{font-size:clamp(2.4rem,6.2vw,4.8rem);font-weight:800;letter-spacing:-.02em}
+.heroin p{max-width:46ch;font-size:1.1rem;opacity:.92;margin:18px 0 0}
+.typed::after{content:"";display:inline-block;width:.45em;height:.9em;background:var(--sun);margin-left:6px;vertical-align:-.05em;animation:cur 1s steps(2) infinite}
+@keyframes cur{50%{opacity:0}}
+.feat{background:var(--paper);color:var(--ink);border-radius:20px;overflow:hidden;cursor:pointer;border:0;text-align:left;font:inherit;padding:0;width:100%;transition:transform .25s}
+.feat:hover{transform:rotate(-1.2deg) translateY(-4px)}
+.feat .art{aspect-ratio:16/9}
+.feat .tx{padding:18px 20px 22px}
+.feat h2{font-size:1.6rem;margin:8px 0}
+
+/* filtros */
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:40px 0 24px}
+.chip{border:2px solid var(--line);background:transparent;color:var(--fg);border-radius:99px;padding:7px 16px;font:500 .95rem "DM Sans",sans-serif;cursor:pointer;transition:background .2s,border-color .2s,transform .2s}
+.chip:hover{border-color:var(--cobalt)}
+.chip[aria-pressed="true"]{background:var(--cobalt);border-color:var(--cobalt);color:#fff;transform:scale(1.04)}
+.search{margin-left:auto;border:2px solid var(--line);background:var(--card);color:var(--fg);border-radius:99px;padding:8px 16px;font:inherit;min-width:220px}
+.search:focus{border-color:var(--cobalt);outline:none}
+
+/* cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px;padding-bottom:64px}
+.card{background:var(--card);border-radius:16px;overflow:hidden;cursor:pointer;border:0;text-align:left;font:inherit;color:inherit;padding:0;display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-6px);box-shadow:8px 8px 0 var(--sun)}
+.card .art{aspect-ratio:16/10}
+.card .tx{padding:16px 18px 20px;display:flex;flex-direction:column;gap:8px;flex:1}
+.card h3{font-size:1.25rem}
+.card p{margin:0;color:var(--muted);font-size:.95rem}
+.meta{font-size:.85rem;color:var(--muted)}
+.tag{display:inline-block;font-weight:700;font-size:.8rem;padding:2px 10px;border-radius:99px;background:var(--sun);color:var(--ink);width:fit-content}
+.art svg,.art img{display:block;width:100%;height:100%}
+.art img{object-fit:cover;background:var(--line)}
+.art{overflow:hidden}
+.empty{grid-column:1/-1;text-align:center;padding:48px 0;color:var(--muted)}
+.card.in{animation:pop .45s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes pop{from{opacity:0;transform:scale(.9)}}
+
+/* modo carrossel */
+.mode{display:inline-flex;border:2px solid var(--line);border-radius:99px;overflow:hidden}
+.mode button{border:0;background:transparent;color:var(--fg);font:500 .9rem "DM Sans",sans-serif;padding:7px 14px;cursor:pointer;transition:background .2s}
+.mode button:hover{background:rgba(36,51,240,.12)}
+.mode button[aria-pressed="true"]{background:var(--cobalt);color:#fff}
+.marq{overflow:hidden;padding:16px 0 72px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent);mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)}
+.marq .track{display:flex;align-items:stretch;width:max-content;animation:marq var(--dur,120s) linear infinite;will-change:transform}
+.marq:hover .track,.marq:focus-within .track,.marq.paused .track{animation-play-state:paused}
+.marq .card{flex:none;width:300px;margin-right:22px}
+@keyframes marq{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.marq{overflow-x:auto;-webkit-mask-image:none;mask-image:none}.marq .card[aria-hidden="true"]{display:none}}
+
+/* modal */
+dialog{border:0;border-radius:20px;padding:0;max-width:640px;width:calc(100% - 32px);background:var(--card);color:var(--fg)}
+dialog::backdrop{background:rgba(14,16,51,.7);backdrop-filter:blur(4px)}
+dialog[open]{animation:pop .3s ease-out}
+dialog .art{aspect-ratio:16/8}
+dialog .tx{padding:22px 26px 28px}
+dialog h2{font-size:2rem;margin:10px 0}
+dialog .close{position:absolute;top:12px;right:12px;border:0;border-radius:50%;width:38px;height:38px;font-size:1.2rem;cursor:pointer;background:var(--paper);color:var(--ink)}
+footer{background:var(--ink);color:#c9ccf5;padding:32px 0;font-size:.9rem}
+@media (max-width:820px){.heroin{grid-template-columns:1fr;padding-bottom:48px}.search{margin-left:0;width:100%}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+dialog a{color:inherit;text-decoration:underline;font-weight:700}
+
+/* ===== menu lateral ===== */
+:root{--sw:232px}
+html.nav-collapsed{--sw:76px}
+html{scroll-behavior:smooth}
+body{padding-left:var(--sw);transition:padding-left .25s}
+#topo,#feat,#noticias{scroll-margin-top:16px}
+.side{position:fixed;inset:0 auto 0 0;width:var(--sw);background:var(--ink);color:#e6e8ff;z-index:20;display:flex;flex-direction:column;padding:calc(16px + env(safe-area-inset-top,0px)) 12px calc(16px + env(safe-area-inset-bottom,0px));border-right:1px solid rgba(255,255,255,.08);transition:width .25s,transform .25s,visibility 0s}
+.side .brand{display:flex;align-items:center;gap:12px;padding:6px 12px;text-decoration:none;font:800 1.15rem "Bricolage Grotesque",sans-serif;color:#fff;white-space:nowrap}
+.side .brand i{flex:none;width:16px;height:16px;background:var(--sun);box-shadow:5px 5px 0 var(--coral);margin-right:5px}
+.slist{flex:1;overflow-y:auto;overflow-x:hidden;margin-top:14px;display:flex;flex-direction:column}
+.grp{font:700 .7rem/1 "DM Sans",sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#8a8fd0;margin:20px 12px 8px;white-space:nowrap}
+.item{position:relative;display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border-radius:12px;border:0;background:transparent;color:inherit;font:500 .95rem "DM Sans",sans-serif;text-align:left;text-decoration:none;cursor:pointer;white-space:nowrap;transition:background .2s}
+.item:hover{background:rgba(255,255,255,.09)}
+.item svg{flex:none;width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.item .n{margin-left:auto;font-size:.75rem;background:rgba(255,255,255,.12);padding:1px 9px;border-radius:99px}
+.item[aria-current="true"]{background:var(--cobalt);color:#fff;font-weight:700}
+.item[aria-current="true"] .n{background:rgba(255,255,255,.25)}
+.item[aria-current="true"]::before{content:"";position:absolute;left:-12px;top:50%;width:6px;height:20px;transform:translateY(-50%);background:var(--sun);border-radius:0 3px 3px 0}
+.side .foot{border-top:1px solid rgba(255,255,255,.1);padding-top:10px;margin-top:10px}
+.item.collapse svg{transition:transform .25s}
+.mbtn,.sclose,.scrim{display:none}
+@media (min-width:900px){
+  html.nav-collapsed .lbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  html.nav-collapsed .item .n{display:none}
+  html.nav-collapsed .item{justify-content:center;padding:12px 0}
+  html.nav-collapsed .item[aria-current="true"]::before{left:-12px}
+  html.nav-collapsed .grp{font-size:0;height:1px;background:rgba(255,255,255,.12);margin:14px 10px}
+  html.nav-collapsed .side .brand{padding:6px 0;justify-content:center;font-size:0;gap:0}
+  html.nav-collapsed .side .brand i{margin:0 5px 0 0}
+  html.nav-collapsed .item.collapse svg{transform:rotate(180deg)}
+}
+@media (max-width:899px){
+  :root{--sw:0px}
+  .side{width:min(280px,86vw);transform:translateX(-100%);visibility:hidden;transition:transform .25s,visibility 0s .25s}
+  html.menu-open .side{transform:none;visibility:visible;transition:transform .25s}
+  .item.collapse{display:none}
+  .mbtn{display:grid;place-items:center;position:fixed;z-index:30;top:calc(12px + env(safe-area-inset-top,0px));left:12px;width:44px;height:44px;border:0;border-radius:50%;background:var(--sun);color:var(--ink);cursor:pointer;box-shadow:3px 3px 0 var(--coral)}
+  .mbtn svg,.sclose svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
+  html.menu-open .mbtn{display:none}
+  .sclose{display:grid;place-items:center;position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:12px;width:38px;height:38px;border:0;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;cursor:pointer}
+  .scrim{display:block;position:fixed;inset:0;z-index:15;background:rgba(14,16,51,.6);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .25s}
+  html.menu-open .scrim{opacity:1;pointer-events:auto}
+  nav .logo{margin-left:56px}
+}
+footer .by{margin:14px 0 0;display:flex;align-items:center;gap:10px;font-size:1rem}
+footer .by::before{content:"";width:10px;height:10px;background:var(--sun);box-shadow:4px 4px 0 var(--coral);margin-right:4px}
+footer .by strong{color:#fff;font-weight:700}
+
+/* ===== área admin ===== */
+html.adm-open{overflow:hidden}
+.adm[hidden]{display:none}
+.adm{position:fixed;inset:0;z-index:100;background:var(--bg);color:var(--fg);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+.a-top{display:flex;align-items:center;gap:10px;padding:12px 20px;background:var(--ink);color:#fff;flex-wrap:wrap}
+.a-title{font:800 1.25rem "Bricolage Grotesque",sans-serif;margin-right:6px}
+.a-sp{flex:1}
+.a-chip{font-size:.8rem;padding:3px 12px;border-radius:99px;background:rgba(255,255,255,.14)}
+.a-chip.warn{background:var(--sun);color:var(--ink);font-weight:700}
+.a-btn{border:2px solid var(--line);background:var(--card);color:var(--fg);border-radius:12px;padding:8px 14px;font:500 .92rem "DM Sans",sans-serif;cursor:pointer;transition:border-color .2s,background .2s}
+.a-btn:hover{border-color:var(--cobalt)}
+.a-btn.pri{background:var(--cobalt);border-color:var(--cobalt);color:#fff;font-weight:700}
+.a-btn.dan{color:#d6294b;border-color:#d6294b}
+.a-top .a-btn{background:rgba(255,255,255,.12);color:#fff;border-color:transparent}
+.a-top .a-btn:hover{background:rgba(255,255,255,.24)}
+.a-tabs{display:flex;gap:6px;padding:8px 20px 0;border-bottom:1px solid var(--line);overflow-x:auto;background:var(--card)}
+.a-tab{border:0;background:transparent;color:var(--muted);padding:10px 14px;font:700 .95rem "DM Sans",sans-serif;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+.a-tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--cobalt)}
+.a-body{flex:1;overflow:auto;padding:20px calc(20px + env(safe-area-inset-right,0px)) calc(40px + env(safe-area-inset-bottom,0px))}
+.a-wrap{max-width:760px;margin:0 auto;display:grid;gap:20px}
+.a-card{background:var(--card);border-radius:16px;padding:20px 22px 24px;border:1px solid var(--line)}
+.a-card h2{font-size:1.35rem;margin:0 0 8px}
+.a-card h3{font-size:1.05rem;margin:22px 0 4px}
+.a-card label{display:block;font-weight:700;font-size:.85rem;margin:14px 0 6px}
+.a-in{width:100%;border:2px solid var(--line);background:var(--bg);color:var(--fg);border-radius:12px;padding:9px 12px;font:inherit}
+.a-in:focus{border-color:var(--cobalt);outline:none}
+textarea.a-in{resize:vertical;line-height:1.5}
+.a-hint{color:var(--muted);font-size:.88rem;margin:6px 0}
+.a-err{color:#d6294b;font-weight:700;font-size:.9rem;min-height:1.2em;margin-top:10px}
+.a-act{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.a-news{display:grid;grid-template-columns:minmax(270px,360px) 1fr;gap:20px;align-items:start;max-width:1200px;margin:0 auto}
+.a-list{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;position:sticky;top:0;max-height:calc(100vh - 170px);display:flex;flex-direction:column;gap:10px}
+.a-lhead{display:flex;gap:8px;flex-wrap:wrap}
+.a-items{overflow:auto;display:grid;gap:6px;align-content:start}
+.a-rowi{display:grid;grid-template-columns:72px 1fr auto;gap:10px;align-items:center;padding:6px;border-radius:12px;border:2px solid transparent}
+.a-rowi.on{background:rgba(36,51,240,.1);border-color:var(--cobalt)}
+.a-th{width:72px;aspect-ratio:16/10;border-radius:8px;background:var(--line)}
+.a-pick{border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer;padding:0;display:grid;gap:2px;min-width:0}
+.a-pick b{font-size:.92rem;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.a-pick small{color:var(--muted)}
+.a-mv{display:grid;gap:4px}
+.a-mv button,.a-crow button{border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:8px;width:30px;height:26px;cursor:pointer}
+.a-mv button:hover,.a-crow button:hover:not(:disabled){border-color:var(--cobalt)}
+.a-crow button:disabled{opacity:.35;cursor:not-allowed}
+.a-ph{color:var(--muted)}
+.a-row3{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:12px}
+.a-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.a-cover{display:grid;grid-template-columns:minmax(200px,320px) 1fr;gap:18px;align-items:start;margin-top:8px}
+.a-prev{aspect-ratio:16/10;border-radius:12px;background:var(--line);width:100%}
+.a-chk{display:flex!important;align-items:center;gap:10px;font-weight:500!important;font-size:.95rem!important;margin-top:18px!important}
+.a-chk input{width:18px;height:18px}
+.a-crow{display:grid;grid-template-columns:1fr auto auto auto auto;gap:8px;align-items:center;margin:8px 0}
+.a-steps{margin:8px 0;padding-left:20px}
+.a-steps li{margin:4px 0}
+.a-login{flex:1;display:grid;place-items:center;padding:20px}
+.a-login .a-card{width:min(420px,100%)}
+.a-toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:120;background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;max-width:min(92vw,520px);font-size:.95rem;transition:opacity .25s,transform .25s;box-shadow:4px 4px 0 var(--sun)}
+.a-toast.show{opacity:1;transform:translate(-50%,0)}
+.a-toast.err{background:#c62848;box-shadow:4px 4px 0 var(--ink)}
+footer .adminlink{margin:10px 0 0;font-size:.82rem;opacity:.7}
+@media (max-width:899px){
+  .a-news{grid-template-columns:1fr}
+  .a-list{position:static;max-height:none}
+  .a-items{max-height:300px}
+  .a-cover,.a-row3,.a-row2{grid-template-columns:1fr}
+  .a-crow{grid-template-columns:1fr auto auto auto}
+  .a-crow small{display:none}
+}
+</style>
+</head>
+<body>
+<button class="mbtn" id="mbtn" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="side"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+<div class="scrim" id="scrim"></div>
+<aside class="side" id="side" aria-label="Menu lateral">
+  <a class="brand" href="#topo" data-go="topo" title="Nizzera Games"><i></i><span class="lbl sname">Nizzera Games</span></a>
+  <button class="sclose" id="sclose" type="button" aria-label="Fechar menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <div class="slist" id="slist" role="navigation" aria-label="Menu principal"></div>
+</aside>
+<header class="hero" id="topo">
+  <canvas id="grid" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <nav>
+      <a class="logo" href="#"><i></i><span class="sname">Nizzera Games</span></a>
+      <button class="tbtn" id="theme" type="button">Alternar tema</button>
+    </nav>
+    <div class="heroin">
+      <div>
+        <h1 id="typed" class="typed" aria-label="Tudo que rolou no mundo dos games."></h1>
+        <p id="intro">Lançamentos, Nintendo, Xbox e esports, em textos curtos e sem enrolação. Mova o mouse sobre o fundo e acenda os pixels.</p>
+      </div>
+      <button class="feat" id="feat" type="button"></button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="noticias">
+  <div class="tools" role="group" aria-label="Filtrar por categoria" id="chips"></div>
+  <div class="cards" id="cards" aria-live="polite"></div>
+</main>
+
+<dialog id="modal" aria-label="Notícia">
+  <button class="close" id="close" type="button" aria-label="Fechar">✕</button>
+  <div id="mbody"></div>
+</dialog>
+
+<footer><div class="wrap"><span id="ftxt"></span><p class="by">Criado por <strong id="fcredit"></strong></p></div></footer>
+<div id="admin" class="adm" hidden></div>
+<script id="nz-data" type="application/json">
+{
+ "site": {
+  "name": "Nizzera Games",
+  "tagline": "Tudo que rolou no mundo dos games.",
+  "intro": "Lançamentos, Nintendo, Xbox e esports, em textos curtos e sem enrolação. Mova o mouse sobre o fundo e acenda os pixels.",
+  "footer": "Nizzera Games © 2026 · Resumos de reportagens de games, com link para a fonte. Site em desenvolvimento.",
+  "credit": "Eduardo Nizer"
+ },
+ "cats": [
+  "Lançamentos",
+  "Nintendo",
+  "Steam",
+  "Game Pass",
+  "Serviços",
+  "Esports",
+  "Eventos"
+ ],
+ "news": [
+  {
+   "id": 5,
+   "img": "https://www.otakupt.com/wp-content/uploads/2026/11/Pikmin-4-Nintendo-Switch-2-Edition-Plus-Dandori-Academy-scaled-e1793711632629.jpg",
+   "alt": "Pikmin 4 – Nintendo Switch 2 Edition + Academia Dandori",
+   "pos": "",
+   "credit": "OtakuPT",
+   "cat": "Nintendo",
+   "title": "Pikmin 4 ganha edição para Switch 2 com Academia Dandori em 12 de novembro",
+   "date": "2026-11-03",
+   "read": 1,
+   "sum": "A Nintendo mostrou um vídeo de quase quatro minutos com as novidades.",
+   "body": "A Nintendo publicou um vídeo de cerca de quatro minutos sobre Pikmin 4 – Nintendo Switch 2 Edition + Academia Dandori, que chega ao console em 12 de novembro. A edição também está na lista de lançamentos físicos do mês.",
+   "src": "OtakuPT",
+   "url": "https://www.otakupt.com/jogos/nintendo-mostra-mais-de-pikmin-4-nintendo-switch-2-edition-dandori-academy/",
+   "featured": false
+  },
+  {
+   "id": 7,
+   "img": "https://xboxpower-wp.s3.amazonaws.com/wp-content/uploads/2026/11/xpg-nov-2026-w1-featured.jpg",
+   "alt": "Jogos que chegam ao Xbox Game Pass em novembro de 2026",
+   "pos": "",
+   "credit": "Xbox Power",
+   "cat": "Game Pass",
+   "title": "Game Pass de novembro começa com Pit of Goblin, Void/Breaker e Escape Academy 2",
+   "date": "2026-11-03",
+   "read": 2,
+   "sum": "A primeira leva do mês mistura terror cooperativo, FPS roguelite, quebra-cabeças e simulação.",
+   "body": "A Microsoft revelou a primeira leva de novembro do Xbox Game Pass. Pit of Goblin, um terror cooperativo online em masmorras, já está disponível desde 3 de novembro nos planos Ultimate, Premium e PC Game Pass.\n\nEm 4 de novembro entra Void/Breaker, que une FPS e roguelite com forte personalização de armas. Em 5 de novembro chegam Escape Academy 2 (direto no lançamento, para Ultimate e PC Game Pass), Firefighting Simulator: Ignite e MySims Cozy Bundle.",
+   "src": "Xbox Power",
+   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
+   "featured": false
+  },
+  {
+   "id": 8,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Game Pass",
+   "title": "Warhammer Survivors chega direto ao Game Pass em 10 de novembro",
+   "date": "2026-11-03",
+   "read": 1,
+   "sum": "O bullet heaven no universo de Warhammer estreia no catálogo no dia do lançamento.",
+   "body": "Warhammer Survivors, parceria entre a Auroch Digital e a poncle, entra no Game Pass em 10 de novembro, já no lançamento, para os planos Ultimate e PC Game Pass. É um bullet heaven em que heróis do universo Warhammer enfrentam hordas enormes e desbloqueiam melhorias cada vez mais exageradas. Quem curte Vampire Survivors deve se sentir em casa.",
+   "src": "Xbox Power",
+   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
+   "featured": false
+  },
+  {
+   "id": 9,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Game Pass",
+   "title": "Thronefall e Toxic Commando chegam ao Game Pass em 11 e 12 de novembro",
+   "date": "2026-11-03",
+   "read": 1,
+   "sum": "Estratégia de reino de um lado e zumbis cooperativos do outro, ambos nos planos Ultimate, Premium e PC.",
+   "body": "Thronefall entra em 11 de novembro. É um jogo de estratégia em que o dia serve para administrar recursos e fortalecer o reino, e a noite para sobreviver aos ataques inimigos.\n\nNo dia seguinte, 12, chega John Carpenter’s Toxic Commando, ação cooperativa para até quatro jogadores contra hordas de zumbis, com veículos armados e ambientes semiabertos.",
+   "src": "Xbox Power",
+   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
+   "featured": false
+  },
+  {
+   "id": 10,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Game Pass",
+   "title": "Vampire Crawlers e Aphelion chegam ao Game Pass Premium",
+   "date": "2026-11-03",
+   "read": 1,
+   "sum": "Dois jogos que já estavam no Ultimate e no PC Game Pass entram no plano Premium.",
+   "body": "Vampire Crawlers, dos criadores de Vampire Survivors, mistura roguelite, construção de baralho e batalhas por turnos aceleradas em primeira pessoa. Ele entra no Game Pass Premium em 4 de novembro.\n\nEm 17 de novembro é a vez de Aphelion, aventura de ficção científica da Don’t Nod em que a astronauta Ariane tenta salvar o companheiro Thomas em um planeta congelado. O projeto foi feito em parceria com a Agência Espacial Europeia.",
+   "src": "Xbox Power",
+   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
+   "featured": false
+  },
+  {
+   "id": 11,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Game Pass",
+   "title": "Game Pass Essential recebe Banjo-Kazooie, Perfect Dark e outros clássicos em 15 de novembro",
+   "date": "2026-11-03",
+   "read": 1,
+   "sum": "Oito jogos entram no plano Essential, entre eles os três Banjo e Gears of War: Judgment.",
+   "body": "Em 15 de novembro, o Game Pass Essential ganha oito jogos: Banjo-Kazooie, Banjo-Tooie, Banjo-Kazooie: Nuts & Bolts, Gears of War: Judgment, Halo: Spartan Assault, Perfect Dark, Viva Piñata e Viva Piñata: Trouble in Paradise. A lista junta clássicos da Rare com títulos de Gears e Halo.",
+   "src": "Xbox Power",
+   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
+   "featured": false
+  },
+  {
+   "id": 12,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Game Pass",
+   "title": "Dragon Ball Xenoverse 2, GoldenEye 007 e Wreckfest deixam o Game Pass em 15 de novembro",
+   "date": "2026-11-03",
+   "read": 1,
+   "sum": "A lista de saídas tem mais de uma dezena de jogos; quem quer terminar algum tem até o dia 15.",
+   "body": "Os jogos que saem do Xbox Game Pass em 15 de novembro incluem Dragon Ball Xenoverse 2, GoldenEye 007, Wreckfest, Moonlighter, Winter Burrow, 1000xResist, Police Simulator: Patrol Officers e Pigeon Simulator, entre outros.",
+   "src": "Xbox Power",
+   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
+   "featured": false
+  },
+  {
+   "id": 14,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Game Pass",
+   "title": "Tanuki: Pon’s Summer e Hope in the City estreiam direto no Game Pass",
+   "date": "2026-11-03",
+   "read": 1,
+   "sum": "Dois lançamentos diretos no catálogo, nos dias 10 e 11 de novembro, para Ultimate e PC Game Pass.",
+   "body": "Em 10 de novembro, Tanuki: Pon’s Summer coloca o jogador na pele de um tanuki que entrega encomendas de bicicleta, cozinha sushi e disputa sumô para restaurar um santuário antes de um festival.\n\nEm 11 de novembro chega Hope in the City, um mistério em que a protagonista, Hope Song, volta para casa e encontra os pais desaparecidos. As pistas vêm de transformar desenhos em evidências.",
+   "src": "Xbox Power",
+   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
+   "featured": false
+  },
+  {
+   "id": 20,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Steam",
+   "title": "Festival de RPGs com Batalha Automática chega à Steam em 16 de novembro",
+   "date": "2026-11-03",
+   "read": 1,
+   "sum": "É a única campanha temática da Valve marcada para novembro, e vai até o dia 23.",
+   "body": "Segundo o calendário publicado pelo Canaltech, novembro terá só uma campanha na Steam: o Festival de RPGs com Batalha Automática, de 16 a 23 de novembro. O mês seguinte traz a Promoção de Fim de Ano, de 17 de dezembro de 2026 a 4 de janeiro de 2027.",
+   "src": "Canaltech",
+   "url": "https://canaltech.com.br/games/quais-sao-as-datas-de-promocao-no-steam-em-2026/",
+   "featured": false
+  },
+  {
+   "id": 21,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Steam",
+   "title": "Steam vai reunir as ofertas de Black Friday em um espaço próprio",
+   "date": "2026-11-03",
+   "read": 1,
+   "sum": "Os descontos de Black Friday estão no calendário de novembro, mas as datas ainda não saíram.",
+   "body": "O calendário da Valve prevê descontos de Black Friday em novembro, com datas a divulgar. Em vez de uma campanha tradicional, a ideia é reunir os jogos com desconto em uma seção própria do espaço de ofertas e eventos da Steam.",
+   "src": "Contilnet Notícias",
+   "url": "https://contilnetnoticias.com.br/esports/calendario-de-ofertas-saiba-qual-e-a-proxima-promocao-do-steam-em-2026/",
+   "featured": false
+  },
+  {
+   "id": 15,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Game Pass",
+   "title": "Game Pass tem 10 jogos confirmados para novembro, antes e depois de GTA 6",
+   "date": "2026-11-01",
+   "read": 1,
+   "sum": "O calendário do mês gira em torno de 19 de novembro, data de estreia de GTA 6.",
+   "body": "Em 1º de novembro, o OtakuPT contabilizava dez jogos confirmados para o Xbox Game Pass no mês, num calendário que gira em torno de 19 de novembro, dia em que GTA 6 chega ao PS5 e ao Xbox Series X|S. A lista oficial da primeira leva saiu dois dias depois.",
+   "src": "OtakuPT",
+   "url": "https://www.otakupt.com/jogos/xbox-game-pass-10-jogos-novembro-2026-gta-6/",
+   "featured": false
+  },
+  {
+   "id": 4,
+   "img": "https://nintendoboy.com.br/wp-content/uploads/2026/10/lancamentos-Mensal-2026-11.jpg",
+   "alt": "Lançamentos físicos para Switch 2 e Switch em novembro de 2026",
+   "pos": "",
+   "credit": "NintendoBoy",
+   "cat": "Nintendo",
+   "title": "Zelda: Ocarina of Time chega ao Switch 2 em 5 de novembro",
+   "date": "2026-10-28",
+   "read": 1,
+   "sum": "O clássico da série estreia no novo console com data única nos Estados Unidos, na Europa e no Japão.",
+   "body": "The Legend of Zelda: Ocarina of Time está marcado para 5 de novembro, a mesma data nas três regiões. O jogo aparece entre os lançamentos em mídia física do mês para Switch 2 e Switch.",
+   "src": "NintendoBoy",
+   "url": "https://nintendoboy.com.br/2026/10/lancamentos-fisicos-para-switch-2-e-switch-novembro-de-2026/",
+   "featured": false
+  },
+  {
+   "id": 6,
+   "img": "https://www.gamersegames.com.br/wp-content/uploads/2026/10/Deep-Rock-Galactic-Halloween-2026.webp",
+   "alt": "Deep Rock Galactic: evento Hoxxes Halloween 2026",
+   "pos": "",
+   "credit": "Gamers & Games",
+   "cat": "Eventos",
+   "title": "Deep Rock Galactic abre o evento Hoxxes Halloween 2026",
+   "date": "2026-10-22",
+   "read": 1,
+   "sum": "Cosméticos temáticos e bônus de pontos ficam disponíveis até 5 de novembro.",
+   "body": "O evento de Halloween de Deep Rock Galactic começou em 22 de outubro e vai até 5 de novembro. Traz chapéus exclusivos, uma Space Rig temática e bônus duplo de Pontos de Performance por entrega, com crânios voadores assombrando Hoxxes IV.",
+   "src": "Gamers & Games",
+   "url": "https://www.gamersegames.com.br/2026/10/22/hoxxes-halloween-2026-chega-hoje-a-deep-rock-galactic-com-cosmeticos-e-bonus/",
+   "featured": false
+  },
+  {
+   "id": 13,
+   "img": "https://www.oficinadanet.com.br/media/post/73512/1200/xbox-game-pass-de-outubro-ganha-final-fantasy-vii-remake-e-mais-7-jogos.jpg",
+   "alt": "Jogos que chegam ao Xbox Game Pass em outubro e novembro",
+   "pos": "",
+   "credit": "Oficina da Net",
+   "cat": "Game Pass",
+   "title": "Final Fantasy VII Remake Intergrade e Plants vs. Zombies: Replanted entram no Game Pass",
+   "date": "2026-10-20",
+   "read": 1,
+   "sum": "A segunda leva de outubro tem oito jogos, com destaque para o RPG da Square Enix.",
+   "body": "Em 20 de outubro, a Microsoft anunciou a segunda leva de jogos do Game Pass em outubro, que cobre de 21 de outubro a 3 de novembro e reúne oito títulos. O principal destaque é Final Fantasy VII Remake Intergrade, ao lado de Plants vs. Zombies: Replanted.",
+   "src": "Oficina da Net",
+   "url": "https://www.oficinadanet.com.br/xbox-game-pass/73512-xbox-game-pass-lista-jogos-outubro-2026",
+   "featured": false
+  },
+  {
+   "id": 1,
+   "img": "https://classic.exame.com/wp-content/uploads/2026/08/GTA6.jpg",
+   "alt": "Cena do trailer de lançamento de GTA 6",
+   "pos": "",
+   "credit": "Exame",
+   "cat": "Lançamentos",
+   "title": "GTA 6 ganha trailer de lançamento e segue marcado para 19 de novembro",
+   "date": "2026-10-15",
+   "read": 2,
+   "sum": "A Rockstar publicou um vídeo de cerca de 90 segundos, gravado no PS5, com música inédita da dupla Justice.",
+   "body": "A Rockstar Games divulgou em 15 de outubro o trailer de lançamento de GTA 6, com novas cenas de Jason e Lucia pelo estado fictício de Leonida. O jogo chega em 19 de novembro para PS5 e Xbox Series X|S, e a versão de PC ainda não tem data. Segundo a loja brasileira da Rockstar, o pré-carregamento começa em 12 de novembro.",
+   "src": "Exame",
+   "url": "https://exame.com/pop/gta-6-ganha-trailer-de-lancamento-a-um-mes-da-estreia-e-surpreende-fas-com-cenas-ineditas/",
+   "featured": true
+  },
+  {
+   "id": 3,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Esports",
+   "title": "Worlds 2026 está em andamento e a final será em Nova York",
+   "date": "2026-10-15",
+   "read": 2,
+   "sum": "São 19 equipes disputando a Copa do Invocador até 14 de novembro.",
+   "body": "O Mundial de League of Legends começou em 15 de outubro e vai até 14 de novembro, com partidas em Los Angeles, no Texas e em Nova York. O CBLOL ganhou uma vaga extra e tem duas representantes no torneio. A grande final acontece em Nova York, no dia 14.",
+   "src": "RDY.GG",
+   "url": "https://rdy.gg/pt/lol/news/league-of-legends-lol-worlds-2026-details",
+   "featured": false
+  },
+  {
+   "id": 16,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Steam",
+   "title": "Steam bate recorde com mais de 43,5 milhões de usuários simultâneos",
+   "date": "2026-10-13",
+   "read": 1,
+   "sum": "O pico foi em 11 de outubro; 14,4 milhões estavam com algum jogo aberto.",
+   "body": "Segundo o SteamDB, a Steam chegou a 43.505.724 usuários online no domingo, 11 de outubro, o maior número de sua história. Cerca de 14,4 milhões estavam com algum jogo aberto na hora do pico. O recorde anterior, de 42,7 milhões, era de março de 2026.",
+   "src": "GameBlast",
+   "url": "https://www.gameblast.com.br/2026/10/steam-registra-novo-recorde-usuarios-simultaneos-ultrapassando-43-milhoes.html",
+   "featured": false
+  },
+  {
+   "id": 22,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Steam",
+   "title": "Deadlock, da Valve, chega a 262 mil jogadores simultâneos",
+   "date": "2026-10-13",
+   "read": 1,
+   "sum": "O pico foi em 9 de outubro, dois dias antes do recorde geral da Steam.",
+   "body": "O shooter em terceira pessoa da própria Valve, ainda em desenvolvimento ativo, chegou a 262.145 jogadores simultâneos em 9 de outubro, impulsionado por uma atualização.\n\nDois dias depois, em 11 de outubro, a Steam bateu seu recorde geral de usuários online. Segundo o site, esse pico reuniu o público de Counter-Strike 2, Dota 2, PUBG, Deadlock e WARDOGS.",
+   "src": "Shattered",
+   "url": "https://shattered.io/pt/steam-recorde-43-5-milhoes-utilizadores-2026/",
+   "featured": false
+  },
+  {
+   "id": 17,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Steam",
+   "title": "Steam Frame ganha preço de US$ 1.059 e vendas por sorteio",
+   "date": "2026-09-14",
+   "read": 2,
+   "sum": "O headset de realidade virtual da Valve tem versões de 256 GB e de 1 TB.",
+   "body": "Em 14 de setembro, a Valve revelou o preço do Steam Frame: US$ 1.059 pela versão de 256 GB e US$ 1.299 pela de 1 TB.\n\nEm vez de vender por ordem de chegada, a empresa abriu inscrições até 17 de setembro e sorteou a posição na fila, com os primeiros convites de compra saindo em 18 de setembro. A ideia é reduzir a vantagem de bots e revendedores. Até o anúncio, a Valve não havia confirmado venda oficial no Brasil.",
+   "src": "Game Over Drive",
+   "url": "https://gameoverdrive.com.br/steam-frame-preco-data-venda-valve/",
+   "featured": false
+  },
+  {
+   "id": 18,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Steam",
+   "title": "Steam Frame usa chip Snapdragon 8 Gen 3 e não vem com carregador",
+   "date": "2026-09-14",
+   "read": 1,
+   "sum": "O headset roda SteamOS 3 e funciona de forma independente.",
+   "body": "O Steam Frame é um headset de realidade virtual autônomo, movido por um processador Snapdragon 8 Gen 3 e pelo SteamOS 3. Ele não traz fonte de energia na caixa: a Valve diz que funciona com o carregador do Steam Deck ou com qualquer carregador USB-C de 45 W ou mais.",
+   "src": "Dexerto",
+   "url": "https://www.dexerto.com/gaming/valve-reveals-steam-frame-price-and-release-date-starting-at-1059-3408909/",
+   "featured": false
+  },
+  {
+   "id": 2,
+   "img": "https://tl.ctcdn.com.br/NXK-bHCU2xsx3sgwTAC53sqIg8w=/1200x675/smart/filters:format(webp):quality(85)/c970fb6b-7261-438a-8689-c87540318b5e.jpg",
+   "alt": "Xbox Cloud Gaming",
+   "pos": "",
+   "credit": "Canaltech",
+   "cat": "Serviços",
+   "title": "Xbox Cloud Gaming passa a ter limite mensal de horas no Game Pass",
+   "date": "2026-09-03",
+   "read": 2,
+   "sum": "A partir de novembro: 15 horas no Ultimate, 10 no Premium e 5 no Essential.",
+   "body": "A Microsoft anunciou que o Cloud Gaming deixa de ser ilimitado no Game Pass. Quem passar do limite poderá comprar horas extras na Xbox Store, e o serviço também poderá ser usado sem assinatura, pagando por hora. A empresa estima que cerca de 4% dos assinantes serão afetados.",
+   "src": "Canaltech",
+   "url": "https://canaltech.com.br/games/nova-regra-do-xbox-game-pass-corta-uso-livre-da-nuvem-e-pode-pesar-no-bolso-do-jogador",
+   "featured": false
+  },
+  {
+   "id": 19,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Steam",
+   "title": "Steam Machine custa a partir de US$ 1.049 e fica fora do Brasil por enquanto",
+   "date": "2026-06-22",
+   "read": 2,
+   "sum": "A Valve revelou os preços do PC de sala; a versão de 2 TB com controle chega a US$ 1.428.",
+   "body": "Em 22 de junho, a Valve anunciou os preços da Steam Machine: US$ 1.049 pela versão de 512 GB, chegando a US$ 1.428 na de 2 TB com controle incluso. Os primeiros pedidos começaram a ser faturados em 29 de junho.\n\nO aparelho foi anunciado em novembro de 2025, ao lado do Steam Controller e do Steam Frame. Não há previsão de venda no Brasil: a página da loja avisa que o item não está disponível na região.",
+   "src": "Tecnoblog",
+   "url": "https://tecnoblog.net/noticias/steam-machine-finalmente-tem-preco-revelado-veja-os-valores/",
+   "featured": false
+  }
+ ]
+}
+</script>
+
+<script>
+/* ===== dados do site (editáveis na área admin: abra o site com #admin no endereço) ===== */
+var DKEY="nz-data-v1";
+function clone(o){return JSON.parse(JSON.stringify(o))}
+var BASE=JSON.parse(document.getElementById("nz-data").textContent);
+function loadData(){try{var r=localStorage.getItem(DKEY);if(r){var d=JSON.parse(r);if(d&&Array.isArray(d.news)&&Array.isArray(d.cats)&&d.site)return d}}catch(_){}return clone(BASE)}
+var DATA=loadData(), NEWS=DATA.news, CATS=["Todas"].concat(DATA.cats);
+var PAL = [["#ff5c7a","#ffd23f"],["#2433f0","#7be0ff"],["#12b886","#0e1033"],["#9b5cff","#ffd23f"],["#ff8a3d","#2433f0"],["#0e1033","#ff5c7a"]];
+
+/* ===== util: arte pixelada gerada por semente ===== */
+function rng(s){return function(){s=(s*1664525+1013904223)%4294967296;return s/4294967296}}
+function art(id){
+  if(SCENES[id])return SCENES[id]();
+  var r=rng(id*977+13), p=PAL[id%PAL.length], N=9, c=18, svg="";
+  var bg=p[0], fg=p[1];
+  svg+='<rect width="100%" height="100%" fill="'+bg+'"/>';
+  for(var k=0;k<14;k++){ // estrelas
+    svg+='<rect x="'+(r()*160|0)*6+'" y="'+(r()*90|0)*6+'" width="6" height="6" fill="'+fg+'" opacity=".25"/>';
+  }
+  var cells="", ox=(960-N*c*2)/2, oy=(540-N*c*2)/2;
+  for(var y=0;y<N;y++)for(var x=0;x<(N+1)/2|0;x++){
+    if(r()>.45){
+      [x,N-1-x].forEach(function(xx){cells+='<rect x="'+(ox+xx*c*2)+'" y="'+(oy+y*c*2)+'" width="'+c*2+'" height="'+c*2+'" fill="'+fg+'"/>'});
+    }
+  }
+  return '<svg viewBox="0 0 960 540" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Ilustração pixelada">'+svg+cells+'</svg>';
+}
+function fmt(d){if(!d)return "";var x=new Date(d+"T12:00:00");return isNaN(x)?"":x.toLocaleDateString("pt-BR",{day:"numeric",month:"short"})}
+function safeUrl(u){return /^https?:\/\//i.test(u||"")?u:"#"}
+function bodyHtml(t){return String(t||"").split(/\n\s*\n/).map(function(p){return p.trim()}).filter(Boolean).map(function(p){return "<p>"+esc(p).replace(/\n/g,"<br>")+"</p>"}).join("")}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+
+/* ===== Imagens das notícias ===== */
+/* Cada notícia pode ter uma foto própria: preencha  img:"imagens/arquivo.jpg"  (e alt:"descrição").
+   Se img estiver vazio ou não carregar, aparece a ilustração em pixel art abaixo. */
+var K=12;
+function R(x,y,w,h,c,o){return '<rect x="'+x*K+'" y="'+y*K+'" width="'+w*K+'" height="'+h*K+'" fill="'+c+'"'+(o?' opacity="'+o+'"':'')+'/>'}
+function C(cx,cy,r,c){var s="";for(var y=-r;y<=r;y++){var w=Math.floor(Math.sqrt(r*r-y*y)+.5);s+=R(cx-w,cy+y,w*2+1,1,c)}return s}
+function E(cx,cy,rx,ry,c){var s="";for(var y=-ry;y<=ry;y++){var w=Math.floor(rx*Math.sqrt(1-y*y/(ry*ry))+.5);s+=R(cx-w,cy+y,w*2+1,1,c)}return s}
+var FONT={"1":"010110010010111","5":"111100111001111","H":"101101111101101","2":"111001111100111"};
+function PT(str,x,y,c,s){var o="";for(var i=0;i<str.length;i++){var g=FONT[str[i]];for(var k=0;k<15;k++)if(g[k]==="1")o+=R(x+i*4*s+(k%3)*s,y+Math.floor(k/3)*s,s,s,c)}return o}
+function sv(inner,label){return '<svg viewBox="0 0 960 540" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges" role="img" aria-label="'+label+'">'+inner+'</svg>'}
+function stars(seed,col,n){var r=rng(seed),o="";for(var i=0;i<n;i++)o+=R(r()*78|0,r()*26|0,1,1,col,.5+r()*.4);return o}
+function plus(x,y,c){return R(x,y-1,1,3,c)+R(x-1,y,3,1,c)}
+function note(x,y,c){return R(x,y,1,4,c)+R(x-2,y+3,2,2,c)+R(x+1,y,2,1,c)}
+function palm(bx,lean,h,top){var o="",tx=bx,i;for(i=0;i<=h;i++){tx=bx+Math.round(lean*(i/h)*3);o+=R(tx,top+h-i,2,1,"#0e1033")}
+  var cx=tx+1,cy=top,F=[[-1,.5,.14],[-1,.1,.16],[1,.5,.14],[1,.1,.16],[-1,.9,.1],[1,.9,.1]];
+  F.forEach(function(f){for(var t=0;t<8;t++)o+=R(cx+f[0]*t,cy-Math.round(f[1]*t)+Math.floor(t*t*f[2]),1,2,"#0e1033")});return o}
+
+var SCENES={
+1:function(){ // GTA 6: pôr do sol, palmeiras e carro
+  var o="",B=[["#2a0a4a",0,6],["#5b1a7a",6,6],["#b0307a",12,5],["#ff5c7a",17,4],["#ff8a3d",21,3],["#ffd23f",24,3]];
+  B.forEach(function(b){o+=R(0,b[1],80,b[2],b[0])});
+  o+=C(40,24,11,"#fff4b0")+R(29,19,23,1,"#ff5c7a")+R(29,21,23,1,"#ff8a3d")+R(29,23,23,1,"#ff8a3d")+R(29,25,23,1,"#ffd23f");
+  [[8,4,6],[13,3,9],[17,4,5],[22,3,11],[26,5,7],[54,4,8],[59,3,12],[63,5,6],[68,4,10],[72,3,5]].forEach(function(b){o+=R(b[0],27-b[2],b[1],b[2],"#1a0838")});
+  o+=R(0,27,80,18,"#1a0838")+R(35,29,10,1,"#ff5c7a")+R(37,31,6,1,"#ff8a3d")+R(38,33,4,1,"#ffd23f");
+  o+=R(0,34,80,11,"#2b1250")+R(0,34,80,1,"#ff5c7a");
+  for(var x=2;x<80;x+=10)o+=R(x,40,5,1,"#ffd23f");
+  o+=palm(10,1,12,22)+palm(68,-1,12,22);
+  o+=R(30,37,22,4,"#00e5c3")+R(35,34,11,3,"#00e5c3")+R(36,35,4,2,"#0e1033")+R(41,35,4,2,"#0e1033")+R(51,38,1,1,"#fff4b0")+R(30,38,1,1,"#ff5c7a")
+    +C(36,41,2,"#0e1033")+R(36,41,1,1,"#c9ccf5")+C(46,41,2,"#0e1033")+R(46,41,1,1,"#c9ccf5");
+  return sv(o,"Ilustração pixelada de um carro ao pôr do sol entre palmeiras")},
+2:function(){ // Xbox Cloud Gaming: nuvem, controle e limite de horas
+  var o=R(0,0,80,45,"#0e5a1e")+R(0,26,80,19,"#0b4a18"),r=rng(7),i;
+  for(i=0;i<22;i++)o+=R(r()*78|0,r()*44|0,1,1,"#7be0a0",.35);
+  o+=C(28,19,5,"#f2f0ff")+C(37,14,8,"#f2f0ff")+C(47,18,6,"#f2f0ff")+R(23,19,30,5,"#f2f0ff")+R(23,22,30,2,"#c9ccf5");
+  o+=C(66,12,5,"#ffd23f")+C(66,12,3,"#0e1033")+R(66,10,1,3,"#ffd23f")+R(66,12,3,1,"#ffd23f");
+  o+=E(40,31,13,6,"#1b1f5e")+C(29,34,4,"#1b1f5e")+C(51,34,4,"#1b1f5e")+R(35,25,10,1,"#1b1f5e");
+  o+=C(33,30,2,"#55597f")+R(36,33,3,1,"#f2f0ff")+R(37,32,1,3,"#f2f0ff")+R(39,29,2,2,"#12b886")
+    +R(46,27,2,2,"#ffd23f")+R(44,29,2,2,"#2433f0")+R(48,29,2,2,"#ff5c7a")+R(46,31,2,2,"#12b886")+C(43,34,2,"#55597f");
+  o+=R(16,40,48,3,"#082f10")+R(16,40,32,3,"#ffd23f")+R(48,40,1,3,"#fff4b0");
+  return sv(o,"Ilustração pixelada de uma nuvem, um controle e uma barra de horas")},
+3:function(){ // Worlds: troféu sobre o skyline de Nova York
+  var o=R(0,0,80,10,"#0b0d2b")+R(0,10,80,10,"#141a6e")+R(0,20,80,25,"#2433f0")+stars(3,"#f2f0ff",30),i,r=rng(21);
+  for(i=0;i<9;i++){var w=Math.floor(11-i*1.1);if(w>0)o+=R(40-w,i,w*2,1,"#fff4b0",.12)}
+  [[3,5,14],[9,4,10],[14,6,26],[15,4,6],[16,2,4],[17,1,4],[22,5,12],[28,4,8],[52,4,9],[57,6,16],[64,4,11],[69,5,18],[75,4,8]].forEach(function(b){
+    var h=b[2],yy=45-h;o+=R(b[0],yy,b[1],h,"#070920");
+    for(var wy=yy+2;wy<43;wy+=3)for(var wx=b[0]+1;wx<b[0]+b[1]-1;wx+=2)if(r()>.5)o+=R(wx,wy,1,1,"#ffd23f")});
+  for(i=0;i<7;i++)o+=R(10+i*10,22,2,2,"#ff5c7a");
+  for(i=0;i<22;i++)o+=R(r()*74+3|0,r()*30+2|0,1,1,["#ff5c7a","#ffd23f","#7be0ff","#ffffff"][i%4]);
+  var w;[[10,18],[16,16],[17,14],[18,12],[19,10],[20,8],[21,6]].forEach(function(p){o+=R(40-p[1]/2,p[0]+1,p[1],1,"#ffd23f")});
+  o+=R(31,11,18,5,"#ffd23f")+R(33,11,2,6,"#fff4b0")+R(38,22,4,6,"#e0a800")+R(33,28,14,2,"#ffd23f")+R(31,30,18,3,"#e0a800");
+  o+=R(27,11,5,1,"#ffd23f")+R(27,11,1,7,"#ffd23f")+R(27,17,5,1,"#ffd23f")+R(49,11,5,1,"#ffd23f")+R(53,11,1,7,"#ffd23f")+R(49,17,5,1,"#ffd23f");
+  o+=plus(40,14,"#fff4b0");
+  return sv(o,"Ilustração pixelada de um troféu diante do skyline de uma cidade à noite")},
+4:function(){ // Ocarina: instrumento, notas e colinas
+  var o=R(0,0,80,12,"#0e1033")+R(0,12,80,12,"#103a5c")+R(0,24,80,21,"#0f6b6b")+stars(11,"#f2f0ff",26),x,i;
+  for(x=0;x<80;x++){var y=35+Math.round(3*Math.sin(x/7));o+=R(x,y,1,45-y,"#0b3d2e")}
+  for(x=0;x<80;x++){var y2=39+Math.round(2*Math.sin(x/5+2));o+=R(x,y2,1,45-y2,"#082a20")}
+  for(i=0;i<6;i++)o+=R(49+i,18-i,3,2,"#2d6bff");
+  o+=R(55,10,3,2,"#1a3fb0")+E(40,24,14,9,"#1f4fd1")+E(39,23,12,7,"#2d6bff")+E(35,20,5,2,"#9be8ff");
+  [[33,25],[38,27],[43,27],[47,25],[36,22],[41,22]].forEach(function(h){o+=R(h[0],h[1],2,2,"#0e1033")});
+  o+=plus(20,12,"#fff4b0")+plus(62,26,"#fff4b0")+plus(67,9,"#ffd23f")+plus(13,28,"#ffd23f")
+    +note(16,16,"#ffd23f")+note(64,16,"#ffd23f")+note(24,30,"#fff4b0")+note(58,30,"#fff4b0");
+  return sv(o,"Ilustração pixelada de uma ocarina azul com notas musicais")},
+5:function(){ // Pikmin 4 no Switch 2: console com broto na tela
+  var o=R(0,0,80,32,"#7be0ff")+R(0,6,80,26,"#bff3ff")+R(0,32,80,13,"#12b886")+R(0,38,80,7,"#0e8f6a"),i;
+  o+=C(68,8,3,"#ffd23f")+R(8,4,8,2,"#fff")+R(10,3,4,1,"#fff")+R(52,6,10,2,"#fff")+R(54,5,5,1,"#fff");
+  o+=R(22,10,6,16,"#2cc7ff")+R(52,10,6,16,"#ff5c7a")+R(27,8,26,19,"#0e1033")+R(28,9,24,17,"#7be0ff")+R(28,19,24,7,"#12b886")
+    +R(39,14,1,6,"#0e8f6a")+R(36,13,3,2,"#0e8f6a")+R(40,12,3,2,"#0e8f6a")+R(31,22,2,1,"#0e8f6a")+R(46,21,2,1,"#0e8f6a");
+  o+=C(25,14,1,"#0e1033")+R(24,20,3,1,"#0e1033")+R(55,13,2,1,"#fff")+R(55,17,2,1,"#fff")+R(54,20,1,3,"#0e1033")+R(23,26,34,1,"#0e8f6a",.6);
+  [[8,38,"#ff5c7a"],[16,41,"#ffd23f"],[64,39,"#ff5c7a"],[72,42,"#ffd23f"],[30,41,"#9b5cff"],[50,41,"#fff"]].forEach(function(f){o+=R(f[0],f[1]+1,1,3,"#0b6b4e")+plus(f[0],f[1],f[2])+R(f[0],f[1],1,1,"#ffd23f")});
+  for(i=3;i<80;i+=7)o+=R(i,31,1,2,"#0e8f6a")+R(i+1,30,1,3,"#0e8f6a");
+  o+=C(62,31,5,"#ff5c7a")+PT("2",60,29,"#fff",1);
+  return sv(o,"Ilustração pixelada de um console portátil com um broto na tela, em um gramado")},
+6:function(){ // Hoxxes Halloween: caverna, abóbora e morcegos
+  var o=R(0,0,80,45,"#3a1470")+R(0,22,80,23,"#2a0a4a"),i;
+  o+=C(62,14,6,"#fff4b0")+R(60,12,2,2,"#e8d98a")+R(64,16,2,1,"#e8d98a");
+  [[2,8,9],[11,6,6],[19,8,10],[46,6,7],[52,8,9],[62,6,6],[70,9,8]].forEach(function(s){for(i=0;i<s[2];i++){var w=s[1]-Math.floor(i*s[1]/s[2]);if(w>0)o+=R(s[0]+Math.floor((s[1]-w)/2),i,w,1,"#0b0420")}});
+  [[14,9],[22,8],[57,11],[48,7]].forEach(function(b){var x=b[0],y=b[1];o+=R(x,y,2,1,"#0b0420")+R(x+5,y,2,1,"#0b0420")+R(x,y+1,7,1,"#0b0420")+R(x+3,y,1,2,"#0b0420")+R(x+2,y+2,3,1,"#0b0420")});
+  o+=R(0,40,80,5,"#0b0420")+R(8,38,3,2,"#ffd23f")+R(13,39,2,1,"#ffd23f")+R(66,38,3,2,"#ffd23f");
+  o+=R(18,34,2,6,"#12b886")+R(20,36,2,4,"#7be0ff")+R(16,37,2,3,"#7be0ff")+R(60,34,2,6,"#12b886")+R(62,36,2,4,"#7be0ff");
+  o+=E(40,29,13,10,"#d9631a")+E(34,29,4,9,"#e87420")+E(46,29,4,9,"#e87420")+E(40,29,5,10,"#ff9a52")+R(39,17,3,3,"#0e8f6a")+R(42,17,2,1,"#0e8f6a");
+  o+=R(35,24,2,1,"#ffd23f")+R(34,25,4,1,"#ffd23f")+R(33,26,6,1,"#ffd23f")+R(44,24,2,1,"#ffd23f")+R(43,25,4,1,"#ffd23f")+R(42,26,6,1,"#ffd23f")
+    +R(40,28,1,1,"#ffd23f")+R(39,29,3,1,"#ffd23f")+R(34,32,13,2,"#ffd23f")+R(37,32,2,1,"#e87420")+R(42,32,2,1,"#e87420")+R(39,33,2,1,"#e87420");
+  return sv(o,"Ilustração pixelada de uma abóbora de Halloween numa caverna com morcegos")}
+};
+function pic(n){
+  var u=n.img;
+  if(u&&!/^\s*javascript:/i.test(u))return '<img src="'+esc(u)+'" alt="'+esc(n.alt||n.title)+'" loading="lazy" decoding="async" referrerpolicy="no-referrer"'+(/^(top|bottom)$/.test(n.pos)?' style="object-position:center '+n.pos+'"':'')+' onerror="imgFail(this,'+(+n.id||0)+')">';
+  return art(n.id);
+}
+function imgFail(el,id){el.parentNode.innerHTML=art(id)}
+
+/* ===== lista e filtros ===== */
+var cat="Todas", q="", MODE="marq", MQ=false;
+try{var _m=localStorage.getItem("nz-mode");if(_m==="grid"||_m==="marq")MODE=_m}catch(_){}
+var chips=document.getElementById("chips"), cards=document.getElementById("cards");
+var s=document.createElement("input");s.className="search";s.type="search";s.placeholder="Buscar notícia";s.setAttribute("aria-label","Buscar notícia");
+s.oninput=function(){q=s.value.toLowerCase();render()};
+function buildChips(){
+  if(CATS.indexOf(cat)<0)cat="Todas";
+  chips.innerHTML="";
+  CATS.forEach(function(c){
+    var b=document.createElement("button");b.className="chip";b.type="button";b.textContent=c;
+    b.setAttribute("aria-pressed",c===cat);
+    b.onclick=function(){cat=c;[].forEach.call(chips.querySelectorAll(".chip"),function(x){x.setAttribute("aria-pressed",x===b)});render()};
+    chips.appendChild(b);
+  });
+  var mc=document.createElement("div");mc.className="mode";mc.setAttribute("role","group");mc.setAttribute("aria-label","Modo de exibição");
+  [["marq","Carrossel","As notícias rolam sozinhas; passe o cursor para pausar"],["grid","Grade","Todas as notícias lado a lado"]].forEach(function(m){
+    var b=document.createElement("button");b.type="button";b.textContent=m[1];b.title=m[2];b.setAttribute("aria-pressed",MODE===m[0]);
+    b.onclick=function(){MODE=m[0];try{localStorage.setItem("nz-mode",MODE)}catch(_){}[].forEach.call(mc.querySelectorAll("button"),function(x){x.setAttribute("aria-pressed",x===b)});render()};
+    mc.appendChild(b);
+  });
+  chips.appendChild(mc);
+  chips.appendChild(s);
+}
+
+function cardHtml(n,i,dup){
+  return '<button class="card'+(dup||MQ?'':' in')+'" '+(dup?'aria-hidden="true" tabindex="-1" ':'')+(MQ?'':'style="animation-delay:'+i*50+'ms" ')+'data-id="'+(+n.id||0)+'" type="button"><div class="art">'+pic(n)+'</div><div class="tx"><span class="tag">'+esc(n.cat)+'</span><h3>'+esc(n.title)+'</h3><p>'+esc(n.sum)+'</p><span class="meta">'+fmt(n.date)+' · '+(+n.read||0)+' min de leitura</span></div></button>';
+}
+function render(){
+  var list=NEWS.filter(function(n){return (cat==="Todas"||n.cat===cat)&&(n.title+n.sum).toLowerCase().indexOf(q)>-1});
+  if(!list.length){cards.className="cards";cards.innerHTML='<p class="empty">Nenhuma notícia encontrada. Tente outra categoria ou termo.</p>';return}
+  MQ=MODE==="marq"&&list.length>=4; /* com poucos resultados, usa a grade */
+  if(MQ){
+    var reps=Math.max(1,Math.ceil(8/list.length)),half=[],r;
+    for(r=0;r<reps;r++)list.forEach(function(n){half.push({n:n,dup:r>0})});
+    var a=half.map(function(x){return cardHtml(x.n,0,x.dup)}).join(""),b=half.map(function(x){return cardHtml(x.n,0,true)}).join("");
+    cards.className="marq";
+    cards.innerHTML='<div class="track" style="--dur:'+half.length*8+'s">'+a+b+'</div>';
+    return;
+  }
+  cards.className="cards";
+  cards.innerHTML=list.map(function(n,i){return cardHtml(n,i,false)}).join("");
+}
+var _pt;
+cards.addEventListener("touchstart",function(){clearTimeout(_pt);cards.classList.add("paused")},{passive:true});
+function _resume(){clearTimeout(_pt);_pt=setTimeout(function(){cards.classList.remove("paused")},3500)}
+cards.addEventListener("touchend",_resume);cards.addEventListener("touchcancel",_resume);
+cards.onclick=function(e){var b=e.target.closest(".card");if(b)open(+b.dataset.id)};
+
+/* ===== destaque e modal ===== */
+var F=null, feat=document.getElementById("feat");
+function renderFeat(){
+  F=NEWS.filter(function(n){return n.featured})[0]||NEWS[0]||null;
+  if(!F){feat.hidden=true;feat.innerHTML="";return}
+  feat.hidden=false;
+  feat.innerHTML='<div class="art">'+pic(F)+'</div><div class="tx"><span class="tag">'+esc(F.cat)+'</span><h2>'+esc(F.title)+'</h2><span class="meta">'+fmt(F.date)+' · '+F.read+' min de leitura</span></div>';
+}
+feat.onclick=function(){if(F)open(F.id)};
+var modal=document.getElementById("modal");
+function open(id){
+  var n=NEWS.filter(function(x){return x.id===id})[0];if(!n)return;
+  document.getElementById("mbody").innerHTML='<div class="art">'+pic(n)+'</div><div class="tx"><span class="tag">'+esc(n.cat)+'</span><h2>'+esc(n.title)+'</h2><p class="meta">'+fmt(n.date)+' · '+n.read+' min de leitura</p>'+bodyHtml(n.body||n.sum)+((n.url||n.credit)?'<p class="meta">'+(n.url?'Fonte: <a href="'+esc(safeUrl(n.url))+'" target="_blank" rel="noopener noreferrer">'+esc(n.src||n.url)+'</a>':'')+(n.url&&n.credit?' · ':'')+(n.credit?'Imagem: '+esc(n.credit):'')+'</p>':'')+'</div>';
+  modal.showModal();
+}
+document.getElementById("close").onclick=function(){modal.close()};
+modal.addEventListener("click",function(e){if(e.target===modal)modal.close()});
+
+/* ===== tema ===== */
+document.getElementById("theme").onclick=function(){
+  var r=document.documentElement,dark=getComputedStyle(r).getPropertyValue("--bg").trim()!=="#f2f0ff";
+  r.setAttribute("data-theme",dark?"light":"dark");
+};
+
+/* ===== título digitado ===== */
+var el=document.getElementById("typed"), reduce=matchMedia("(prefers-reduced-motion:reduce)").matches, typeTimer, typedNow="";
+function typeTitle(txt){
+  clearTimeout(typeTimer);el.setAttribute("aria-label",txt);
+  if(reduce){el.textContent=txt;return}
+  var k=0;(function t(){el.textContent=txt.slice(0,++k);if(k<txt.length)typeTimer=setTimeout(t,45)})();
+}
+
+/* ===== fundo de pixels que acende com o mouse ===== */
+(function(){
+  var cv=document.getElementById("grid"),g=cv.getContext("2d"),S=28,cols,rows,heat;
+  function size(){var r=cv.getBoundingClientRect(),d=devicePixelRatio||1;cv.width=r.width*d;cv.height=r.height*d;g.setTransform(d,0,0,d,0,0);cols=Math.ceil(r.width/S);rows=Math.ceil(r.height/S);heat=new Float32Array(cols*rows)}
+  function poke(x,y,v){var cx=x/S|0,cy=y/S|0;for(var dy=-2;dy<=2;dy++)for(var dx=-2;dx<=2;dx++){var X=cx+dx,Y=cy+dy;if(X>=0&&Y>=0&&X<cols&&Y<rows){var k=cols*Y+X,f=v/(1+dx*dx+dy*dy);if(f>heat[k])heat[k]=f}}}
+  function pos(e){var r=cv.getBoundingClientRect(),p=e.touches?e.touches[0]:e;poke(p.clientX-r.left,p.clientY-r.top,1)}
+  addEventListener("pointermove",pos);addEventListener("touchmove",pos,{passive:true});addEventListener("resize",size);size();
+  if(reduce)return;
+  var tick=0;
+  (function loop(){
+    tick++; if(tick%40===0)poke(Math.random()*cv.clientWidth,Math.random()*cv.clientHeight,.6);
+    g.clearRect(0,0,cv.clientWidth,cv.clientHeight);
+    for(var y=0;y<rows;y++)for(var x=0;x<cols;x++){
+      var k=cols*y+x,h=heat[k];
+      g.fillStyle="rgba(255,255,255,.07)";g.fillRect(x*S+12,y*S+12,3,3);
+      if(h>.02){g.fillStyle="rgba(255,210,63,"+h.toFixed(2)+")";g.fillRect(x*S+3,y*S+3,S-6,S-6);heat[k]=h*.93}
+    }
+    requestAnimationFrame(loop);
+  })();
+})();
+
+function applySite(){
+  var S=DATA.site;
+  document.title=S.name+" – notícias de games";
+  [].forEach.call(document.querySelectorAll(".sname"),function(e){e.textContent=S.name});
+  var br=document.querySelector(".side .brand");if(br)br.title=S.name;
+  document.getElementById("intro").textContent=S.intro;
+  document.getElementById("ftxt").textContent=S.footer;
+  document.getElementById("fcredit").textContent=S.credit;
+  document.querySelector("footer .by").hidden=!S.credit;
+  if(typedNow!==S.tagline){typedNow=S.tagline;typeTitle(S.tagline)}
+}
+function refreshAll(){
+  NEWS=DATA.news;CATS=["Todas"].concat(DATA.cats);
+  buildChips();renderFeat();render();applySite();
+  if(window.buildSide)window.buildSide();
+}
+refreshAll();
+</script>
+<script>
+/* ===== menu lateral: edite os itens aqui ===== */
+(function(){
+  var html=document.documentElement, list=document.getElementById("slist"), mbtn=document.getElementById("mbtn");
+  var IC={
+    home:'<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>',
+    star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+    news:'<path d="M5 4h11a2 2 0 012 2v14H7a2 2 0 01-2-2zM18 8h2v10a2 2 0 01-2 2M8 8h7M8 12h7M8 16h4"/>',
+    rocket:'<path d="M12 3c3 2 5 5 5 9l-2 3H9l-2-3c0-4 2-7 5-9zM9 15l-2 4 3-1M15 15l2 4-3-1"/><circle cx="12" cy="10" r="1.5"/>',
+    pad:'<rect x="3" y="7" width="18" height="10" rx="5"/><path d="M8 10v4M6 12h4M15.5 11h.01M18 13h.01"/>',
+    cloud:'<path d="M7 18a4 4 0 010-8 5 5 0 019.6-1A4.5 4.5 0 0117 18z"/>',
+    trophy:'<path d="M8 4h8v5a4 4 0 01-8 0zM8 6H4v1a3 3 0 003 3M16 6h4v1a3 3 0 01-3 3M12 13v4M8 20h8M10 17h4"/>',
+    cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+    tag:'<path d="M4 4h8l8 8-8 8-8-8z"/><circle cx="8.5" cy="8.5" r="1"/>',
+    search:'<circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/>',
+    theme:'<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 010 16z" fill="currentColor"/>',
+    monitor:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+    ticket:'<path d="M4 8a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 000 4v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2a2 2 0 000-4z"/><path d="M14 6v12"/>',
+    chev:'<path d="M15 6l-6 6 6 6"/>'
+  };
+  var CATICON={"Todas":"news","Lançamentos":"rocket","Nintendo":"pad","Serviços":"cloud","Steam":"monitor","Game Pass":"ticket","Esports":"trophy","Eventos":"cal"};
+  function svg(n){return '<svg viewBox="0 0 24 24" aria-hidden="true">'+IC[n]+'</svg>'}
+  function count(c){return c==="Todas"?NEWS.length:NEWS.filter(function(n){return n.cat===c}).length}
+  function buildSide(){
+  var h='<div class="grp">Navegar</div>'
+   +'<a class="item" href="#topo" data-go="topo" title="Início">'+svg("home")+'<span class="lbl">Início</span></a>'
+   +'<a class="item" href="#feat" data-go="feat" title="Destaque do dia">'+svg("star")+'<span class="lbl">Destaque</span></a>'
+   +'<div class="grp">Notícias</div>';
+  CATS.forEach(function(c){
+    var lab=esc(c==="Todas"?"Todas as notícias":c);
+    h+='<button class="item" type="button" data-cat="'+esc(c)+'" title="'+lab+'">'+svg(CATICON[c]||"tag")+'<span class="lbl">'+lab+'</span><span class="n">'+count(c)+'</span></button>';
+  });
+  h+='<div class="grp">Ferramentas</div>'
+   +'<button class="item" type="button" data-act="search" title="Buscar notícia">'+svg("search")+'<span class="lbl">Buscar</span></button>'
+   +'<button class="item" type="button" data-act="theme" title="Alternar tema claro/escuro">'+svg("theme")+'<span class="lbl">Tema claro/escuro</span></button>'
+   +'<div style="flex:1"></div><div class="foot"><button class="item collapse" type="button" data-act="collapse" title="Recolher ou expandir menu">'+svg("chev")+'<span class="lbl">Recolher menu</span></button></div>';
+  list.innerHTML=h;
+  items=[].slice.call(list.querySelectorAll(".item"));
+  if(typeof update==="function")update();
+  }
+  var items=[], brand=document.querySelector(".side .brand");
+  var smooth=!matchMedia("(prefers-reduced-motion:reduce)").matches;
+  function go(id){var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:smooth?"smooth":"auto",block:"start"})}
+  function setCat(c){var b=[].filter.call(document.querySelectorAll("#chips .chip"),function(x){return x.textContent===c})[0];if(b)b.click()}
+  function section(){var s="topo";["feat","noticias"].forEach(function(id){var el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<=100)s=id});return s}
+  function update(){
+    var s=section();
+    items.forEach(function(it){
+      var on=false;
+      if(it.dataset.go)on=it.dataset.go===s;
+      else if(it.dataset.cat)on=(s==="noticias"&&cat===it.dataset.cat);
+      if(on)it.setAttribute("aria-current","true");else it.removeAttribute("aria-current");
+    });
+  }
+  function openMenu(o){
+    html.classList.toggle("menu-open",o);mbtn.setAttribute("aria-expanded",o);
+    if(o){var f=list.querySelector(".item");if(f)f.focus()}else if(matchMedia("(max-width:899px)").matches)mbtn.focus();
+  }
+  function closeMenu(){if(html.classList.contains("menu-open"))openMenu(false)}
+
+  document.getElementById("side").addEventListener("click",function(e){
+    var it=e.target.closest(".item,.brand");if(!it)return;
+    if(it.dataset.go){e.preventDefault();go(it.dataset.go);closeMenu()}
+    else if(it.dataset.cat){setCat(it.dataset.cat);go("noticias");closeMenu()}
+    else if(it.dataset.act==="search"){closeMenu();go("noticias");setTimeout(function(){var q=document.querySelector(".search");if(q)q.focus({preventScroll:true})},smooth?450:0)}
+    else if(it.dataset.act==="theme"){document.getElementById("theme").click()}
+    else if(it.dataset.act==="collapse"){var c=html.classList.toggle("nav-collapsed");try{localStorage.setItem("nz-nav",c?"1":"0")}catch(_){}}
+  });
+  mbtn.onclick=function(){openMenu(true)};
+  document.getElementById("sclose").onclick=function(){openMenu(false)};
+  document.getElementById("scrim").onclick=function(){openMenu(false)};
+  addEventListener("keydown",function(e){if(e.key==="Escape")closeMenu()});
+  addEventListener("resize",function(){if(!matchMedia("(max-width:899px)").matches)html.classList.remove("menu-open")});
+  try{if(localStorage.getItem("nz-nav")==="1")html.classList.add("nav-collapsed")}catch(_){}
+
+  var tick=false;
+  addEventListener("scroll",function(){if(!tick){tick=true;requestAnimationFrame(function(){tick=false;update()})}},{passive:true});
+  var _render=render;render=function(){_render();update()};
+  window.buildSide=buildSide;buildSide();
+})();
+</script>
+
+<script>
+/* ===== área admin ===== */
+(function(){
+  var adm=document.getElementById("admin"),html=document.documentElement;
+  var AKEY="nz-admin",SKEY="nz-auth",UKEY="nz-unpub",FILE="index.html";
+  var st={tab:"news",sel:null,draft:null,isNew:false,dirty:false,q:"",cats:[]},tt,authOk=false;
+  function lsGet(k){try{return localStorage.getItem(k)}catch(_){return null}}
+  function lsSet(k,v){try{localStorage.setItem(k,v);return true}catch(_){return false}}
+  function lsDel(k){try{localStorage.removeItem(k)}catch(_){}}
+  function $(s){return adm.querySelector(s)}
+  var toastEl=document.createElement("div");toastEl.id="a-toast";toastEl.className="a-toast";toastEl.setAttribute("role","status");toastEl.setAttribute("aria-live","polite");document.body.appendChild(toastEl);
+  function toast(m,err){toastEl.textContent=m;toastEl.className="a-toast show"+(err?" err":"");clearTimeout(tt);tt=setTimeout(function(){toastEl.className="a-toast"},err?6500:2800)}
+
+  /* ---- utilidades ---- */
+  function today(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
+  function words(s){return String(s||"").trim().split(/\s+/).filter(Boolean).length}
+  function nextId(){return DATA.news.reduce(function(m,n){return Math.max(m,n.id)},0)+1}
+  function find(id){return DATA.news.filter(function(n){return n.id===id})[0]}
+  function idx(id){for(var i=0;i<DATA.news.length;i++)if(DATA.news[i].id===id)return i;return -1}
+  function fld(label,id,val,type){return '<label for="'+id+'">'+label+'</label><input class="a-in" id="'+id+'" type="'+(type||"text")+'" value="'+esc(val==null?"":val)+'">'}
+  function area(label,id,val,rows){return '<label for="'+id+'">'+label+'</label><textarea class="a-in" id="'+id+'" rows="'+rows+'">'+esc(val==null?"":val)+'</textarea>'}
+  function hashPw(p){
+    if(window.crypto&&crypto.subtle&&window.TextEncoder)return crypto.subtle.digest("SHA-256",new TextEncoder().encode("nz:"+p)).then(function(b){return [].map.call(new Uint8Array(b),function(x){return ("0"+x.toString(16)).slice(-2)}).join("")});
+    var h=5381;for(var i=0;i<p.length;i++)h=((h<<5)+h+p.charCodeAt(i))|0;return Promise.resolve("d"+h);
+  }
+  var fails=0,lockUntil=0;
+  function authed(){if(authOk)return true;try{return sessionStorage.getItem(SKEY)==="1"}catch(_){return false}}
+  function login(){authOk=true;try{sessionStorage.setItem(SKEY,"1")}catch(_){}}
+
+  /* ---- salvar (com reversão se o navegador não deixar gravar) ---- */
+  function persist(){
+    if(!lsSet(DKEY,JSON.stringify(DATA))){toast("Não deu para salvar neste navegador (armazenamento cheio ou bloqueado). Tente uma imagem menor ou um link de imagem.",true);return false}
+    lsSet(UKEY,"1");return true;
+  }
+  function mutate(fn,msg){
+    var snap=JSON.stringify(DATA);fn();
+    if(!persist()){DATA=JSON.parse(snap);return false}
+    refreshAll();status();if(msg)toast(msg);return true;
+  }
+  function status(){var c=$("#a-status");if(!c)return;var u=lsGet(UKEY)==="1";c.className="a-chip"+(u?" warn":"");c.textContent=u?"● Alterações ainda não publicadas":"✓ Tudo publicado"}
+
+  /* ---- abrir / fechar ---- */
+  function openAdmin(){adm.hidden=false;html.classList.add("adm-open");paint();adm.scrollTop=0}
+  function closeAdmin(skip){
+    if(!adm.hidden&&st.dirty&&!skip&&!confirm("Há alterações não salvas. Sair mesmo assim?"))return false;
+    st.dirty=false;st.draft=null;st.isNew=false;st.sel=null;adm.hidden=true;html.classList.remove("adm-open");
+    if(location.hash==="#admin"){try{history.replaceState(null,"",location.href.split("#")[0])}catch(_){location.hash=""}}
+    return true;
+  }
+  function paint(){if(!authed()){loginView();return}shell();tab(st.tab)}
+
+  /* ---- login ---- */
+  function loginView(){
+    var has=!!lsGet(AKEY);
+    adm.innerHTML='<div class="a-login"><form id="a-lf" class="a-card" novalidate><h2>'+(has?"Entrar na área admin":"Criar senha do admin")+'</h2><p class="a-hint">'+(has?"Digite a senha deste painel.":"Defina uma senha para abrir este painel neste navegador.")+'</p>'
+      +'<label for="l-pw">Senha</label><input class="a-in" id="l-pw" type="password" autocomplete="'+(has?"current-password":"new-password")+'">'
+      +(has?"":'<label for="l-pw2">Repita a senha</label><input class="a-in" id="l-pw2" type="password" autocomplete="new-password">')
+      +'<div class="a-err" id="l-err" role="alert"></div><div class="a-act"><button class="a-btn pri" type="submit">'+(has?"Entrar":"Criar senha e entrar")+'</button><button class="a-btn" type="button" id="l-back">Voltar ao site</button></div>'
+      +'<p class="a-hint">Atenção: esta senha só tranca o painel neste navegador. Ela não protege o arquivo do site.</p></form></div>';
+    setTimeout(function(){var i=$("#l-pw");if(i)i.focus()},30);
+  }
+
+  /* ---- estrutura ---- */
+  function shell(){
+    adm.innerHTML='<div class="a-top"><strong class="a-title">Área admin</strong><span class="a-chip" id="a-status"></span><span class="a-sp"></span><button class="a-btn" type="button" id="a-view">Ver site</button><button class="a-btn" type="button" id="a-out">Sair</button></div>'
+      +'<div class="a-tabs" role="tablist"><button class="a-tab" role="tab" type="button" data-tab="news">Notícias</button><button class="a-tab" role="tab" type="button" data-tab="site">Site e categorias</button><button class="a-tab" role="tab" type="button" data-tab="back">Publicar e backup</button></div><div class="a-body" id="a-body"></div>';
+    status();
+  }
+  function tab(n){
+    if(n!==st.tab){if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;st.dirty=false;st.draft=null;st.sel=null;st.isNew=false}
+    st.tab=n;
+    [].forEach.call(adm.querySelectorAll(".a-tab"),function(b){b.setAttribute("aria-selected",b.dataset.tab===n)});
+    ({news:newsView,site:siteView,back:backView})[n]();
+  }
+
+  /* ---- aba Notícias ---- */
+  function newsView(){
+    $("#a-body").innerHTML='<div class="a-news"><aside class="a-list" aria-label="Lista de notícias"><div class="a-lhead"><button class="a-btn pri" type="button" id="a-new">+ Nova notícia</button><button class="a-btn" type="button" id="a-sort" title="Mais recentes primeiro">Ordenar por data</button></div>'
+      +'<input class="a-in" id="a-q" type="search" placeholder="Buscar na lista" aria-label="Buscar na lista" value="'+esc(st.q)+'"><div class="a-items" id="a-items"></div></aside><section id="a-edit"></section></div>';
+    items();editor();
+  }
+  function items(){
+    var q=st.q.toLowerCase(),h="";
+    DATA.news.forEach(function(n){
+      if(q&&(n.title+" "+n.cat).toLowerCase().indexOf(q)<0)return;
+      h+='<div class="a-rowi'+(n.id===st.sel?" on":"")+'"><div class="art a-th">'+pic(n)+'</div><button type="button" class="a-pick" data-pick="'+n.id+'"><b>'+esc(n.title||"(sem título)")+'</b><small>'+esc(n.cat)+" · "+esc(fmt(n.date))+(n.featured?" · ★ destaque":"")+'</small></button>'
+       +'<span class="a-mv"><button type="button" data-mv="-1" data-mid="'+n.id+'" aria-label="Subir" title="Subir">↑</button><button type="button" data-mv="1" data-mid="'+n.id+'" aria-label="Descer" title="Descer">↓</button></span></div>';
+    });
+    $("#a-items").innerHTML=h||'<p class="a-hint">Nenhuma notícia encontrada.</p>';
+  }
+  function editor(){
+    var box=$("#a-edit"),d=st.draft;
+    if(!d){box.innerHTML='<div class="a-card a-ph"><h2>Editar notícia</h2><p>Escolha uma notícia na lista ao lado ou crie uma nova.</p></div>';return}
+    var opts=DATA.cats.map(function(c){return '<option'+(c===d.cat?" selected":"")+'>'+esc(c)+'</option>'}).join("");
+    var isData=/^data:/.test(d.img||"");
+    var pos=[["","Centro"],["top","Topo"],["bottom","Base"]].map(function(p){return '<option value="'+p[0]+'"'+((d.pos||"")===p[0]?" selected":"")+'>'+p[1]+'</option>'}).join("");
+    box.innerHTML='<form id="a-form" class="a-card" novalidate><h2>'+(st.isNew?"Nova notícia":"Editar notícia")+'</h2>'
+      +fld("Título","f-title",d.title)
+      +'<div class="a-row3"><div><label for="f-cat">Categoria</label><select class="a-in" id="f-cat">'+opts+'</select></div><div><label for="f-date">Data</label><input class="a-in" id="f-date" type="date" value="'+esc(d.date)+'"></div><div><label for="f-read">Leitura (min)</label><input class="a-in" id="f-read" type="number" min="1" max="60" placeholder="auto" value="'+esc(d.read||"")+'"></div></div>'
+      +area("Resumo (aparece no card)","f-sum",d.sum,2)
+      +area("Texto completo (uma linha em branco separa os parágrafos)","f-body",d.body,8)
+      +'<div class="a-row2"><div>'+fld("Nome da fonte","f-src",d.src)+'</div><div>'+fld("Link da matéria original","f-url",d.url,"url")+'</div></div>'
+      +'<h3>Capa</h3><div class="a-cover"><div class="art a-prev" id="a-prev"></div><div>'
+      +'<label for="f-img" style="margin-top:0">Endereço (link) da imagem</label><input class="a-in" id="f-img" type="url" placeholder="'+(isData?"Imagem enviada do computador":"https://...")+'" value="'+esc(isData?"":d.img)+'">'
+      +'<div class="a-act"><button type="button" class="a-btn" id="a-up">Enviar do computador</button><button type="button" class="a-btn" id="a-pix">Usar arte em pixel</button></div><input type="file" id="a-file" accept="image/*" hidden>'
+      +'<label for="f-pos">Enquadramento</label><select class="a-in" id="f-pos">'+pos+'</select>'
+      +fld("Texto alternativo (para leitores de tela)","f-alt",d.alt)+fld("Crédito da imagem (opcional)","f-credit",d.credit)+'</div></div>'
+      +'<label class="a-chk"><input type="checkbox" id="f-feat"'+(d.featured?" checked":"")+'> Mostrar como destaque no topo do site</label>'
+      +'<div class="a-err" id="f-err" role="alert"></div>'
+      +'<div class="a-act"><button class="a-btn pri" type="submit">Salvar</button><button type="button" class="a-btn" id="a-disc">Descartar alterações</button>'+(st.isNew?"":'<button type="button" class="a-btn dan" id="a-del">Excluir</button>')+'</div></form>';
+    preview();
+  }
+  function readForm(){
+    var d=st.draft;if(!d||!$("#a-form"))return;
+    d.title=$("#f-title").value.trim();d.cat=$("#f-cat").value;d.date=$("#f-date").value;d.read=parseInt($("#f-read").value,10)||0;
+    d.sum=$("#f-sum").value.trim();d.body=$("#f-body").value.trim();d.src=$("#f-src").value.trim();d.url=$("#f-url").value.trim();
+    d.alt=$("#f-alt").value.trim();d.credit=$("#f-credit").value.trim();d.pos=$("#f-pos").value;d.featured=$("#f-feat").checked;
+  }
+  function preview(){var d=st.draft,p=$("#a-prev");if(!p||!d)return;p.innerHTML=pic({id:d.id,img:d.img,alt:d.alt,title:d.title,pos:d.pos})}
+  function pick(id){
+    if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;
+    st.dirty=false;st.isNew=false;st.sel=id;st.draft=clone(find(id));items();editor();
+    if(innerWidth<900)$("#a-edit").scrollIntoView({behavior:"smooth",block:"start"});
+  }
+  function addNew(){
+    if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;
+    st.dirty=false;st.isNew=true;st.sel=null;
+    st.draft={id:nextId(),img:"",alt:"",pos:"",credit:"",cat:DATA.cats[0]||"",title:"",date:today(),read:0,sum:"",body:"",src:"",url:"",featured:false};
+    items();editor();var t=$("#f-title");if(t)t.focus();
+    if(innerWidth<900)$("#a-edit").scrollIntoView({behavior:"smooth",block:"start"});
+  }
+  function saveNews(){
+    var d=st.draft;if(!d)return;readForm();var err=$("#f-err");err.textContent="";
+    if(!d.title){err.textContent="Dê um título à notícia.";$("#f-title").focus();return}
+    if(!d.cat){err.textContent="Crie uma categoria na aba “Site e categorias” antes de salvar.";return}
+    if(d.url&&!/^https?:\/\//i.test(d.url)){err.textContent="O link da matéria precisa começar com http:// ou https://";$("#f-url").focus();return}
+    if(d.img&&/^\s*(javascript:|data:(?!image\/))/i.test(d.img)){err.textContent="Endereço de imagem inválido.";$("#f-img").focus();return}
+    if(!d.date)d.date=today();
+    if(!d.read)d.read=Math.max(1,Math.round(words(d.body||d.sum)/180));
+    var ok=mutate(function(){
+      if(d.featured)DATA.news.forEach(function(x){x.featured=false});
+      if(st.isNew)DATA.news.unshift(clone(d));else DATA.news[idx(d.id)]=clone(d);
+    },"Notícia salva.");
+    if(ok){st.isNew=false;st.sel=d.id;st.dirty=false;st.draft=clone(find(d.id));items();editor()}
+  }
+  function delNews(){
+    var d=st.draft;if(!d||st.isNew)return;
+    if(!confirm("Excluir “"+d.title+"”? Para desfazer só importando um backup.")) return;
+    if(mutate(function(){DATA.news.splice(idx(d.id),1)},"Notícia excluída.")){st.sel=null;st.draft=null;st.dirty=false;items();editor()}
+  }
+  function move(id,dir){
+    var i=idx(id),j=i+dir;if(i<0||j<0||j>=DATA.news.length)return;
+    mutate(function(){var t=DATA.news[i];DATA.news[i]=DATA.news[j];DATA.news[j]=t});items();
+  }
+  function onFile(f){
+    if(!f)return;if(!/^image\//.test(f.type)){toast("Escolha um arquivo de imagem.",true);return}
+    var fr=new FileReader();fr.onerror=function(){toast("Não consegui ler o arquivo.",true)};
+    fr.onload=function(){
+      var im=new Image();im.onerror=function(){toast("Não consegui abrir essa imagem.",true)};
+      im.onload=function(){
+        var r=Math.min(1,1200/im.width),c=document.createElement("canvas");c.width=Math.max(1,Math.round(im.width*r));c.height=Math.max(1,Math.round(im.height*r));
+        var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);
+        st.draft.img=c.toDataURL("image/jpeg",.82);st.dirty=true;
+        var fi=$("#f-img");fi.value="";fi.placeholder="Imagem enviada do computador";preview();toast("Imagem carregada. Clique em Salvar para aplicar.");
+      };im.src=fr.result;
+    };fr.readAsDataURL(f);
+  }
+
+  /* ---- aba Site e categorias ---- */
+  function siteView(){
+    var S=DATA.site;st.cats=DATA.cats.map(function(c){return {orig:c,name:c}});
+    $("#a-body").innerHTML='<div class="a-wrap"><form id="a-site" class="a-card" novalidate><h2>Textos do site</h2>'
+      +fld("Nome do site","s-name",S.name)+fld("Frase animada do topo","s-tag",S.tagline)+area("Texto abaixo da frase","s-intro",S.intro,3)+area("Texto do rodapé","s-foot",S.footer,3)+fld("Criado por (deixe vazio para ocultar)","s-cred",S.credit)
+      +'<div class="a-act"><button class="a-btn pri" type="submit">Salvar textos</button></div></form>'
+      +'<div class="a-card"><h2>Categorias</h2><p class="a-hint">A ordem aqui é a ordem dos filtros e do menu lateral. Uma categoria só pode ser excluída quando não tem notícias.</p><div id="a-cats"></div>'
+      +'<div class="a-err" id="c-err" role="alert"></div><div class="a-act"><button class="a-btn" type="button" id="a-addcat">+ Adicionar categoria</button><button class="a-btn pri" type="button" id="a-savecats">Salvar categorias</button></div></div></div>';
+    catRows();
+  }
+  function catCount(c){return DATA.news.filter(function(n){return n.cat===c}).length}
+  function catRows(){
+    $("#a-cats").innerHTML=st.cats.map(function(c,i){var n=c.orig?catCount(c.orig):0;
+      return '<div class="a-crow"><input class="a-in" data-ci="'+i+'" value="'+esc(c.name)+'" aria-label="Nome da categoria"><small class="a-hint">'+n+' notícia(s)</small><button type="button" data-cm="-1" data-ci="'+i+'" aria-label="Subir" title="Subir">↑</button><button type="button" data-cm="1" data-ci="'+i+'" aria-label="Descer" title="Descer">↓</button><button type="button" data-cd="'+i+'" aria-label="Excluir"'+(n?' disabled title="Mova ou exclua as notícias desta categoria primeiro"':' title="Excluir"')+'>✕</button></div>'}).join("")||'<p class="a-hint">Nenhuma categoria.</p>';
+  }
+  function saveSite(){
+    var g=function(i){return $(i).value.trim()};
+    if(!g("#s-name")){toast("O nome do site não pode ficar vazio.",true);return}
+    mutate(function(){DATA.site={name:g("#s-name"),tagline:g("#s-tag"),intro:g("#s-intro"),footer:g("#s-foot"),credit:g("#s-cred")}},"Textos salvos.");
+  }
+  function saveCats(){
+    var err=$("#c-err"),names=st.cats.map(function(c){return c.name.trim()}),low={};err.textContent="";
+    for(var i=0;i<names.length;i++){
+      if(!names[i]){err.textContent="Há uma categoria sem nome.";return}
+      if(names[i].toLowerCase()==="todas"){err.textContent="“Todas” já existe automaticamente; escolha outro nome.";return}
+      if(low[names[i].toLowerCase()]){err.textContent="Há categorias repetidas: “"+names[i]+"”.";return}
+      low[names[i].toLowerCase()]=1;
+    }
+    var map={};st.cats.forEach(function(c,i){if(c.orig)map[c.orig]=names[i]});
+    if(mutate(function(){DATA.news.forEach(function(n){if(map.hasOwnProperty(n.cat))n.cat=map[n.cat]});DATA.cats=names.slice()},"Categorias salvas.")){siteView()}
+  }
+
+  /* ---- aba Publicar e backup ---- */
+  function backView(){
+    $("#a-body").innerHTML='<div class="a-wrap">'
+      +'<div class="a-card"><h2>Publicar suas alterações</h2><ol class="a-steps"><li>Edite as notícias e os textos (as mudanças já aparecem neste navegador).</li><li>Clique em <b>Baixar site atualizado</b>.</li><li>Troque o arquivo antigo por esse novo no lugar onde o site está hospedado.</li></ol><p class="a-hint">Até você fazer isso, só você vê as alterações, e só neste navegador.</p><div class="a-act"><button class="a-btn pri" type="button" id="a-dl">Baixar site atualizado (.html)</button></div></div>'
+      +'<div class="a-card"><h2>Backup das notícias</h2><p class="a-hint">Um arquivo .json com todas as notícias, categorias e textos. Serve para guardar uma cópia ou levar para outro navegador.</p><div class="a-act"><button class="a-btn" type="button" id="a-json">Baixar notícias (.json)</button><button class="a-btn" type="button" id="a-imp">Importar notícias (.json)</button></div><input type="file" id="a-impf" accept=".json,application/json" hidden></div>'
+      +'<form id="a-pwf" class="a-card" novalidate><h2>Senha do painel</h2>'+fld("Nova senha","p-new","","password")+fld("Repita a nova senha","p-new2","","password")+'<div class="a-err" id="p-err" role="alert"></div><div class="a-act"><button class="a-btn" type="submit">Trocar senha</button></div></form>'
+      +'<div class="a-card"><h2>Voltar ao original</h2><p class="a-hint">Apaga as alterações feitas neste navegador e volta ao conteúdo que está dentro do arquivo do site.</p><div class="a-act"><button class="a-btn dan" type="button" id="a-reset">Descartar alterações deste navegador</button></div></div></div>';
+    var f=$("#p-new");if(f)f.setAttribute("autocomplete","new-password");
+  }
+  function norm(d){
+    if(!d||!Array.isArray(d.news))return null;
+    var o={site:{},cats:[],news:[]},s=d.site||{},seen={};
+    ["name","tagline","intro","footer","credit"].forEach(function(k){o.site[k]=String(s[k]==null?BASE.site[k]:s[k])});
+    d.news.forEach(function(n,i){
+      if(!n||!n.title)return;var id=+n.id||i+1;while(seen[id])id++;seen[id]=1;
+      o.news.push({id:id,img:String(n.img||""),alt:String(n.alt||""),credit:String(n.credit||""),pos:/^(top|bottom)$/.test(n.pos)?n.pos:"",cat:String(n.cat||""),title:String(n.title),date:String(n.date||""),read:+n.read||0,sum:String(n.sum||""),body:String(n.body||""),src:String(n.src||""),url:String(n.url||""),featured:!!n.featured});
+    });
+    var cs=(Array.isArray(d.cats)?d.cats:[]).map(String).filter(function(c){return c&&c!=="Todas"});
+    o.news.forEach(function(n){if(n.cat&&cs.indexOf(n.cat)<0)cs.push(n.cat)});
+    o.cats=cs;return o;
+  }
+  function jsonForHtml(o){return JSON.stringify(o,null,1).replace(/</g,"\\u003c")}
+  function buildHtml(){
+    var c=document.documentElement.cloneNode(true);
+    ["class","data-theme","style"].forEach(function(a){c.removeAttribute(a)});
+    ["#cards","#chips","#feat","#slist","#mbody","#typed"].forEach(function(s){var e=c.querySelector(s);if(e)e.innerHTML=""});
+    var f=c.querySelector("#feat");if(f)f.removeAttribute("hidden");
+    var a=c.querySelector("#admin");if(a){a.innerHTML="";a.setAttribute("hidden","")}
+    var t=c.querySelector("#a-toast");if(t)t.remove();
+    var g=c.querySelector("#grid");if(g)["width","height","style"].forEach(function(k){g.removeAttribute(k)});
+    var mb=c.querySelector("#mbtn");if(mb)mb.setAttribute("aria-expanded","false");
+    var m=c.querySelector("#modal");if(m)m.removeAttribute("open");
+    var d=c.querySelector("#nz-data");d.textContent="\n"+jsonForHtml(DATA)+"\n";
+    return "<!DOCTYPE html>\n"+c.outerHTML;
+  }
+  function download(name,type,text){
+    var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:type}));a.download=name;document.body.appendChild(a);a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},800);
+  }
+
+  /* ---- eventos ---- */
+  adm.addEventListener("click",function(e){
+    var t=e.target.closest("button");if(!t)return;var id=t.id,ds=t.dataset;
+    if(ds.tab){tab(ds.tab);return}
+    if(ds.pick){pick(+ds.pick);return}
+    if(ds.mv){move(+ds.mid,+ds.mv);return}
+    if(ds.cm!==undefined){var i=+ds.ci,j=i+(+ds.cm);if(j>=0&&j<st.cats.length){var x=st.cats[i];st.cats[i]=st.cats[j];st.cats[j]=x;catRows()}return}
+    if(ds.cd!==undefined){st.cats.splice(+ds.cd,1);catRows();return}
+    if(id==="l-back"||id==="a-view"){closeAdmin();return}
+    if(id==="a-out"){if(closeAdmin()){authOk=false;try{sessionStorage.removeItem(SKEY)}catch(_){}}return}
+    if(id==="a-new"){addNew();return}
+    if(id==="a-sort"){mutate(function(){DATA.news.sort(function(a,b){return String(b.date).localeCompare(String(a.date))})},"Ordenado por data (mais recentes primeiro).");items();return}
+    if(id==="a-up"){$("#a-file").click();return}
+    if(id==="a-pix"){st.draft.img="";st.dirty=true;var fi=$("#f-img");fi.value="";fi.placeholder="https://...";preview();return}
+    if(id==="a-disc"){st.dirty=false;st.draft=st.isNew?null:clone(find(st.sel));if(st.isNew)st.isNew=false;items();editor();return}
+    if(id==="a-del"){delNews();return}
+    if(id==="a-addcat"){st.cats.push({orig:null,name:""});catRows();var ins=adm.querySelectorAll(".a-crow input[data-ci]");var li=ins[ins.length-1];if(li)li.focus();return}
+    if(id==="a-savecats"){saveCats();return}
+    if(id==="a-dl"){download(FILE,"text/html",buildHtml());lsDel(UKEY);status();toast("Arquivo baixado. Agora é só trocar pelo arquivo antigo no seu site.");return}
+    if(id==="a-json"){download("nizzera-noticias.json","application/json",JSON.stringify(DATA,null,1));toast("Backup baixado.");return}
+    if(id==="a-imp"){$("#a-impf").click();return}
+    if(id==="a-reset"){if(confirm("Descartar tudo o que foi alterado neste navegador e voltar ao conteúdo original do arquivo?")){DATA=clone(BASE);lsDel(DKEY);lsDel(UKEY);refreshAll();status();toast("Conteúdo original restaurado.")}return}
+  });
+  adm.addEventListener("submit",function(e){
+    e.preventDefault();var id=e.target.id;
+    if(id==="a-lf"){
+      var pw=$("#l-pw").value,has=!!lsGet(AKEY),err=$("#l-err");
+      if(has){
+        if(Date.now()<lockUntil){err.textContent="Muitas tentativas. Aguarde "+Math.ceil((lockUntil-Date.now())/1000)+"s e tente de novo.";return}
+        hashPw(pw).then(function(h){if(h===lsGet(AKEY)){fails=0;login();paint()}else{fails++;if(fails>=5){fails=0;lockUntil=Date.now()+60000;err.textContent="Muitas tentativas. Aguarde 60s."}else err.textContent="Senha incorreta."}})}
+      else{
+        if(pw.length<8){err.textContent="Use pelo menos 8 caracteres.";return}
+        if(pw!==$("#l-pw2").value){err.textContent="As senhas não conferem.";return}
+        hashPw(pw).then(function(h){if(!lsSet(AKEY,h)){err.textContent="Este navegador bloqueou o armazenamento, então não dá para criar a senha.";return}login();paint()});
+      }
+    }
+    else if(id==="a-form")saveNews();
+    else if(id==="a-site")saveSite();
+    else if(id==="a-pwf"){
+      var p=$("#p-new").value,er=$("#p-err");er.textContent="";
+      if(p.length<8){er.textContent="Use pelo menos 8 caracteres.";return}
+      if(p!==$("#p-new2").value){er.textContent="As senhas não conferem.";return}
+      hashPw(p).then(function(h){if(lsSet(AKEY,h)){$("#p-new").value="";$("#p-new2").value="";toast("Senha alterada.")}else er.textContent="Não consegui gravar a nova senha neste navegador."});
+    }
+  });
+  adm.addEventListener("input",function(e){
+    var t=e.target;
+    if(t.id==="a-q"){st.q=t.value;items();return}
+    if(t.dataset&&t.dataset.ci!==undefined&&t.tagName==="INPUT"){st.cats[+t.dataset.ci].name=t.value;return}
+    if(!t.closest||!t.closest("#a-form")||!st.draft)return;
+    st.dirty=true;readForm();
+    if(t.id==="f-img")st.draft.img=t.value.trim();
+    if(["f-img","f-alt","f-pos","f-title"].indexOf(t.id)>-1)preview();
+  });
+  adm.addEventListener("change",function(e){
+    var t=e.target;
+    if(t.id==="a-file"){onFile(t.files&&t.files[0]);t.value=""}
+    else if(t.id==="a-impf"){
+      var f=t.files&&t.files[0];t.value="";if(!f)return;
+      var fr=new FileReader();fr.onerror=function(){toast("Não consegui ler o arquivo.",true)};
+      fr.onload=function(){
+        var d;try{d=norm(JSON.parse(fr.result))}catch(_){d=null}
+        if(!d||!d.news.length){toast("Esse arquivo não parece um backup válido do site.",true);return}
+        if(!confirm("Importar "+d.news.length+" notícia(s)? Isso substitui as notícias, categorias e textos atuais."))return;
+        if(mutate(function(){DATA=d},"Backup importado.")){st.sel=null;st.draft=null;st.dirty=false;tab(st.tab)}
+      };fr.readAsText(f);
+    }
+  });
+  addEventListener("hashchange",function(){
+    if(location.hash==="#admin"){if(adm.hidden)openAdmin()}
+    else if(!adm.hidden)closeAdmin(true);
+  });
+  addEventListener("keydown",function(e){if(e.key==="Escape"&&!adm.hidden)closeAdmin()});
+  addEventListener("beforeunload",function(e){if(st.dirty&&!adm.hidden){e.preventDefault();e.returnValue=""}});
+  if(location.hash==="#admin")openAdmin();
+})();
+</script>
+
+</body>
+</html>
