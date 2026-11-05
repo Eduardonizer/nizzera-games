@@ -56,6 +56,18 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0
 .sec{font-size:1.6rem;margin:40px 0 0}
 .carr .sec{margin-top:36px}
 .carr .marq{padding-bottom:8px}
+.dtabs{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 20px}
+.deals{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
+.deal{display:flex;flex-direction:column;background:var(--card);border-radius:14px;overflow:hidden;text-decoration:none;color:inherit;transition:transform .2s,box-shadow .2s}
+.deal:hover{transform:translateY(-5px);box-shadow:6px 6px 0 var(--sun)}
+.deal img{display:block;width:100%;aspect-ratio:460/215;object-fit:cover;background:var(--line)}
+.deal .dx{padding:12px 14px 14px;display:grid;gap:8px}
+.deal b{font-size:.98rem;line-height:1.25}
+.dp{display:flex;align-items:center;gap:8px}
+.dd{background:var(--sun);color:var(--ink);font-weight:800;border-radius:6px;padding:2px 8px}
+.dp s{color:var(--muted);font-size:.9rem}.dp strong{margin-left:auto}
+#dmeta{margin:14px 0 0}
+.soon{grid-column:1/-1;text-align:center;padding:36px 12px;color:var(--muted);border:2px dashed var(--line);border-radius:14px}
 .feat .art{aspect-ratio:16/9}
 .feat .tx{padding:18px 20px 22px}
 .feat h2{font-size:1.6rem;margin:8px 0}
@@ -264,6 +276,13 @@ footer .adminlink{margin:10px 0 0;font-size:.82rem;opacity:.7}
   <div class="marq" id="carr" aria-live="off"></div>
 </section>
 
+<section class="wrap ofertas" id="ofertas" aria-label="Ofertas da semana">
+  <h2 class="sec">Ofertas da semana</h2>
+  <div class="dtabs" id="dtabs" role="tablist"></div>
+  <div class="deals" id="deals" aria-live="polite"></div>
+  <p class="meta" id="dmeta"></p>
+</section>
+
 <main class="wrap" id="noticias">
   <h2 class="sec">Todas as notícias</h2>
   <div class="tools" role="group" aria-label="Filtrar por categoria" id="chips"></div>
@@ -297,369 +316,33 @@ footer .adminlink{margin:10px 0 0;font-size:.82rem;opacity:.7}
  ],
  "news": [
   {
-   "id": 38,
-   "img": "https://i0.wp.com/www.otakupt.com/wp-content/uploads/2025/06/steam_store_home.jpg?fit=1920%2C1080&ssl=1",
-   "alt": "Steam muda as regras de lançamento para reduzir atrasos nas revisões, que já chegam aos 12 dias úteis",
-   "pos": "",
-   "credit": "OtakuPT",
-   "cat": "Steam",
-   "title": "Steam muda as regras de lançamento para reduzir atrasos nas revisões, que já chegam aos 12 dias úteis",
-   "date": "2026-11-04",
-   "read": 1,
-   "sum": "Há jogos independentes a falhar a data de lançamento na Steam, em alguns casos por várias semanas, e a Valve decidiu mexer nas regras de submissão para tentar desentupir…",
-   "body": "Há jogos independentes a falhar a data de lançamento na Steam, em alguns casos por várias semanas, e a Valve decidiu mexer nas regras de submissão para tentar desentupir a fila de revisão. O objetivo é reduzir as segundas análises que estão a prolongar uma espera que, neste momento, pode chegar aos 12 dias úteis.",
-   "src": "OtakuPT",
-   "url": "https://www.otakupt.com/jogos/steam-muda-regras-lancamento-reduzir-atrasos-revisoes-12-dias-uteis/",
-   "featured": false
-  },
-  {
-   "id": 37,
-   "img": "https://i0.wp.com/www.otakupt.com/wp-content/uploads/2025/05/GTA-6-Jason_and_Lucia_02_landscape.jpg?fit=1920%2C1080&ssl=1",
-   "alt": "GTA 6 na PS5 Pro: a Rockstar confirma melhorias, mas ainda não revela quais",
-   "pos": "",
-   "credit": "OtakuPT",
-   "cat": "Lançamentos",
-   "title": "GTA 6 na PS5 Pro: a Rockstar confirma melhorias, mas ainda não revela quais",
-   "date": "2026-11-04",
-   "read": 1,
-   "sum": "Faltam 15 dias para o lançamento de GTA 6 (Grand Theft Auto VI, no nome oficial) e quem pondera trocar de consola continua sem resposta a uma pergunta simples: o que…",
-   "body": "Faltam 15 dias para o lançamento de GTA 6 (Grand Theft Auto VI, no nome oficial) e quem pondera trocar de consola continua sem resposta a uma pergunta simples: o que muda, na prática, na PS5 Pro? A PlayStation Store já lista o jogo com a indicação PS5 Pro Enhanced, mas nem a Rockstar nem O conteúdo GTA 6 na PS5 Pro: a Rockstar confirma melhorias, mas ainda não revela quais aparece primeiro em OtakuPT .",
-   "src": "OtakuPT",
-   "url": "https://www.otakupt.com/jogos/gta-6-ps5-pro-rockstar-confirma-melhorias/",
-   "featured": false
-  },
-  {
-   "id": 36,
-   "img": "https://i0.wp.com/www.otakupt.com/wp-content/uploads/2026/11/GTA-6-Ultimate-Edition-Visual.jpg?fit=1920%2C1080&ssl=1",
-   "alt": "GTA 6: vale a pena pagar mais 20 euros pela Ultimate Edition?",
-   "pos": "",
-   "credit": "OtakuPT",
-   "cat": "Lançamentos",
-   "title": "GTA 6: vale a pena pagar mais 20 euros pela Ultimate Edition?",
-   "date": "2026-11-04",
-   "read": 1,
-   "sum": "Com o lançamento marcado para 19 de novembro para PS5 e Xbox Series X|S, GTA 6 chega às lojas em duas edições.",
-   "body": "Com o lançamento marcado para 19 de novembro para PS5 e Xbox Series X|S, GTA 6 chega às lojas em duas edições. A diferença entre elas é de 20 euros e traduz-se num pacote de conteúdo extra dentro do jogo, que vai de carros e armas a lojas inteiras e a duas atividades próprias. A O conteúdo GTA 6: vale a pena pagar mais 20 euros pela Ultimate Edition? aparece primeiro em OtakuPT .",
-   "src": "OtakuPT",
-   "url": "https://www.otakupt.com/jogos/gta-6-vale-a-pena-pagar-mais-20-euros-ultimate-edition/",
-   "featured": false
-  },
-  {
-   "id": 35,
-   "img": "https://i0.wp.com/www.otakupt.com/wp-content/uploads/2026/10/Kingdom-of-Night-1920x1080-1.jpg?fit=1920%2C1080&ssl=1",
-   "alt": "Kingdom of Night – Análise na PlayStation 5",
+   "id": 5,
+   "img": "https://www.otakupt.com/wp-content/uploads/2026/11/Pikmin-4-Nintendo-Switch-2-Edition-Plus-Dandori-Academy-scaled-e1793711632629.jpg",
+   "alt": "Pikmin 4 – Nintendo Switch 2 Edition + Academia Dandori",
    "pos": "",
    "credit": "OtakuPT",
    "cat": "Nintendo",
-   "title": "Kingdom of Night – Análise na PlayStation 5",
-   "date": "2026-11-04",
+   "title": "Pikmin 4 ganha edição para Switch 2 com Academia Dandori em 12 de novembro",
+   "date": "2026-11-03",
    "read": 1,
-   "sum": "Lançado originalmente para PC a 2 de dezembro de 2025, Kingdom of Night prepara-se para levar o terror cósmico às consolas, chegando à PlayStation 5, Xbox Series e…",
-   "body": "Lançado originalmente para PC a 2 de dezembro de 2025, Kingdom of Night prepara-se para levar o terror cósmico às consolas, chegando à PlayStation 5, Xbox Series e Nintendo Switch no dia 5 de Novembro de 2026. Desenvolvido pela Friends of Safety e publicado pela DANGEN Entertainment, este indie junta a ação dos RPG clássicos, O conteúdo Kingdom of Night – Análise na PlayStation 5 aparece primeiro em OtakuPT .",
+   "sum": "A Nintendo mostrou um vídeo de quase quatro minutos com as novidades.",
+   "body": "A Nintendo publicou um vídeo de cerca de quatro minutos sobre Pikmin 4 – Nintendo Switch 2 Edition + Academia Dandori, que chega ao console em 12 de novembro. A edição também está na lista de lançamentos físicos do mês.",
    "src": "OtakuPT",
-   "url": "https://www.otakupt.com/review/kingdom-of-night-analise-na-playstation-5/",
+   "url": "https://www.otakupt.com/jogos/nintendo-mostra-mais-de-pikmin-4-nintendo-switch-2-edition-dandori-academy/",
    "featured": false
   },
   {
-   "id": 29,
-   "img": "https://i0.wp.com/www.otakupt.com/wp-content/uploads/2025/09/Roblox-website-visual.jpg?fit=1920%2C1080&ssl=1",
-   "alt": "Reino Unido quer impedir menores de 16 anos de falar com estranhos nos jogos online, mas há oposição",
-   "pos": "",
-   "credit": "OtakuPT",
-   "cat": "Lançamentos",
-   "title": "Reino Unido quer impedir menores de 16 anos de falar com estranhos nos jogos online, mas há oposição",
-   "date": "2026-11-04",
-   "read": 1,
-   "sum": "O Governo do Reino Unido confirmou que pretende limitar, em breve, a forma como os menores de 16 anos comunicam dentro dos jogos online, com o chat de voz no centro das…",
-   "body": "O Governo do Reino Unido confirmou que pretende limitar, em breve, a forma como os menores de 16 anos comunicam dentro dos jogos online, com o chat de voz no centro das atenções. A medida não reúne consenso, e há já quem alerte para os efeitos que pode ter na experiência de jogo. A confirmação O conteúdo Reino Unido quer impedir menores de 16 anos de falar com estranhos nos jogos online, mas há oposição aparece primeiro em OtakuPT .",
-   "src": "OtakuPT",
-   "url": "https://www.otakupt.com/jogos/reino-unido-impedir-menores-16-anos-falar-estranhos-jogos-online-oposicao/",
-   "featured": true
-  },
-  {
-   "id": 28,
-   "img": "https://i0.wp.com/www.otakupt.com/wp-content/uploads/2026/06/God-of-War-Laufey-visual-PSN.jpg?fit=1920%2C1080&ssl=1",
-   "alt": "God of War Laufey adiado: Jogo de Faye só chega à PS5 dia 20 de maio de 2027",
-   "pos": "",
-   "credit": "OtakuPT",
-   "cat": "Lançamentos",
-   "title": "God of War Laufey adiado: Jogo de Faye só chega à PS5 dia 20 de maio de 2027",
-   "date": "2026-11-04",
-   "read": 1,
-   "sum": "O Santa Monica Studio adiou God of War Laufey.",
-   "body": "O Santa Monica Studio adiou God of War Laufey. O jogo, que tinha lançamento marcado para 16 de fevereiro de 2027, passa agora para 20 de maio de 2027, ou seja, um adiamento de pouco mais de três meses. A confirmação surgiu esta quarta-feira, 4 de novembro, numa publicação na conta oficial do estúdio na O conteúdo God of War Laufey adiado: Jogo de Faye só chega à PS5 dia 20 de maio de 2027 aparece primeiro em OtakuPT .",
-   "src": "OtakuPT",
-   "url": "https://www.otakupt.com/jogos/god-of-war-laufey-adiado-jogo-faye-ps5-maio-2027/",
-   "featured": false
-  },
-  {
-   "id": 27,
-   "img": "https://i0.wp.com/www.otakupt.com/wp-content/uploads/2026/11/GOG-thumb-primeiro-showcase.jpg?fit=1920%2C1080&ssl=1",
-   "alt": "GOG prepara o seu primeiro showcase e pode trazer de volta vários jogos clássicos",
-   "pos": "",
-   "credit": "OtakuPT",
-   "cat": "Eventos",
-   "title": "GOG prepara o seu primeiro showcase e pode trazer de volta vários jogos clássicos",
-   "date": "2026-11-04",
-   "read": 1,
-   "sum": "A GOG vai ter, pela primeira vez na sua história, um showcase próprio.",
-   "body": "A GOG vai ter, pela primeira vez na sua história, um showcase próprio. O evento está marcado para quinta-feira, 5 de novembro, e coincide com o 18.º aniversário da loja e promete novos jogos e novas funcionalidades. O showcase arranca no YouTube às 18h00 em Portugal continental e haverá legendas em inglês, alemão, francês e O conteúdo GOG prepara o seu primeiro showcase e pode trazer de volta vários jogos clássicos aparece primeiro em OtakuPT .",
-   "src": "OtakuPT",
-   "url": "https://www.otakupt.com/jogos/gog-primeiro-showcase-regresso-jogos-classicos/",
-   "featured": false
-  },
-  {
-   "id": 26,
-   "img": "https://i0.wp.com/www.otakupt.com/wp-content/uploads/2026/11/Wonderfall-game-pv-screenshot.jpg?fit=1920%2C1080&ssl=1",
-   "alt": "Wonderfall chega a 9 de dezembro: uma Paris de 1920 a desfazer-se em areia",
-   "pos": "",
-   "credit": "OtakuPT",
-   "cat": "Steam",
-   "title": "Wonderfall chega a 9 de dezembro: uma Paris de 1920 a desfazer-se em areia",
-   "date": "2026-11-04",
-   "read": 1,
-   "sum": "Wonderfall já tem data de lançamento. O jogo de aventura da Attaboy Interactive chega ao PC através da Steam a 9 de dezembro.",
-   "body": "Wonderfall já tem data de lançamento. O jogo de aventura da Attaboy Interactive chega ao PC através da Steam a 9 de dezembro. O projeto, conhecido anteriormente como Entropia, é desenvolvido pelo estúdio independente sediado em Paris e quem quiser experimentá-lo antes do lançamento já pode fazê-lo, uma demo foi disponibilizada em maio.",
-   "src": "OtakuPT",
-   "url": "https://www.otakupt.com/jogos/wonderfall-chega-a-9-de-dezembro-uma-paris-de-1920-a-desfazer-se-em-areia/",
-   "featured": false
-  },
-  {
-   "id": 25,
-   "img": "https://xboxpower-wp.s3.amazonaws.com/wp-content/uploads/2026/11/massive_FH_6_S07_Master_Chief_Suit_02_16x9_WM_31ed7fc050-300x169.jpg",
-   "alt": "Forza Horizon 6 recebe atualização Series 7 com novas pistas em Tóquio, carros inéditos e conteúdo de Halo",
+   "id": 7,
+   "img": "https://xboxpower-wp.s3.amazonaws.com/wp-content/uploads/2026/11/xpg-nov-2026-w1-featured.jpg",
+   "alt": "Jogos que chegam ao Xbox Game Pass em novembro de 2026",
    "pos": "",
    "credit": "Xbox Power",
-   "cat": "Lançamentos",
-   "title": "Forza Horizon 6 recebe atualização Series 7 com novas pistas em Tóquio, carros inéditos e conteúdo de Halo",
-   "date": "2026-11-04",
-   "read": 1,
-   "sum": "A Playground Games lançou a atualização Serie 7 de Forza Horizon 6, intitulada City Life, trazendo novidades para os jogadores.",
-   "body": "A Playground Games lançou a atualização Serie 7 de Forza Horizon 6, intitulada City Life, trazendo novidades para os jogadores. O destaque fica por conta de duas novas pistas permanentes em Tóquio: Edo Circuit Road Race e Shuto Charge Street Race. A atualização também adiciona o IKEA Prop Pack, com 35 objetos decorativos inspirados na",
-   "src": "Xbox Power",
-   "url": "https://www.xboxpower.com.br/2026/11/04/forza-horizon-6-recebe-atualizacao-series-7-com-novas-pistas-em-toquio-carros-ineditos-e-conteudo-de-halo/",
-   "featured": false
-  },
-  {
-   "id": 24,
-   "img": "https://xboxpower-wp.s3.amazonaws.com/wp-content/uploads/2026/11/ss_8b3d11bd496c7b7f3d4744f3193ec5b2344e28b9.1920x1080-1024x576-1-300x169.jpg",
-   "alt": "Truck World: Australia chega ao Xbox Game Preview em 5 de novembro com proposta ambiciosa de simulação",
-   "pos": "",
-   "credit": "Xbox Power",
-   "cat": "Lançamentos",
-   "title": "Truck World: Australia chega ao Xbox Game Preview em 5 de novembro com proposta ambiciosa de simulação",
-   "date": "2026-11-04",
-   "read": 1,
-   "sum": "Os fãs de simuladores de caminhões terão uma nova experiência para explorar a partir de amanhã, 5 de novembro.",
-   "body": "Os fãs de simuladores de caminhões terão uma nova experiência para explorar a partir de amanhã, 5 de novembro. Truck World: Australia, desenvolvido pela Truck World Studio e publicado pela HypeTrain Digital, chega ao Xbox Series em formato Game Preview, permitindo que os jogadores experimentem o título durante seu desenvolvimento em acesso antecipado. A proposta",
-   "src": "Xbox Power",
-   "url": "https://www.xboxpower.com.br/2026/11/04/truck-world-australia-chega-ao-xbox-game-preview-em-5-de-novembro-com-proposta-ambiciosa-de-simulacao/",
-   "featured": false
-  },
-  {
-   "id": 23,
-   "img": "https://xboxwire.thesourcemediaassets.com/sites/2/2026/11/XBOX-Wire-DtC-Phone-Controller-110426-5428ff0def107f49971d-1024x576.jpg",
-   "alt": "XBOX Cloud Gaming ganha duas novas formas de jogar: celular e controle XBOX Nano entram em cena",
-   "pos": "",
-   "credit": "Xbox Power",
-   "cat": "Serviços",
-   "title": "XBOX Cloud Gaming ganha duas novas formas de jogar: celular e controle XBOX Nano entram em cena",
-   "date": "2026-11-04",
-   "read": 1,
-   "sum": "O XBOX Cloud Gaming acaba de receber duas novidades que podem mudar a forma como muita gente joga na nuvem.",
-   "body": "O XBOX Cloud Gaming acaba de receber duas novidades que podem mudar a forma como muita gente joga na nuvem. A partir dos testes iniciados em 4 de novembro de 2026, a Microsoft começou a liberar duas experiências em prévia: usar o celular como controle em Smart TVs compatíveis e conectar o novo XBOX Nano",
-   "src": "Xbox Power",
-   "url": "https://www.xboxpower.com.br/2026/11/04/xbox-cloud-gaming-ganha-duas-novas-formas-de-jogar-celular-e-controle-xbox-nano-entram-em-cena/",
-   "featured": false
-  },
-  {
-   "id": 45,
-   "img": "https://xboxpower-wp.s3.amazonaws.com/wp-content/uploads/2026/11/1288449-final-fantasy-resonance-square-enix-devoile-le-premier-final-fantasy-en-hd-2d.jpg",
-   "alt": "Square Enix queria apenas um port simples, mas produtor insistiu em RPG completo para Final Fantasy Resonance",
-   "pos": "",
-   "credit": "Xbox Power",
-   "cat": "Lançamentos",
-   "title": "Square Enix queria apenas um port simples, mas produtor insistiu em RPG completo para Final Fantasy Resonance",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "O produtor Keisuke Nakashima revelou que Final Fantasy Resonance quase teve uma abordagem muito mais simples durante seu desenvolvimento.",
-   "body": "O produtor Keisuke Nakashima revelou que Final Fantasy Resonance quase teve uma abordagem muito mais simples durante seu desenvolvimento. Em entrevista à Bloomberg, o responsável explicou que, inicialmente, executivos da Square Enix preferiam transformar Final Fantasy Brave Exvius, jogo originalmente lançado para dispositivos móveis, em um port direto para consoles e PC. A proposta era",
-   "src": "Xbox Power",
-   "url": "https://www.xboxpower.com.br/2026/11/03/square-enix-queria-apenas-um-port-simples-mas-produtor-insistiu-em-rpg-completo-para-final-fantasy-resonance/",
-   "featured": false
-  },
-  {
-   "id": 44,
-   "img": "https://xboxpower-wp.s3.amazonaws.com/wp-content/uploads/2026/11/01M6H05M5V38BSD366PK9HQ1J4-hero-1.jpg",
-   "alt": "The Elder Scrolls 6: Sentinel ganha nome oficial e primeiro trailer para Xbox",
-   "pos": "",
-   "credit": "Xbox Power",
-   "cat": "Lançamentos",
-   "title": "The Elder Scrolls 6: Sentinel ganha nome oficial e primeiro trailer para Xbox",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "The Elder Scrolls 6: Sentinel finalmente teve seu nome revelado oficialmente pela Xbox e Bethesda nesta terça-feira, 3 de novembro de 2026, após mais de oito anos desde…",
-   "body": "The Elder Scrolls 6: Sentinel finalmente teve seu nome revelado oficialmente pela Xbox e Bethesda nesta terça-feira, 3 de novembro de 2026, após mais de oito anos desde o primeiro teaser. A apresentação trouxe um breve trailer do aguardado RPG, destacando efeitos de areia e uma ambientação que aponta para Hammerfell, região de Tamriel. O",
-   "src": "Xbox Power",
-   "url": "https://www.xboxpower.com.br/2026/11/03/the-elder-scrolls-6-sentinel-ganha-nome-oficial-e-primeiro-trailer-para-xbox/",
-   "featured": false
-  },
-  {
-   "id": 43,
-   "img": "https://xboxpower-wp.s3.amazonaws.com/wp-content/uploads/2026/11/Captura-de-tela_3-11-2026_113622_insider-gaming.com_-1024x569.jpeg",
-   "alt": "Conheça os locais revelados até agora em GTA VI",
-   "pos": "",
-   "credit": "Xbox Power",
-   "cat": "Lançamentos",
-   "title": "Conheça os locais revelados até agora em GTA VI",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "Um dos maiores lançamentos da década, GTA VI está chegando e nos levará à icônica Leonida, apresentando também vários locais inéditos, além da ensolarada Vice City.",
-   "body": "Um dos maiores lançamentos da década, GTA VI está chegando e nos levará à icônica Leonida, apresentando também vários locais inéditos, além da ensolarada Vice City. Leonida contará com cerca de seis locais para explorarmos, incluindo cidades, pântanos, praias, áreas industriais e muita natureza. Começando por Vice City, que é o coração de GTA VI,",
-   "src": "Xbox Power",
-   "url": "https://www.xboxpower.com.br/2026/11/03/conheca-os-locais-revelados-ate-agora-em-gta-vi/",
-   "featured": false
-  },
-  {
-   "id": 42,
-   "img": "https://xboxpower-wp.s3.amazonaws.com/wp-content/uploads/2026/11/861576b0-9d89-11f1-b109-879e35c24276-1077x516-1.jpg",
-   "alt": "Guarde espaço no seu SSD, pois GTA VI está chegando",
-   "pos": "",
-   "credit": "Xbox Power",
-   "cat": "Lançamentos",
-   "title": "Guarde espaço no seu SSD, pois GTA VI está chegando",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "A Rockstar anunciou oficialmente a data de início do pré-load de GTA VI, permitindo que os jogadores comecem o download a partir de 10/11.",
-   "body": "A Rockstar anunciou oficialmente a data de início do pré-load de GTA VI, permitindo que os jogadores comecem o download a partir de 10/11. Os jogadores vão precisar de 212 GB, então já comece a liberar espaço. Grand Theft Auto VI pre-install begins on November 10. There’s still time to pre-order and ensure you’re able",
-   "src": "Xbox Power",
-   "url": "https://www.xboxpower.com.br/2026/11/03/guarde-espaco-no-seu-ssd-pois-gta-vi-esta-chegando/",
-   "featured": false
-  },
-  {
-   "id": 30,
-   "img": "https://xboxpower-wp.s3.amazonaws.com/wp-content/uploads/2026/11/price-1024x576.jpg",
-   "alt": "Análise – Call of Duty: Modern Warfare 4",
-   "pos": "",
-   "credit": "Xbox Power",
-   "cat": "Lançamentos",
-   "title": "Análise – Call of Duty: Modern Warfare 4",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "Call of Duty é uma das franquias mais lucrativas do mundo, conquistando uma legião de fãs por todos os lados.",
-   "body": "Call of Duty é uma das franquias mais lucrativas do mundo, conquistando uma legião de fãs por todos os lados. Sempre fui muito fã das campanhas, que têm variado nos últimos títulos, mas que prometem voltar ao auge em Call of Duty: Modern Warfare 4. Além disso, a Activision promete melhorar a experiência do jogador",
-   "src": "Xbox Power",
-   "url": "https://www.xboxpower.com.br/2026/11/03/analise-call-of-duty-modern-warfare-4/",
-   "featured": false
-  },
-  {
-   "id": 21,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Steam",
-   "title": "Steam vai reunir as ofertas de Black Friday em um espaço próprio",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "Os descontos de Black Friday estão no calendário de novembro, mas as datas ainda não saíram.",
-   "body": "O calendário da Valve prevê descontos de Black Friday em novembro, com datas a divulgar. Em vez de uma campanha tradicional, a ideia é reunir os jogos com desconto em uma seção própria do espaço de ofertas e eventos da Steam.",
-   "src": "Contilnet Notícias",
-   "url": "https://contilnetnoticias.com.br/esports/calendario-de-ofertas-saiba-qual-e-a-proxima-promocao-do-steam-em-2026/",
-   "featured": false
-  },
-  {
-   "id": 20,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Steam",
-   "title": "Festival de RPGs com Batalha Automática chega à Steam em 16 de novembro",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "É a única campanha temática da Valve marcada para novembro, e vai até o dia 23.",
-   "body": "Segundo o calendário publicado pelo Canaltech, novembro terá só uma campanha na Steam: o Festival de RPGs com Batalha Automática, de 16 a 23 de novembro. O mês seguinte traz a Promoção de Fim de Ano, de 17 de dezembro de 2026 a 4 de janeiro de 2027.",
-   "src": "Canaltech",
-   "url": "https://canaltech.com.br/games/quais-sao-as-datas-de-promocao-no-steam-em-2026/",
-   "featured": false
-  },
-  {
-   "id": 14,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
    "cat": "Game Pass",
-   "title": "Tanuki: Pon’s Summer e Hope in the City estreiam direto no Game Pass",
+   "title": "Game Pass de novembro começa com Pit of Goblin, Void/Breaker e Escape Academy 2",
    "date": "2026-11-03",
-   "read": 1,
-   "sum": "Dois lançamentos diretos no catálogo, nos dias 10 e 11 de novembro, para Ultimate e PC Game Pass.",
-   "body": "Em 10 de novembro, Tanuki: Pon’s Summer coloca o jogador na pele de um tanuki que entrega encomendas de bicicleta, cozinha sushi e disputa sumô para restaurar um santuário antes de um festival.\n\nEm 11 de novembro chega Hope in the City, um mistério em que a protagonista, Hope Song, volta para casa e encontra os pais desaparecidos. As pistas vêm de transformar desenhos em evidências.",
-   "src": "Xbox Power",
-   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
-   "featured": false
-  },
-  {
-   "id": 12,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Game Pass",
-   "title": "Dragon Ball Xenoverse 2, GoldenEye 007 e Wreckfest deixam o Game Pass em 15 de novembro",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "A lista de saídas tem mais de uma dezena de jogos; quem quer terminar algum tem até o dia 15.",
-   "body": "Os jogos que saem do Xbox Game Pass em 15 de novembro incluem Dragon Ball Xenoverse 2, GoldenEye 007, Wreckfest, Moonlighter, Winter Burrow, 1000xResist, Police Simulator: Patrol Officers e Pigeon Simulator, entre outros.",
-   "src": "Xbox Power",
-   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
-   "featured": false
-  },
-  {
-   "id": 11,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Game Pass",
-   "title": "Game Pass Essential recebe Banjo-Kazooie, Perfect Dark e outros clássicos em 15 de novembro",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "Oito jogos entram no plano Essential, entre eles os três Banjo e Gears of War: Judgment.",
-   "body": "Em 15 de novembro, o Game Pass Essential ganha oito jogos: Banjo-Kazooie, Banjo-Tooie, Banjo-Kazooie: Nuts & Bolts, Gears of War: Judgment, Halo: Spartan Assault, Perfect Dark, Viva Piñata e Viva Piñata: Trouble in Paradise. A lista junta clássicos da Rare com títulos de Gears e Halo.",
-   "src": "Xbox Power",
-   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
-   "featured": false
-  },
-  {
-   "id": 10,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Game Pass",
-   "title": "Vampire Crawlers e Aphelion chegam ao Game Pass Premium",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "Dois jogos que já estavam no Ultimate e no PC Game Pass entram no plano Premium.",
-   "body": "Vampire Crawlers, dos criadores de Vampire Survivors, mistura roguelite, construção de baralho e batalhas por turnos aceleradas em primeira pessoa. Ele entra no Game Pass Premium em 4 de novembro.\n\nEm 17 de novembro é a vez de Aphelion, aventura de ficção científica da Don’t Nod em que a astronauta Ariane tenta salvar o companheiro Thomas em um planeta congelado. O projeto foi feito em parceria com a Agência Espacial Europeia.",
-   "src": "Xbox Power",
-   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
-   "featured": false
-  },
-  {
-   "id": 9,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Game Pass",
-   "title": "Thronefall e Toxic Commando chegam ao Game Pass em 11 e 12 de novembro",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "Estratégia de reino de um lado e zumbis cooperativos do outro, ambos nos planos Ultimate, Premium e PC.",
-   "body": "Thronefall entra em 11 de novembro. É um jogo de estratégia em que o dia serve para administrar recursos e fortalecer o reino, e a noite para sobreviver aos ataques inimigos.\n\nNo dia seguinte, 12, chega John Carpenter’s Toxic Commando, ação cooperativa para até quatro jogadores contra hordas de zumbis, com veículos armados e ambientes semiabertos.",
+   "read": 2,
+   "sum": "A primeira leva do mês mistura terror cooperativo, FPS roguelite, quebra-cabeças e simulação.",
+   "body": "A Microsoft revelou a primeira leva de novembro do Xbox Game Pass. Pit of Goblin, um terror cooperativo online em masmorras, já está disponível desde 3 de novembro nos planos Ultimate, Premium e PC Game Pass.\n\nEm 4 de novembro entra Void/Breaker, que une FPS e roguelite com forte personalização de armas. Em 5 de novembro chegam Escape Academy 2 (direto no lançamento, para Ultimate e PC Game Pass), Firefighting Simulator: Ignite e MySims Cozy Bundle.",
    "src": "Xbox Power",
    "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
    "featured": false
@@ -681,35 +364,115 @@ footer .adminlink{margin:10px 0 0;font-size:.82rem;opacity:.7}
    "featured": false
   },
   {
-   "id": 7,
-   "img": "https://xboxpower-wp.s3.amazonaws.com/wp-content/uploads/2026/11/xpg-nov-2026-w1-featured.jpg",
-   "alt": "Jogos que chegam ao Xbox Game Pass em novembro de 2026",
+   "id": 9,
+   "img": "",
+   "alt": "",
    "pos": "",
-   "credit": "Xbox Power",
+   "credit": "",
    "cat": "Game Pass",
-   "title": "Game Pass de novembro começa com Pit of Goblin, Void/Breaker e Escape Academy 2",
+   "title": "Thronefall e Toxic Commando chegam ao Game Pass em 11 e 12 de novembro",
    "date": "2026-11-03",
-   "read": 2,
-   "sum": "A primeira leva do mês mistura terror cooperativo, FPS roguelite, quebra-cabeças e simulação.",
-   "body": "A Microsoft revelou a primeira leva de novembro do Xbox Game Pass. Pit of Goblin, um terror cooperativo online em masmorras, já está disponível desde 3 de novembro nos planos Ultimate, Premium e PC Game Pass.\n\nEm 4 de novembro entra Void/Breaker, que une FPS e roguelite com forte personalização de armas. Em 5 de novembro chegam Escape Academy 2 (direto no lançamento, para Ultimate e PC Game Pass), Firefighting Simulator: Ignite e MySims Cozy Bundle.",
+   "read": 1,
+   "sum": "Estratégia de reino de um lado e zumbis cooperativos do outro, ambos nos planos Ultimate, Premium e PC.",
+   "body": "Thronefall entra em 11 de novembro. É um jogo de estratégia em que o dia serve para administrar recursos e fortalecer o reino, e a noite para sobreviver aos ataques inimigos.\n\nNo dia seguinte, 12, chega John Carpenter’s Toxic Commando, ação cooperativa para até quatro jogadores contra hordas de zumbis, com veículos armados e ambientes semiabertos.",
    "src": "Xbox Power",
    "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
    "featured": false
   },
   {
-   "id": 5,
-   "img": "https://www.otakupt.com/wp-content/uploads/2026/11/Pikmin-4-Nintendo-Switch-2-Edition-Plus-Dandori-Academy-scaled-e1793711632629.jpg",
-   "alt": "Pikmin 4 – Nintendo Switch 2 Edition + Academia Dandori",
+   "id": 10,
+   "img": "",
+   "alt": "",
    "pos": "",
-   "credit": "OtakuPT",
-   "cat": "Nintendo",
-   "title": "Pikmin 4 ganha edição para Switch 2 com Academia Dandori em 12 de novembro",
+   "credit": "",
+   "cat": "Game Pass",
+   "title": "Vampire Crawlers e Aphelion chegam ao Game Pass Premium",
    "date": "2026-11-03",
    "read": 1,
-   "sum": "A Nintendo mostrou um vídeo de quase quatro minutos com as novidades.",
-   "body": "A Nintendo publicou um vídeo de cerca de quatro minutos sobre Pikmin 4 – Nintendo Switch 2 Edition + Academia Dandori, que chega ao console em 12 de novembro. A edição também está na lista de lançamentos físicos do mês.",
-   "src": "OtakuPT",
-   "url": "https://www.otakupt.com/jogos/nintendo-mostra-mais-de-pikmin-4-nintendo-switch-2-edition-dandori-academy/",
+   "sum": "Dois jogos que já estavam no Ultimate e no PC Game Pass entram no plano Premium.",
+   "body": "Vampire Crawlers, dos criadores de Vampire Survivors, mistura roguelite, construção de baralho e batalhas por turnos aceleradas em primeira pessoa. Ele entra no Game Pass Premium em 4 de novembro.\n\nEm 17 de novembro é a vez de Aphelion, aventura de ficção científica da Don’t Nod em que a astronauta Ariane tenta salvar o companheiro Thomas em um planeta congelado. O projeto foi feito em parceria com a Agência Espacial Europeia.",
+   "src": "Xbox Power",
+   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
+   "featured": false
+  },
+  {
+   "id": 11,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Game Pass",
+   "title": "Game Pass Essential recebe Banjo-Kazooie, Perfect Dark e outros clássicos em 15 de novembro",
+   "date": "2026-11-03",
+   "read": 1,
+   "sum": "Oito jogos entram no plano Essential, entre eles os três Banjo e Gears of War: Judgment.",
+   "body": "Em 15 de novembro, o Game Pass Essential ganha oito jogos: Banjo-Kazooie, Banjo-Tooie, Banjo-Kazooie: Nuts & Bolts, Gears of War: Judgment, Halo: Spartan Assault, Perfect Dark, Viva Piñata e Viva Piñata: Trouble in Paradise. A lista junta clássicos da Rare com títulos de Gears e Halo.",
+   "src": "Xbox Power",
+   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
+   "featured": false
+  },
+  {
+   "id": 12,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Game Pass",
+   "title": "Dragon Ball Xenoverse 2, GoldenEye 007 e Wreckfest deixam o Game Pass em 15 de novembro",
+   "date": "2026-11-03",
+   "read": 1,
+   "sum": "A lista de saídas tem mais de uma dezena de jogos; quem quer terminar algum tem até o dia 15.",
+   "body": "Os jogos que saem do Xbox Game Pass em 15 de novembro incluem Dragon Ball Xenoverse 2, GoldenEye 007, Wreckfest, Moonlighter, Winter Burrow, 1000xResist, Police Simulator: Patrol Officers e Pigeon Simulator, entre outros.",
+   "src": "Xbox Power",
+   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
+   "featured": false
+  },
+  {
+   "id": 14,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Game Pass",
+   "title": "Tanuki: Pon’s Summer e Hope in the City estreiam direto no Game Pass",
+   "date": "2026-11-03",
+   "read": 1,
+   "sum": "Dois lançamentos diretos no catálogo, nos dias 10 e 11 de novembro, para Ultimate e PC Game Pass.",
+   "body": "Em 10 de novembro, Tanuki: Pon’s Summer coloca o jogador na pele de um tanuki que entrega encomendas de bicicleta, cozinha sushi e disputa sumô para restaurar um santuário antes de um festival.\n\nEm 11 de novembro chega Hope in the City, um mistério em que a protagonista, Hope Song, volta para casa e encontra os pais desaparecidos. As pistas vêm de transformar desenhos em evidências.",
+   "src": "Xbox Power",
+   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
+   "featured": false
+  },
+  {
+   "id": 20,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Steam",
+   "title": "Festival de RPGs com Batalha Automática chega à Steam em 16 de novembro",
+   "date": "2026-11-03",
+   "read": 1,
+   "sum": "É a única campanha temática da Valve marcada para novembro, e vai até o dia 23.",
+   "body": "Segundo o calendário publicado pelo Canaltech, novembro terá só uma campanha na Steam: o Festival de RPGs com Batalha Automática, de 16 a 23 de novembro. O mês seguinte traz a Promoção de Fim de Ano, de 17 de dezembro de 2026 a 4 de janeiro de 2027.",
+   "src": "Canaltech",
+   "url": "https://canaltech.com.br/games/quais-sao-as-datas-de-promocao-no-steam-em-2026/",
+   "featured": false
+  },
+  {
+   "id": 21,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Steam",
+   "title": "Steam vai reunir as ofertas de Black Friday em um espaço próprio",
+   "date": "2026-11-03",
+   "read": 1,
+   "sum": "Os descontos de Black Friday estão no calendário de novembro, mas as datas ainda não saíram.",
+   "body": "O calendário da Valve prevê descontos de Black Friday em novembro, com datas a divulgar. Em vez de uma campanha tradicional, a ideia é reunir os jogos com desconto em uma seção própria do espaço de ofertas e eventos da Steam.",
+   "src": "Contilnet Notícias",
+   "url": "https://contilnetnoticias.com.br/esports/calendario-de-ofertas-saiba-qual-e-a-proxima-promocao-do-steam-em-2026/",
    "featured": false
   },
   {
@@ -777,22 +540,6 @@ footer .adminlink{margin:10px 0 0;font-size:.82rem;opacity:.7}
    "featured": false
   },
   {
-   "id": 3,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Esports",
-   "title": "Worlds 2026 está em andamento e a final será em Nova York",
-   "date": "2026-10-15",
-   "read": 2,
-   "sum": "São 19 equipes disputando a Copa do Invocador até 14 de novembro.",
-   "body": "O Mundial de League of Legends começou em 15 de outubro e vai até 14 de novembro, com partidas em Los Angeles, no Texas e em Nova York. O CBLOL ganhou uma vaga extra e tem duas representantes no torneio. A grande final acontece em Nova York, no dia 14.",
-   "src": "RDY.GG",
-   "url": "https://rdy.gg/pt/lol/news/league-of-legends-lol-worlds-2026-details",
-   "featured": false
-  },
-  {
    "id": 1,
    "img": "https://classic.exame.com/wp-content/uploads/2026/08/GTA6.jpg",
    "alt": "Cena do trailer de lançamento de GTA 6",
@@ -806,22 +553,22 @@ footer .adminlink{margin:10px 0 0;font-size:.82rem;opacity:.7}
    "body": "A Rockstar Games divulgou em 15 de outubro o trailer de lançamento de GTA 6, com novas cenas de Jason e Lucia pelo estado fictício de Leonida. O jogo chega em 19 de novembro para PS5 e Xbox Series X|S, e a versão de PC ainda não tem data. Segundo a loja brasileira da Rockstar, o pré-carregamento começa em 12 de novembro.",
    "src": "Exame",
    "url": "https://exame.com/pop/gta-6-ganha-trailer-de-lancamento-a-um-mes-da-estreia-e-surpreende-fas-com-cenas-ineditas/",
-   "featured": false
+   "featured": true
   },
   {
-   "id": 22,
+   "id": 3,
    "img": "",
    "alt": "",
    "pos": "",
    "credit": "",
-   "cat": "Steam",
-   "title": "Deadlock, da Valve, chega a 262 mil jogadores simultâneos",
-   "date": "2026-10-13",
-   "read": 1,
-   "sum": "O pico foi em 9 de outubro, dois dias antes do recorde geral da Steam.",
-   "body": "O shooter em terceira pessoa da própria Valve, ainda em desenvolvimento ativo, chegou a 262.145 jogadores simultâneos em 9 de outubro, impulsionado por uma atualização.\n\nDois dias depois, em 11 de outubro, a Steam bateu seu recorde geral de usuários online. Segundo o site, esse pico reuniu o público de Counter-Strike 2, Dota 2, PUBG, Deadlock e WARDOGS.",
-   "src": "Shattered",
-   "url": "https://shattered.io/pt/steam-recorde-43-5-milhoes-utilizadores-2026/",
+   "cat": "Esports",
+   "title": "Worlds 2026 está em andamento e a final será em Nova York",
+   "date": "2026-10-15",
+   "read": 2,
+   "sum": "São 19 equipes disputando a Copa do Invocador até 14 de novembro.",
+   "body": "O Mundial de League of Legends começou em 15 de outubro e vai até 14 de novembro, com partidas em Los Angeles, no Texas e em Nova York. O CBLOL ganhou uma vaga extra e tem duas representantes no torneio. A grande final acontece em Nova York, no dia 14.",
+   "src": "RDY.GG",
+   "url": "https://rdy.gg/pt/lol/news/league-of-legends-lol-worlds-2026-details",
    "featured": false
   },
   {
@@ -841,19 +588,19 @@ footer .adminlink{margin:10px 0 0;font-size:.82rem;opacity:.7}
    "featured": false
   },
   {
-   "id": 18,
+   "id": 22,
    "img": "",
    "alt": "",
    "pos": "",
    "credit": "",
    "cat": "Steam",
-   "title": "Steam Frame usa chip Snapdragon 8 Gen 3 e não vem com carregador",
-   "date": "2026-09-14",
+   "title": "Deadlock, da Valve, chega a 262 mil jogadores simultâneos",
+   "date": "2026-10-13",
    "read": 1,
-   "sum": "O headset roda SteamOS 3 e funciona de forma independente.",
-   "body": "O Steam Frame é um headset de realidade virtual autônomo, movido por um processador Snapdragon 8 Gen 3 e pelo SteamOS 3. Ele não traz fonte de energia na caixa: a Valve diz que funciona com o carregador do Steam Deck ou com qualquer carregador USB-C de 45 W ou mais.",
-   "src": "Dexerto",
-   "url": "https://www.dexerto.com/gaming/valve-reveals-steam-frame-price-and-release-date-starting-at-1059-3408909/",
+   "sum": "O pico foi em 9 de outubro, dois dias antes do recorde geral da Steam.",
+   "body": "O shooter em terceira pessoa da própria Valve, ainda em desenvolvimento ativo, chegou a 262.145 jogadores simultâneos em 9 de outubro, impulsionado por uma atualização.\n\nDois dias depois, em 11 de outubro, a Steam bateu seu recorde geral de usuários online. Segundo o site, esse pico reuniu o público de Counter-Strike 2, Dota 2, PUBG, Deadlock e WARDOGS.",
+   "src": "Shattered",
+   "url": "https://shattered.io/pt/steam-recorde-43-5-milhoes-utilizadores-2026/",
    "featured": false
   },
   {
@@ -873,6 +620,22 @@ footer .adminlink{margin:10px 0 0;font-size:.82rem;opacity:.7}
    "featured": false
   },
   {
+   "id": 18,
+   "img": "",
+   "alt": "",
+   "pos": "",
+   "credit": "",
+   "cat": "Steam",
+   "title": "Steam Frame usa chip Snapdragon 8 Gen 3 e não vem com carregador",
+   "date": "2026-09-14",
+   "read": 1,
+   "sum": "O headset roda SteamOS 3 e funciona de forma independente.",
+   "body": "O Steam Frame é um headset de realidade virtual autônomo, movido por um processador Snapdragon 8 Gen 3 e pelo SteamOS 3. Ele não traz fonte de energia na caixa: a Valve diz que funciona com o carregador do Steam Deck ou com qualquer carregador USB-C de 45 W ou mais.",
+   "src": "Dexerto",
+   "url": "https://www.dexerto.com/gaming/valve-reveals-steam-frame-price-and-release-date-starting-at-1059-3408909/",
+   "featured": false
+  },
+  {
    "id": 2,
    "img": "https://tl.ctcdn.com.br/NXK-bHCU2xsx3sgwTAC53sqIg8w=/1200x675/smart/filters:format(webp):quality(85)/c970fb6b-7261-438a-8689-c87540318b5e.jpg",
    "alt": "Xbox Cloud Gaming",
@@ -889,51 +652,19 @@ footer .adminlink{margin:10px 0 0;font-size:.82rem;opacity:.7}
    "featured": false
   },
   {
-   "id": 31,
-   "img": "https://t.ctcdn.com.br/E5OFw7N62YW86tjHgXjGhydGvsw=/700x394/smart/i1140397.png",
-   "alt": "8 jogos clássicos que mereciam um remake",
+   "id": 19,
+   "img": "",
+   "alt": "",
    "pos": "",
-   "credit": "Canaltech",
-   "cat": "Nintendo",
-   "title": "8 jogos clássicos que mereciam um remake",
-   "date": "2026-07-12",
-   "read": 1,
-   "sum": "O ano de 2026 será de muita nostalgia para o XBOX e a Nintendo.",
-   "body": "O ano de 2026 será de muita nostalgia para o XBOX e a Nintendo. Do lado verde da força, a marca promete três jogos de suas principais franquias, entre eles Halo Campaign Evolved, remake do primeiro jogo de Master Chief após 25 anos . Já na Big N, a empresa está vendo um sucesso estrondoso com o mais novo remake de Star Fox , que, além de trazer gráficos nunca antes vistos para a série, incluiu legenda e dublagem em português do Brasil.",
-   "src": "Canaltech",
-   "url": "https://canaltech.com.br/games/8-jogos-classicos-que-mereciam-um-remake/",
-   "featured": false
-  },
-  {
-   "id": 33,
-   "img": "https://t.ctcdn.com.br/aKsv9EFTCkdDcuxM3cfhYAHlDCo=/700x394/smart/i1139825.png",
-   "alt": "8 jogos japoneses que nunca viraram um anime",
-   "pos": "",
-   "credit": "Canaltech",
-   "cat": "Nintendo",
-   "title": "8 jogos japoneses que nunca viraram um anime",
-   "date": "2026-07-11",
-   "read": 1,
-   "sum": "Videogames baseados em anime não são novidade nenhuma .",
-   "body": "Videogames baseados em anime não são novidade nenhuma . Desde a consolidação do mercado de consoles domésticos nos anos 80, jogos e animes têm andado de mãos dadas, como Dragon Ball e até produções menos conhecidas como Zillion. O caminho inverso também existe! Jogos que acabam em estúdios de animações japonesas e viram séries transmitidas em TVs e serviços de streaming ou mesmo filmes não são exceções na indústria.",
-   "src": "Canaltech",
-   "url": "https://canaltech.com.br/games/8-jogos-japoneses-que-nunca-viraram-um-anime/",
-   "featured": false
-  },
-  {
-   "id": 32,
-   "img": "https://t.ctcdn.com.br/hsWMACQUjJ44zMDkjRWWFVxsXqY=/700x394/smart/i1124141.png",
-   "alt": "Meia-idade nos games: 10 tiozões e tiazonas que ainda arrebentam em aventuras",
-   "pos": "",
-   "credit": "Canaltech",
-   "cat": "Lançamentos",
-   "title": "Meia-idade nos games: 10 tiozões e tiazonas que ainda arrebentam em aventuras",
-   "date": "2026-07-11",
-   "read": 1,
-   "sum": "Nem sempre o mundo é salvo por jovens ou crianças escolhidas; às vezes, a salvação vem de gente “ferrada” de meia-idade ou até mais velha.",
-   "body": "Nem sempre o mundo é salvo por jovens ou crianças escolhidas; às vezes, a salvação vem de gente “ferrada” de meia-idade ou até mais velha. A idade não é tudo! Conheça, nesta lista, os 10 personagens mais ativos e aventureiros que já sentem o peso dos anos , mas ainda se desdobram para livrar o dia do perigo, seja ele representado por vilões clássicos ou catástrofes bizarras.",
-   "src": "Canaltech",
-   "url": "https://canaltech.com.br/games/meia-idade-nos-games-10-tiozoes-e-tiazonas-que-ainda-arrebentam-em-aventuras/",
+   "credit": "",
+   "cat": "Steam",
+   "title": "Steam Machine custa a partir de US$ 1.049 e fica fora do Brasil por enquanto",
+   "date": "2026-06-22",
+   "read": 2,
+   "sum": "A Valve revelou os preços do PC de sala; a versão de 2 TB com controle chega a US$ 1.428.",
+   "body": "Em 22 de junho, a Valve anunciou os preços da Steam Machine: US$ 1.049 pela versão de 512 GB, chegando a US$ 1.428 na de 2 TB com controle incluso. Os primeiros pedidos começaram a ser faturados em 29 de junho.\n\nO aparelho foi anunciado em novembro de 2025, ao lado do Steam Controller e do Steam Frame. Não há previsão de venda no Brasil: a página da loja avisa que o item não está disponível na região.",
+   "src": "Tecnoblog",
+   "url": "https://tecnoblog.net/noticias/steam-machine-finalmente-tem-preco-revelado-veja-os-valores/",
    "featured": false
   }
  ]
@@ -1111,6 +842,25 @@ function render(){
   cards.className="cards";
   cards.innerHTML=list.map(function(n,i){return cardHtml(n,i,false,false)}).join("");
 }
+/* ===== ofertas da semana (dados em ofertas.json, atualizados pelo robô) ===== */
+var DEALS=null, dealTab="steam", DNAMES={steam:"Steam",playstation:"PlayStation",xbox:"Xbox"};
+var dtabs=document.getElementById("dtabs"), dealsEl=document.getElementById("deals"), dmeta=document.getElementById("dmeta");
+function renderDeals(){
+  dtabs.innerHTML=Object.keys(DNAMES).map(function(k){return '<button type="button" class="chip" role="tab" data-deal="'+k+'" aria-pressed="'+(k===dealTab)+'">'+DNAMES[k]+'</button>'}).join("");
+  var l=DEALS&&Array.isArray(DEALS[dealTab])?DEALS[dealTab]:[];
+  if(!l.length){
+    dealsEl.innerHTML='<p class="soon">'+(dealTab==="steam"?"As ofertas da Steam aparecem aqui assim que a atualização automática rodar.":"As ofertas de "+DNAMES[dealTab]+" chegam em breve.")+'</p>';dmeta.textContent="";return;
+  }
+  dealsEl.innerHTML=l.map(function(d){
+    var id=+d.id||0,url=dealTab==="steam"?"https://store.steampowered.com/app/"+id+"/":safeUrl(d.url);
+    return '<a class="deal" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+(dealTab==="steam"?'<img src="https://cdn.akamai.steamstatic.com/steam/apps/'+id+'/header.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+'<div class="dx"><b>'+esc(d.name||"")+'</b><div class="dp"><span class="dd">-'+(+d.discount||0)+'%</span>'+(d.orig?'<s>'+esc(d.orig)+'</s>':'')+'<strong>'+esc(d.price||"")+'</strong></div></div></a>';
+  }).join("");
+  dmeta.textContent=DEALS.updated?"Atualizado em "+fmt(String(DEALS.updated).slice(0,10))+". Preços e descontos podem mudar; confira na loja.":"";
+}
+function setDeal(k){if(DNAMES[k]){dealTab=k;renderDeals()}}
+dtabs.onclick=function(e){var b=e.target.closest("button");if(b){setDeal(b.dataset.deal);if(window.updateSide)window.updateSide()}};
+renderDeals();
+try{fetch("ofertas.json",{cache:"no-cache"}).then(function(r){return r.ok?r.json():null}).then(function(d){if(d&&typeof d==="object"){DEALS=d;renderDeals()}}).catch(function(){})}catch(_){}
 var _pt;
 carr.addEventListener("touchstart",function(){clearTimeout(_pt);carr.classList.add("paused")},{passive:true});
 function _resume(){clearTimeout(_pt);_pt=setTimeout(function(){carr.classList.remove("paused")},3500)}
@@ -1175,6 +925,7 @@ function typeTitle(txt){
   function poke(x,y,v){var cx=x/S|0,cy=y/S|0;for(var dy=-2;dy<=2;dy++)for(var dx=-2;dx<=2;dx++){var X=cx+dx,Y=cy+dy;if(X>=0&&Y>=0&&X<cols&&Y<rows){var k=cols*Y+X,f=v/(1+dx*dx+dy*dy);if(f>heat[k])heat[k]=f}}}
   function pos(e){var r=cv.getBoundingClientRect(),p=e.touches?e.touches[0]:e;poke(p.clientX-r.left,p.clientY-r.top,1)}
   addEventListener("pointermove",pos);addEventListener("touchmove",pos,{passive:true});addEventListener("resize",size);size();
+  if(window.ResizeObserver)new ResizeObserver(size).observe(cv);
   if(reduce)return;
   var tick=0;
   (function loop(){
@@ -1234,12 +985,15 @@ refreshAll();
   function count(c){return c==="Todas"?NEWS.length:NEWS.filter(function(n){return n.cat===c}).length}
   function buildSide(){
   var h='<div class="grp">Navegar</div>'
-   +'<a class="item" href="#topo" data-go="topo" title="Início">'+svg("home")+'<span class="lbl">Início</span></a>'
-   +'<a class="item" href="#feat" data-go="feat" title="Destaque do dia">'+svg("star")+'<span class="lbl">Destaque</span></a>'
-   +'<div class="grp">Notícias</div>';
-  CATS.forEach(function(c){
+   +'<a class="item" href="#topo" data-go="topo" title="Início">'+svg("home")+'<span class="lbl">Início</span></a>';
+  ["Todas","Eventos"].forEach(function(c){
+    if(CATS.indexOf(c)<0)return;
     var lab=esc(c==="Todas"?"Todas as notícias":c);
     h+='<button class="item" type="button" data-cat="'+esc(c)+'" title="'+lab+'">'+svg(CATICON[c]||"tag")+'<span class="lbl">'+lab+'</span><span class="n">'+fmtN(count(c))+'</span></button>';
+  });
+  h+='<div class="grp">Ofertas da semana</div>';
+  [["steam","Steam","monitor"],["playstation","PlayStation","pad"],["xbox","Xbox","ticket"]].forEach(function(o){
+    h+='<button class="item" type="button" data-deal="'+o[0]+'" title="Ofertas da semana: '+o[1]+'">'+svg(o[2])+'<span class="lbl">'+o[1]+'</span></button>';
   });
   h+='<div class="grp">Ferramentas</div>'
    +'<button class="item" type="button" data-act="search" title="Buscar notícia">'+svg("search")+'<span class="lbl">Buscar</span></button>'
@@ -1254,13 +1008,14 @@ refreshAll();
   var smooth=!matchMedia("(prefers-reduced-motion:reduce)").matches;
   function go(id){var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:smooth?"smooth":"auto",block:"start"})}
   function setCat(c){var b=[].filter.call(document.querySelectorAll("#chips .chip"),function(x){return x.textContent===c})[0];if(b)b.click()}
-  function section(){var s="topo";["feat","noticias"].forEach(function(id){var el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<=100)s=id});return s}
+  function section(){var s="topo";["ofertas","noticias"].forEach(function(id){var el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<=100)s=id});return s}
   function update(){
     var s=section();
     items.forEach(function(it){
       var on=false;
       if(it.dataset.go)on=it.dataset.go===s;
       else if(it.dataset.cat)on=(s==="noticias"&&cat===it.dataset.cat);
+      else if(it.dataset.deal)on=(s==="ofertas"&&dealTab===it.dataset.deal);
       if(on)it.setAttribute("aria-current","true");else it.removeAttribute("aria-current");
     });
   }
@@ -1274,6 +1029,7 @@ refreshAll();
     var it=e.target.closest(".item,.brand");if(!it)return;
     if(it.dataset.go){e.preventDefault();go(it.dataset.go);closeMenu()}
     else if(it.dataset.cat){setCat(it.dataset.cat);go("noticias");closeMenu()}
+    else if(it.dataset.deal){setDeal(it.dataset.deal);go("ofertas");closeMenu();update()}
     else if(it.dataset.act==="search"){closeMenu();go("noticias");setTimeout(function(){var q=document.querySelector(".search");if(q)q.focus({preventScroll:true})},smooth?450:0)}
     else if(it.dataset.act==="theme"){document.getElementById("theme").click()}
     else if(it.dataset.act==="admin"){closeMenu();if(location.hash==="#admin")dispatchEvent(new Event("hashchange"));else location.hash="admin"}
@@ -1289,7 +1045,7 @@ refreshAll();
   var tick=false;
   addEventListener("scroll",function(){if(!tick){tick=true;requestAnimationFrame(function(){tick=false;update()})}},{passive:true});
   var _render=render;render=function(){_render();update()};
-  window.buildSide=buildSide;buildSide();
+  window.buildSide=buildSide;window.updateSide=update;buildSide();
 })();
 </script>
 
@@ -1516,7 +1272,7 @@ refreshAll();
   function buildHtml(){
     var c=document.documentElement.cloneNode(true);
     ["class","data-theme","style"].forEach(function(a){c.removeAttribute(a)});
-    ["#cards","#carr","#fdots","#chips","#feat","#slist","#mbody","#typed"].forEach(function(s){var e=c.querySelector(s);if(e)e.innerHTML=""});
+    ["#cards","#carr","#deals","#dtabs","#dmeta","#fdots","#chips","#feat","#slist","#mbody","#typed"].forEach(function(s){var e=c.querySelector(s);if(e)e.innerHTML=""});
     var f=c.querySelector("#feat");if(f)f.removeAttribute("hidden");var cs=c.querySelector("#carrossel");if(cs)cs.removeAttribute("hidden");var fd=c.querySelector("#fdots");if(fd)fd.removeAttribute("hidden");
     var a=c.querySelector("#admin");if(a){a.innerHTML="";a.setAttribute("hidden","")}
     var t=c.querySelector("#a-toast");if(t)t.remove();
