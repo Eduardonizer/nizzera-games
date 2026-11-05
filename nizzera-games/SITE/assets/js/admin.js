@@ -91,6 +91,7 @@
     st.tab=n;
     [].forEach.call(adm.querySelectorAll(".a-tab"),function(b){b.setAttribute("aria-selected",b.dataset.tab===n)});
     ({news:newsView,cm:cmView,site:siteView,back:backView})[n]();
+    if(n==="back")svcView();
   }
 
   /* ---- aba Notícias ---- */
@@ -281,9 +282,31 @@
   /* ---- aba Publicar e backup ---- */
   function backView(){
     $("#a-body").innerHTML='<div class="a-wrap">'
+      +'<div class="a-card"><h2>Situação do servidor</h2><p class="a-hint">O que já está configurado na Vercel (Settings → Environment Variables). Depois de criar ou mudar uma variável, faça um novo deploy para ela valer.</p><ul class="a-svc" id="a-svc"><li>Verificando…</li></ul>'
+      +'<div class="a-act"><button class="a-btn" type="button" id="a-mailtest">Enviar e-mail de teste</button></div><div class="a-err" id="a-mailerr" role="alert"></div></div>'
       +'<div class="a-card"><h2>Publicar no site</h2><p class="a-hint">Suas alterações já aparecem aqui no painel e no site aberto neste navegador. Para valerem para todo mundo, clique em publicar: os dados são gravados no GitHub e a Vercel atualiza o site em 1 a 2 minutos. As páginas individuais das notícias e o sitemap são gerados logo em seguida.</p><div class="a-act"><button class="a-btn pri" type="button" id="a-pub">Publicar no site agora</button><button class="a-btn" type="button" id="a-dl">Baixar index.html (cópia)</button></div></div>'
       +'<div class="a-card"><h2>Backup das notícias</h2><p class="a-hint">Um arquivo .json com todas as notícias, categorias e textos. Serve para guardar uma cópia ou levar para outro navegador.</p><div class="a-act"><button class="a-btn" type="button" id="a-json">Baixar notícias (.json)</button><button class="a-btn" type="button" id="a-imp">Importar notícias (.json)</button></div><input type="file" id="a-impf" accept=".json,application/json" hidden></div>'
       +'<div class="a-card"><h2>Voltar ao original</h2><p class="a-hint">Apaga as alterações ainda não publicadas deste navegador e volta ao conteúdo que está no site publicado.</p><div class="a-act"><button class="a-btn dan" type="button" id="a-reset">Descartar alterações deste navegador</button></div></div></div>';
+  }
+  function svcView(){
+    api("GET","/api/me").then(function(r){
+      var box=$("#a-svc");if(!box)return;var s=r.services;
+      if(!s){box.innerHTML='<li>Não consegui verificar agora.</li>';return}
+      function row(ok,title,okTxt,noTxt){return '<li class="'+(ok?"ok":"no")+'"><b>'+(ok?"✓":"✕")+' '+title+'</b><span>'+(ok?okTxt:noTxt)+'</span></li>'}
+      box.innerHTML=row(s.email,"E-mail (Fale com a gente)","Configurado. As mensagens vão para "+esc(s.emailTo)+".","Falta RESEND_API_KEY. Veja o passo a passo no README.")
+        +row(s.comments,"Comentários","Configurado (Upstash Redis).","Falta o banco Upstash Redis.")
+        +row(s.publish,"Publicar pelo painel","Configurado (GitHub).","Faltam GITHUB_REPO e GITHUB_TOKEN.")
+        +row(s.totp,"Verificação em 2 etapas","Ativada.","Desativada (opcional): ADMIN_TOTP_SECRET.");
+    },function(){var box=$("#a-svc");if(box)box.innerHTML='<li>Não consegui falar com o servidor.</li>'});
+  }
+  function mailTest(b){
+    var err=$("#a-mailerr");err.textContent="";b.disabled=true;b.textContent="Enviando…";
+    api("POST","/api/contact",{test:true}).then(function(r){
+      b.disabled=false;b.textContent="Enviar e-mail de teste";
+      if(r.ok)toast("E-mail de teste enviado para "+r.to+". Confira a caixa de entrada (e o spam).");
+      else if(r.status===401){authOk=false;toast("Sua sessão expirou. Entre de novo.",true);paint()}
+      else err.textContent=(r.error||"Não consegui enviar.")+(r.detail?" (Resposta do Resend: "+r.detail+")":"");
+    },function(){b.disabled=false;b.textContent="Enviar e-mail de teste";err.textContent="Não consegui falar com o servidor."});
   }
   function norm(d){
     if(!d||!Array.isArray(d.news))return null;
@@ -327,6 +350,7 @@
     if(id==="a-addcat"){st.cats.push({orig:null,name:""});catRows();var ins=adm.querySelectorAll(".a-crow input[data-ci]");var li=ins[ins.length-1];if(li)li.focus();return}
     if(id==="a-savecats"){saveCats();return}
     if(id==="a-savetrend"){saveTrend();return}
+    if(id==="a-mailtest"){mailTest(t);return}
     if(id==="a-pub"){
       if(!confirm("Publicar as alterações no site agora?"))return;
       t.disabled=true;t.textContent="Publicando…";

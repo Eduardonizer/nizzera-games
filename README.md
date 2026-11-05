@@ -99,6 +99,17 @@ Variáveis na Vercel (Settings → Environment Variables), depois faça um novo 
 | `RESEND_API_KEY` | envio da caixa "Fale com a gente" (resend.com) |
 | `CONTACT_TO` / `CONTACT_FROM` | opcionais: quem recebe e quem envia o e-mail |
 
+**E-mail da caixa "Fale com a gente" (Resend):**
+1. Crie uma conta grátis em https://resend.com **usando o e-mail que vai receber as mensagens**
+   (`nizzeragames@gmail.com`). Sem domínio próprio, o Resend só envia para o e-mail da própria conta.
+2. No Resend: **API Keys → Create API Key**, permissão *Sending access*. Copie a chave (`re_...`).
+3. Na Vercel: **Settings → Environment Variables → `RESEND_API_KEY`** = a chave, para *Production*.
+4. **Deployments → ⋯ no último deploy → Redeploy** (variável nova só vale num deploy novo).
+5. No painel `/admin` → **Publicar e backup → Enviar e-mail de teste**. Se falhar, o painel mostra o motivo.
+   Confira também a pasta de spam na primeira vez.
+
+Com domínio próprio no futuro: verifique o domínio no Resend e use `CONTACT_FROM` (ex.: `Nizzera Games <contato@seudominio.com.br>`).
+
 **2FA:** rode `python nizzera-games/scripts/gerar_segredos.py`, cadastre a chave mostrada no
 Google Authenticator (ou Authy, Microsoft Authenticator) e coloque o mesmo valor em
 `ADMIN_TOTP_SECRET` na Vercel. A partir daí, o login pede senha + código.

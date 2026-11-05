@@ -218,21 +218,43 @@ def pagina_comentarios(c, site):
     cab = meta_pagina(f"Comentários e feedback | {nome}",
                       "Deixe sua sugestão, correção ou pedido de pauta para o Nizzera Games.",
                       SITE_URL + "/comentarios/", nome)
-    corpo = f"""<main class="wrap page fb" id="feedback">
+    corpo = f"""<main class="wrap page cm" id="feedback">
   {trilha("Comentários")}
-  <h1 class="ph" id="fb-t">Comentários e feedback</h1>
-  <p class="fb-intro">Gostou do site? Tem sugestão, correção ou pedido de pauta? Deixe seu comentário: ele aparece aqui para todo mundo.</p>
-  <div class="fb-grid">
-    <form class="fb-form" id="fb-form" novalidate>
-      <label for="fb-name">Seu nome (opcional)</label>
-      <input class="fb-in" id="fb-name" maxlength="40" autocomplete="nickname">
-      <label for="fb-msg">Comentário</label>
-      <textarea class="fb-in" id="fb-msg" maxlength="500" rows="4"></textarea>
-      <div class="hp" aria-hidden="true"><label>Não preencha este campo<input id="fb-hp" tabindex="-1" autocomplete="off"></label></div>
-      <div class="fb-row"><span class="fb-count" id="fb-count">0/500</span><button class="fb-btn" id="fb-send" type="submit">Enviar comentário</button></div>
-      <div class="fb-status" id="fb-status" role="status"></div>
-    </form>
-    <div class="fb-list" id="cmlist" aria-live="polite"><p class="soon">Carregando comentários…</p></div>
+  <header class="cm-head">
+    <div>
+      <h1 class="ph">Comentários e feedback</h1>
+      <p class="lead">Sugestões, correções, pedidos de pauta ou só um oi: os comentários aparecem aqui para todo mundo.</p>
+    </div>
+    <p class="cm-stat" id="cm-stat" aria-live="polite"></p>
+  </header>
+  <div class="cm-grid">
+    <aside class="cm-side">
+      <form class="cm-form" id="fb-form" novalidate>
+        <h2>Deixe seu comentário</h2>
+        <label for="fb-name">Seu nome <small>(opcional)</small></label>
+        <input class="fb-in" id="fb-name" maxlength="40" autocomplete="nickname" placeholder="Como você quer aparecer">
+        <label for="fb-msg">Comentário</label>
+        <textarea class="fb-in" id="fb-msg" maxlength="500" rows="5" placeholder="O que achou do site? Que notícia ou jogo você quer ver aqui?"></textarea>
+        <div class="hp" aria-hidden="true"><label>Não preencha este campo<input id="fb-hp" tabindex="-1" autocomplete="off"></label></div>
+        <div class="fb-row"><span class="fb-count" id="fb-count">0/500</span><button class="fb-btn" id="fb-send" type="submit">Publicar comentário</button></div>
+        <div class="fb-status" id="fb-status" role="status"></div>
+      </form>
+      <div class="cm-rules">
+        <h3>Antes de comentar</h3>
+        <ul>
+          <li>Seja respeitoso: ofensas e spam são removidos pela moderação.</li>
+          <li>Links não são permitidos nos comentários.</li>
+          <li>Quer falar só com a equipe? Use o <button type="button" class="cm-link" data-open-chat>Fale com a gente</button>.</li>
+        </ul>
+      </div>
+    </aside>
+    <section class="cm-main" aria-labelledby="cm-list-t">
+      <h2 class="cm-title" id="cm-list-t">Últimos comentários</h2>
+      <div class="cm-list" id="cmlist" aria-live="polite" aria-busy="true">
+        <div class="cm-skel"></div><div class="cm-skel"></div><div class="cm-skel"></div>
+      </div>
+      <button class="cm-more" id="cm-more" type="button" hidden>Ver mais comentários</button>
+    </section>
   </div>
 </main>"""
     return layout(c, nome, cab, corpo)

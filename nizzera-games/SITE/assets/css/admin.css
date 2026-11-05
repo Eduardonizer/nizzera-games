@@ -73,3 +73,10 @@ a.a-btn{display:inline-flex;align-items:center;text-decoration:none}
 .a-cm-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .a-cm-top small{color:var(--muted)}
 .a-cm p{margin:6px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.a-svc{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px}
+.a-svc li{display:grid;gap:2px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
+.a-svc li span{font-size:.88rem;color:var(--muted)}
+.a-svc li.ok b{color:#0d7a5a}
+.a-svc li.no b{color:#d6294b}
+:root[data-theme="dark"] .a-svc li.ok b{color:#5ee6b8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .a-svc li.ok b{color:#5ee6b8}}
