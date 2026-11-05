@@ -46,12 +46,22 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0
 @keyframes cur{50%{opacity:0}}
 .feat{background:var(--paper);color:var(--ink);border-radius:20px;overflow:hidden;cursor:pointer;border:0;text-align:left;font:inherit;padding:0;width:100%;transition:transform .25s}
 .feat:hover{transform:rotate(-1.2deg) translateY(-4px)}
+.heroside{display:grid;gap:12px}
+.feat .slide{animation:fade .5s ease both}
+@keyframes fade{from{opacity:0;transform:translateX(14px)}}
+.feat h2{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.fdots{display:flex;gap:8px;justify-content:center}
+.fdots button{width:12px;height:12px;padding:0;border:0;border-radius:99px;background:rgba(255,255,255,.4);cursor:pointer;transition:width .25s,background .25s}
+.fdots button[aria-selected="true"]{width:30px;background:var(--sun)}
+.sec{font-size:1.6rem;margin:40px 0 0}
+.carr .sec{margin-top:36px}
+.carr .marq{padding-bottom:8px}
 .feat .art{aspect-ratio:16/9}
 .feat .tx{padding:18px 20px 22px}
 .feat h2{font-size:1.6rem;margin:8px 0}
 
 /* filtros */
-.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:40px 0 24px}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:16px 0 24px}
 .chip{border:2px solid var(--line);background:transparent;color:var(--fg);border-radius:99px;padding:7px 16px;font:500 .95rem "DM Sans",sans-serif;cursor:pointer;transition:background .2s,border-color .2s,transform .2s}
 .chip:hover{border-color:var(--cobalt)}
 .chip[aria-pressed="true"]{background:var(--cobalt);border-color:var(--cobalt);color:#fff;transform:scale(1.04)}
@@ -244,12 +254,18 @@ footer .adminlink{margin:10px 0 0;font-size:.82rem;opacity:.7}
         <h1 id="typed" class="typed" aria-label="Tudo que rolou no mundo dos games."></h1>
         <p id="intro">Lançamentos, Nintendo, Xbox e esports, em textos curtos e sem enrolação. Mova o mouse sobre o fundo e acenda os pixels.</p>
       </div>
-      <button class="feat" id="feat" type="button"></button>
+      <div class="heroside"><button class="feat" id="feat" type="button"></button><div class="fdots" id="fdots" role="tablist" aria-label="Notícias em destaque"></div></div>
     </div>
   </div>
 </header>
 
+<section class="wrap carr" id="carrossel" aria-label="Notícias em alta">
+  <h2 class="sec">Em alta</h2>
+  <div class="marq" id="carr" aria-live="off"></div>
+</section>
+
 <main class="wrap" id="noticias">
+  <h2 class="sec">Todas as notícias</h2>
   <div class="tools" role="group" aria-label="Filtrar por categoria" id="chips"></div>
   <div class="cards" id="cards" aria-live="polite"></div>
 </main>
@@ -765,8 +781,7 @@ function pic(n){
 function imgFail(el,id){el.parentNode.innerHTML=art(id)}
 
 /* ===== lista e filtros ===== */
-var cat="Todas", q="", MODE="marq", MQ=false;
-try{var _m=localStorage.getItem("nz-mode");if(_m==="grid"||_m==="marq")MODE=_m}catch(_){}
+var cat="Todas", q="";
 var chips=document.getElementById("chips"), cards=document.getElementById("cards");
 var s=document.createElement("input");s.className="search";s.type="search";s.placeholder="Buscar notícia";s.setAttribute("aria-label","Buscar notícia");
 s.oninput=function(){q=s.value.toLowerCase();render()};
@@ -779,48 +794,68 @@ function buildChips(){
     b.onclick=function(){cat=c;[].forEach.call(chips.querySelectorAll(".chip"),function(x){x.setAttribute("aria-pressed",x===b)});render()};
     chips.appendChild(b);
   });
-  var mc=document.createElement("div");mc.className="mode";mc.setAttribute("role","group");mc.setAttribute("aria-label","Modo de exibição");
-  [["marq","Carrossel","As notícias rolam sozinhas; passe o cursor para pausar"],["grid","Grade","Todas as notícias lado a lado"]].forEach(function(m){
-    var b=document.createElement("button");b.type="button";b.textContent=m[1];b.title=m[2];b.setAttribute("aria-pressed",MODE===m[0]);
-    b.onclick=function(){MODE=m[0];try{localStorage.setItem("nz-mode",MODE)}catch(_){}[].forEach.call(mc.querySelectorAll("button"),function(x){x.setAttribute("aria-pressed",x===b)});render()};
-    mc.appendChild(b);
-  });
-  chips.appendChild(mc);
   chips.appendChild(s);
 }
 
-function cardHtml(n,i,dup){
-  return '<button class="card'+(dup||MQ?'':' in')+'" '+(dup?'aria-hidden="true" tabindex="-1" ':'')+(MQ?'':'style="animation-delay:'+i*50+'ms" ')+'data-id="'+(+n.id||0)+'" type="button"><div class="art">'+pic(n)+'</div><div class="tx"><span class="tag">'+esc(n.cat)+'</span><h3>'+esc(n.title)+'</h3><p>'+esc(n.sum)+'</p><span class="meta">'+fmt(n.date)+' · '+(+n.read||0)+' min de leitura</span></div></button>';
+function cardHtml(n,i,dup,mq){
+  return '<button class="card'+(mq?'':' in')+'" '+(dup?'aria-hidden="true" tabindex="-1" ':'')+(mq?'':'style="animation-delay:'+i*50+'ms" ')+'data-id="'+(+n.id||0)+'" type="button"><div class="art">'+pic(n)+'</div><div class="tx"><span class="tag">'+esc(n.cat)+'</span><h3>'+esc(n.title)+'</h3><p>'+esc(n.sum)+'</p><span class="meta">'+fmt(n.date)+' · '+(+n.read||0)+' min de leitura</span></div></button>';
+}
+/* notícias mais relevantes: destaque primeiro, depois as mais recentes (com foto na frente) */
+function topNews(max){
+  var l=NEWS.slice().sort(function(a,b){
+    return (b.featured?1:0)-(a.featured?1:0)||String(b.date||"").localeCompare(String(a.date||""))||((b.img?1:0)-(a.img?1:0));
+  });
+  return l.slice(0,max);
+}
+var carr=document.getElementById("carr");
+function renderCarr(){
+  var list=topNews(10);
+  if(!list.length){carr.innerHTML="";carr.parentNode.hidden=true;return}
+  carr.parentNode.hidden=false;
+  var reps=Math.max(1,Math.ceil(8/list.length)),half=[],r;
+  for(r=0;r<reps;r++)list.forEach(function(n){half.push({n:n,dup:r>0})});
+  var a=half.map(function(x){return cardHtml(x.n,0,x.dup,true)}).join(""),b=half.map(function(x){return cardHtml(x.n,0,true,true)}).join("");
+  carr.innerHTML='<div class="track" style="--dur:'+half.length*8+'s">'+a+b+'</div>';
 }
 function render(){
   var list=NEWS.filter(function(n){return (cat==="Todas"||n.cat===cat)&&(n.title+n.sum).toLowerCase().indexOf(q)>-1});
   if(!list.length){cards.className="cards";cards.innerHTML='<p class="empty">Nenhuma notícia encontrada. Tente outra categoria ou termo.</p>';return}
-  MQ=MODE==="marq"&&list.length>=4; /* com poucos resultados, usa a grade */
-  if(MQ){
-    var reps=Math.max(1,Math.ceil(8/list.length)),half=[],r;
-    for(r=0;r<reps;r++)list.forEach(function(n){half.push({n:n,dup:r>0})});
-    var a=half.map(function(x){return cardHtml(x.n,0,x.dup)}).join(""),b=half.map(function(x){return cardHtml(x.n,0,true)}).join("");
-    cards.className="marq";
-    cards.innerHTML='<div class="track" style="--dur:'+half.length*8+'s">'+a+b+'</div>';
-    return;
-  }
   cards.className="cards";
-  cards.innerHTML=list.map(function(n,i){return cardHtml(n,i,false)}).join("");
+  cards.innerHTML=list.map(function(n,i){return cardHtml(n,i,false,false)}).join("");
 }
 var _pt;
-cards.addEventListener("touchstart",function(){clearTimeout(_pt);cards.classList.add("paused")},{passive:true});
-function _resume(){clearTimeout(_pt);_pt=setTimeout(function(){cards.classList.remove("paused")},3500)}
-cards.addEventListener("touchend",_resume);cards.addEventListener("touchcancel",_resume);
+carr.addEventListener("touchstart",function(){clearTimeout(_pt);carr.classList.add("paused")},{passive:true});
+function _resume(){clearTimeout(_pt);_pt=setTimeout(function(){carr.classList.remove("paused")},3500)}
+carr.addEventListener("touchend",_resume);carr.addEventListener("touchcancel",_resume);
+carr.onclick=function(e){var b=e.target.closest(".card");if(b)open(+b.dataset.id)};
 cards.onclick=function(e){var b=e.target.closest(".card");if(b)open(+b.dataset.id)};
 
 /* ===== destaque e modal ===== */
-var F=null, feat=document.getElementById("feat");
-function renderFeat(){
-  F=NEWS.filter(function(n){return n.featured})[0]||NEWS[0]||null;
-  if(!F){feat.hidden=true;feat.innerHTML="";return}
-  feat.hidden=false;
-  feat.innerHTML='<div class="art">'+pic(F)+'</div><div class="tx"><span class="tag">'+esc(F.cat)+'</span><h2>'+esc(F.title)+'</h2><span class="meta">'+fmt(F.date)+' · '+F.read+' min de leitura</span></div>';
+var F=null, feat=document.getElementById("feat"), fdots=document.getElementById("fdots"), HS=[], hi=0, hTimer, hHold=false;
+function showSlide(i,anim){
+  if(!HS.length)return;
+  hi=(i+HS.length)%HS.length;F=HS[hi];
+  feat.innerHTML='<div class="slide'+'"><div class="art">'+pic(F)+'</div><div class="tx"><span class="tag">'+esc(F.cat)+'</span><h2>'+esc(F.title)+'</h2><span class="meta">'+fmt(F.date)+' · '+F.read+' min de leitura</span></div></div>';
+  [].forEach.call(fdots.children,function(d,k){d.setAttribute("aria-selected",k===hi)});
 }
+function startHero(){
+  clearInterval(hTimer);
+  if(HS.length<2||reduce)return;
+  hTimer=setInterval(function(){if(!hHold&&!document.hidden)showSlide(hi+1)},5000);
+}
+function renderFeat(){
+  HS=topNews(6);
+  if(!HS.length){feat.hidden=true;fdots.hidden=true;feat.innerHTML="";F=null;clearInterval(hTimer);return}
+  feat.hidden=false;fdots.hidden=HS.length<2;
+  fdots.innerHTML=HS.map(function(n,k){return '<button type="button" role="tab" aria-label="Notícia '+(k+1)+'" data-k="'+k+'"></button>'}).join("");
+  hi=0;showSlide(0);startHero();
+}
+fdots.onclick=function(e){var b=e.target.closest("button");if(b){showSlide(+b.dataset.k);startHero()}};
+var heroSide=feat.parentNode;
+heroSide.addEventListener("mouseenter",function(){hHold=true});
+heroSide.addEventListener("mouseleave",function(){hHold=false});
+heroSide.addEventListener("focusin",function(){hHold=true});
+heroSide.addEventListener("focusout",function(){hHold=false});
 feat.onclick=function(){if(F)open(F.id)};
 var modal=document.getElementById("modal");
 function open(id){
@@ -879,7 +914,7 @@ function applySite(){
 }
 function refreshAll(){
   NEWS=DATA.news;CATS=["Todas"].concat(DATA.cats);
-  buildChips();renderFeat();render();applySite();
+  buildChips();renderFeat();renderCarr();render();applySite();
   if(window.buildSide)window.buildSide();
 }
 refreshAll();
@@ -1193,8 +1228,8 @@ refreshAll();
   function buildHtml(){
     var c=document.documentElement.cloneNode(true);
     ["class","data-theme","style"].forEach(function(a){c.removeAttribute(a)});
-    ["#cards","#chips","#feat","#slist","#mbody","#typed"].forEach(function(s){var e=c.querySelector(s);if(e)e.innerHTML=""});
-    var f=c.querySelector("#feat");if(f)f.removeAttribute("hidden");
+    ["#cards","#carr","#fdots","#chips","#feat","#slist","#mbody","#typed"].forEach(function(s){var e=c.querySelector(s);if(e)e.innerHTML=""});
+    var f=c.querySelector("#feat");if(f)f.removeAttribute("hidden");var cs=c.querySelector("#carrossel");if(cs)cs.removeAttribute("hidden");var fd=c.querySelector("#fdots");if(fd)fd.removeAttribute("hidden");
     var a=c.querySelector("#admin");if(a){a.innerHTML="";a.setAttribute("hidden","")}
     var t=c.querySelector("#a-toast");if(t)t.remove();
     var g=c.querySelector("#grid");if(g)["width","height","style"].forEach(function(k){g.removeAttribute(k)});
