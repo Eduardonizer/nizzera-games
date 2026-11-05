@@ -122,7 +122,7 @@
       +'<div class="a-row2"><div>'+fld("Nome da fonte","f-src",d.src)+'</div><div>'+fld("Link da matéria original","f-url",d.url,"url")+'</div></div>'
       +'<h3>Capa</h3><div class="a-cover"><div class="art a-prev" id="a-prev"></div><div>'
       +'<label for="f-img" style="margin-top:0">Endereço (link) da imagem</label><input class="a-in" id="f-img" type="url" placeholder="'+(isData?"Imagem enviada do computador":"https://...")+'" value="'+esc(isData?"":d.img)+'">'
-      +'<div class="a-act"><button type="button" class="a-btn" id="a-up">Enviar do computador</button><button type="button" class="a-btn" id="a-pix">Usar arte em pixel</button></div><input type="file" id="a-file" accept="image/*" hidden>'
+      +'<div class="a-act"><button type="button" class="a-btn" id="a-up">Enviar do computador</button></div><input type="file" id="a-file" accept="image/*" hidden>'
       +'<label for="f-pos">Enquadramento</label><select class="a-in" id="f-pos">'+pos+'</select>'
       +fld("Texto alternativo (para leitores de tela)","f-alt",d.alt)+fld("Crédito da imagem (opcional)","f-credit",d.credit)+'</div></div>'
       +'<label class="a-chk"><input type="checkbox" id="f-feat"'+(d.featured?" checked":"")+'> Mostrar como destaque no topo do site</label>'
@@ -152,6 +152,7 @@
   function saveNews(){
     var d=st.draft;if(!d)return;readForm();var err=$("#f-err");err.textContent="";
     if(!d.title){err.textContent="Dê um título à notícia.";$("#f-title").focus();return}
+    if(!d.img){err.textContent="Toda notícia precisa de uma imagem: cole o link de uma foto ou envie do computador.";$("#f-img").focus();return}
     if(!d.cat){err.textContent="Crie uma categoria na aba “Site e categorias” antes de salvar.";return}
     if(d.url&&!/^https?:\/\//i.test(d.url)){err.textContent="O link da matéria precisa começar com http:// ou https://";$("#f-url").focus();return}
     if(d.img&&/^\s*(javascript:|data:(?!image\/))/i.test(d.img)){err.textContent="Endereço de imagem inválido.";$("#f-img").focus();return}
@@ -292,7 +293,6 @@
     if(id==="a-new"){addNew();return}
     if(id==="a-sort"){mutate(function(){DATA.news.sort(function(a,b){return String(b.date).localeCompare(String(a.date))})},"Ordenado por data (mais recentes primeiro).");items();return}
     if(id==="a-up"){$("#a-file").click();return}
-    if(id==="a-pix"){st.draft.img="";st.dirty=true;var fi=$("#f-img");fi.value="";fi.placeholder="https://...";preview();return}
     if(id==="a-disc"){st.dirty=false;st.draft=st.isNew?null:clone(find(st.sel));if(st.isNew)st.isNew=false;items();editor();return}
     if(id==="a-del"){delNews();return}
     if(id==="a-addcat"){st.cats.push({orig:null,name:""});catRows();var ins=adm.querySelectorAll(".a-crow input[data-ci]");var li=ins[ins.length-1];if(li)li.focus();return}

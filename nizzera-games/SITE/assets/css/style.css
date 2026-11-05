@@ -53,13 +53,6 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0
 .dd{background:var(--sun);color:var(--ink);font-weight:800;border-radius:6px;padding:2px 8px}
 .dp{flex-wrap:wrap}.dp s{color:var(--muted);font-size:.9rem;white-space:nowrap}.dp strong{margin-left:auto;white-space:nowrap}
 #dmeta{margin:14px 0 0}
-#dmodal{max-width:1040px;max-height:calc(100vh - 32px);overflow:auto}
-#dmodal .dhead{position:sticky;top:0;z-index:2;background:var(--card);padding:22px 70px 14px 24px;border-bottom:1px solid var(--line)}
-#dmodal h2{font-size:1.6rem;margin:0}
-#dmodal .dtabs{margin:12px 0 0}
-#dmodal .dbody{padding:20px 24px 26px}
-#dmodal .deals{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
-#dmodal a.deal{text-decoration:none;font-weight:400}
 .dnoimg{display:grid;place-items:center;aspect-ratio:460/215;background:linear-gradient(135deg,var(--cobalt),#7a3cff);color:#fff;font:800 1.7rem "Bricolage Grotesque",sans-serif;letter-spacing:.04em}
 .soon{grid-column:1/-1;text-align:center;padding:36px 12px;color:var(--muted);border:2px dashed var(--line);border-radius:14px}
 .feat .art{aspect-ratio:16/9}
@@ -269,3 +262,18 @@ html.solo{--sw:0px}
 .notfound{text-align:center;padding:72px 0 96px}
 .notfound h1{font-size:clamp(2.4rem,7vw,4.4rem);margin:0 0 12px}
 .notfound .a{display:inline-block;margin-top:18px;background:var(--cobalt);color:#fff;font-weight:700;text-decoration:none;padding:12px 22px;border-radius:99px;box-shadow:4px 4px 0 var(--sun)}
+
+/* ===== site em várias páginas ===== */
+a.feat{display:block;text-decoration:none}
+.page{padding-bottom:72px}
+.ph{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;letter-spacing:-.02em;margin:14px 0 8px}
+.page .lead{color:var(--muted);font-size:1.1rem;margin:0 0 20px;max-width:62ch}
+.page .dtabs:empty{display:none}
+.page.fb .fb-intro{margin-top:0}
+.post .share{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:18px 0 0;font-size:.9rem;color:var(--muted)}
+.post .share a{color:inherit;overflow-wrap:anywhere}
+.post .share button{border:2px solid var(--line);background:var(--card);color:var(--fg);border-radius:99px;padding:6px 14px;font:700 .85rem "DM Sans",sans-serif;cursor:pointer}
+.post .share button:hover{border-color:var(--cobalt)}
+.topbar .tbtn{flex:none}
+@media (max-width:899px){.topbar .logo{margin-left:56px}}
+@media (max-width:560px){.topbar .tbtn{display:none}.topbar .logo{font-size:1.25rem}}

@@ -43,6 +43,7 @@ function clean(d) {
     const title = str(n.title, 300, "Um título").trim();
     if (!title) throw new Bad("Há uma notícia sem título.");
     const img = str(n.img, 3_000_000, "Uma imagem");
+    if (!img) throw new Bad(`A notícia "${title.slice(0, 40)}" está sem imagem. Toda notícia precisa de foto.`);
     if (img && !(img.length <= 2000 && HTTP.test(img)) && !DATA_IMG.test(img)) throw new Bad(`A imagem da notícia "${title.slice(0, 40)}" é inválida.`);
     const url = str(n.url, 2000, "Um link");
     if (url && !HTTP.test(url)) throw new Bad(`O link da notícia "${title.slice(0, 40)}" precisa começar com http:// ou https://.`);

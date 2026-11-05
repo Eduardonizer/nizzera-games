@@ -108,62 +108,14 @@ addEventListener("popstate",function(){
   [].forEach.call(chips.querySelectorAll(".chip"),function(x){x.setAttribute("aria-pressed",x.textContent===cat)});
   render();
 });
-/* ===== ofertas da semana (dados em data/ofertas.json, atualizados pelo robô) — abrem num painel pelo menu lateral ===== */
-var DEALS=null, dealTab="steam", DNAMES={steam:"Steam"};
-var dtabs=document.getElementById("dtabs"), dealsEl=document.getElementById("deals"), dmeta=document.getElementById("dmeta"), dmodal=document.getElementById("dmodal");
-function dealImgs(d){
-  var l=[],id=+d.id||0;
-  if(typeof d.img==="string"&&/^https:\/\/\S+$/.test(d.img))l.push(d.img);
-  if(dealTab==="steam"&&id)l.push(
-    "https://cdn.akamai.steamstatic.com/steam/apps/"+id+"/header.jpg",
-    "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/"+id+"/header.jpg",
-    "https://cdn.cloudflare.steamstatic.com/steam/apps/"+id+"/header.jpg",
-    "https://cdn.akamai.steamstatic.com/steam/apps/"+id+"/capsule_616x353.jpg");
-  return l;
-}
-function initials(n){var w=String(n||"").replace(/[^\p{L}\p{N} ]/gu,"").split(/\s+/).filter(Boolean);return (w.slice(0,2).map(function(x){return x[0]}).join("")||"?").toUpperCase()}
-function dealImgHtml(d){
-  var l=dealImgs(d),ph=initials(d.name);
-  if(!l.length)return '<div class="dnoimg" aria-hidden="true">'+esc(ph)+'</div>';
-  return '<img src="'+esc(l[0])+'" data-next="'+esc(l.slice(1).join(" "))+'" data-ph="'+esc(ph)+'" alt="" loading="lazy" referrerpolicy="no-referrer">';
-}
-/* se uma imagem não existe, tenta a próxima; no fim, mostra um quadrado colorido com as iniciais */
-dealsEl.addEventListener("error",function(e){
-  var im=e.target;if(!im||im.tagName!=="IMG")return;
-  var nx=(im.getAttribute("data-next")||"").split(" ").filter(Boolean);
-  if(nx.length){im.setAttribute("data-next",nx.slice(1).join(" "));im.src=nx[0];return}
-  var ph=document.createElement("div");ph.className="dnoimg";ph.setAttribute("aria-hidden","true");ph.textContent=im.getAttribute("data-ph")||"?";im.replaceWith(ph);
-},true);
-function renderDeals(){
-  if(Object.keys(DNAMES).length<2){dtabs.style.display="none";dtabs.innerHTML=""}
-  else{dtabs.style.display="";dtabs.innerHTML=Object.keys(DNAMES).map(function(k){return '<button type="button" class="chip" role="tab" data-deal="'+k+'" aria-pressed="'+(k===dealTab)+'">'+DNAMES[k]+'</button>'}).join("")}
-  var l=DEALS&&Array.isArray(DEALS[dealTab])?DEALS[dealTab]:[];
-  if(!l.length){
-    dealsEl.innerHTML='<p class="soon">'+(DEALS?"Nenhuma oferta de "+DNAMES[dealTab]+" disponível no momento.":"As ofertas ainda não foram carregadas.")+'</p>';dmeta.textContent="";return;
-  }
-  dealsEl.innerHTML=l.map(function(d){
-    var id=+d.id||0,url=(dealTab==="steam"&&id)?"https://store.steampowered.com/app/"+id+"/":safeUrl(d.url);
-    return '<a class="deal" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+dealImgHtml(d)+'<div class="dx"><b>'+esc(d.name||"")+'</b><div class="dp"><span class="dd">-'+(+d.discount||0)+'%</span>'+(d.orig?'<s>'+esc(d.orig)+'</s>':'')+'<strong>'+esc(d.price||"")+'</strong></div></div></a>';
-  }).join("");
-  dmeta.textContent=DEALS.updated?"Atualizado em "+fmt(String(DEALS.updated).slice(0,10)).replace(/\.$/,"")+". Preços e descontos podem mudar; confira na loja.":"";
-}
-function setDeal(k){if(DNAMES[k]){dealTab=k;renderDeals()}}
-function openDeals(k){if(k)setDeal(k);if(!dmodal.open)dmodal.showModal()}
-dtabs.onclick=function(e){var b=e.target.closest("button");if(b)setDeal(b.dataset.deal)};
-document.getElementById("dclose").onclick=function(){dmodal.close()};
-dmodal.addEventListener("click",function(e){if(e.target===dmodal)dmodal.close()});
-renderDeals();
-try{fetch("/data/ofertas.json",{cache:"no-cache"}).then(function(r){return r.ok?r.json():null}).then(function(d){if(d&&typeof d==="object"){DEALS=d;renderDeals()}}).catch(function(){})}catch(_){}
-/* carrossel "Em alta": só anima — sem pausa e sem clique */
-/* clique normal abre a leitura rápida; Ctrl/Cmd+clique abre a página da notícia em outra aba */
-function cardClick(e){var b=e.target.closest(".card");if(!b||!plainClick(e))return;e.preventDefault();open(+b.dataset.id)}
-cards.onclick=cardClick;
+/* carrossel "Em alta": só anima — sem pausa e sem clique.
+   Na lista, cada card é um link: o clique abre a página da notícia, com endereço próprio. */
 
-/* ===== destaque e modal ===== */
+/* ===== destaque do topo (cada slide é um link para a notícia) ===== */
 var F=null, feat=document.getElementById("feat"), fdots=document.getElementById("fdots"), HS=[], hi=0, hTimer, hHold=false;
 function showSlide(i,anim){
   if(!HS.length)return;
-  hi=(i+HS.length)%HS.length;F=HS[hi];
+  hi=(i+HS.length)%HS.length;F=HS[hi];feat.href=newsUrl(F);feat.setAttribute("aria-label","Destaque: "+F.title);
   feat.innerHTML='<div class="slide'+'"><div class="art">'+pic(F)+'</div><div class="tx"><span class="tag">'+esc(F.cat)+'</span><h2>'+esc(F.title)+'</h2><span class="meta">'+fmt(F.date)+' · '+F.read+' min de leitura</span></div></div>';
   [].forEach.call(fdots.children,function(d,k){d.setAttribute("aria-selected",k===hi)});
 }
@@ -185,22 +137,6 @@ heroSide.addEventListener("mouseenter",function(){hHold=true});
 heroSide.addEventListener("mouseleave",function(){hHold=false});
 heroSide.addEventListener("focusin",function(){hHold=true});
 heroSide.addEventListener("focusout",function(){hHold=false});
-feat.onclick=function(){if(F)open(F.id)};
-var modal=document.getElementById("modal");
-function open(id){
-  var n=NEWS.filter(function(x){return x.id===id})[0];if(!n)return;
-  document.getElementById("mbody").innerHTML='<div class="art">'+pic(n)+'</div><div class="tx"><span class="tag">'+esc(n.cat)+'</span><h2>'+esc(n.title)+'</h2><p class="meta">'+fmt(n.date)+' · '+n.read+' min de leitura</p>'+bodyHtml(n.body||n.sum)+((n.url||n.credit)?'<p class="meta">'+(n.url?'Fonte: <a href="'+esc(safeUrl(n.url))+'" target="_blank" rel="noopener noreferrer">'+esc(n.src||n.url)+'</a>':'')+(n.url&&n.credit?' · ':'')+(n.credit?'Imagem: '+esc(n.credit):'')+'</p>':'')+'<p class="mlink"><a href="'+esc(newsUrl(n))+'">Abrir página da notícia →</a></p></div>';
-  modal.showModal();
-}
-document.getElementById("close").onclick=function(){modal.close()};
-modal.addEventListener("click",function(e){if(e.target===modal)modal.close()});
-
-/* ===== tema ===== */
-document.getElementById("theme").onclick=function(){
-  var r=document.documentElement,dark=getComputedStyle(r).getPropertyValue("--bg").trim()!=="#f2f0ff";
-  r.setAttribute("data-theme",dark?"light":"dark");
-};
-
 /* ===== título digitado ===== */
 var el=document.getElementById("typed"), reduce=matchMedia("(prefers-reduced-motion:reduce)").matches, typeTimer, typedNow="";
 function typeTitle(txt){

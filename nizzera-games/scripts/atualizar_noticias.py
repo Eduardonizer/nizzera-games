@@ -43,7 +43,7 @@ NS = {"media": "http://search.yahoo.com/mrss/", "content": "http://purl.org/rss/
 # -----------------------------------------------------------
 
 
-def baixar(url, limite=400_000):
+def baixar(url, limite=5_000_000):  # feeds grandes (ex.: Tecnoblog, ~850 KB) chegavam cortados
     req = urllib.request.Request(url, headers=UA)
     with urllib.request.urlopen(req, timeout=20) as r:
         return r.read(limite)
@@ -160,6 +160,9 @@ def montar(dados, coletados, hoje):
         if k in vistas_url or t in vistos_tit or it["data"] > hoje + timedelta(days=1):
             continue
         img = it["img"] or og_image(it["link"])
+        if not img:  # o site só publica notícias com foto
+            print(f"[pula] sem imagem: {it['titulo'][:70]}")
+            continue
         corpo = cortar(it["texto"], 450) or it["titulo"]
         novas.append({
             "id": prox_id, "img": img, "alt": it["titulo"] if img else "", "pos": "",

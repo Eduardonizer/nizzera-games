@@ -16,18 +16,22 @@ https://nizzera-games.vercel.app. Criado por Eduardo Nizer.
 │   │   ├── robots.txt
 │   │   ├── sitemap.xml           ┐
 │   │   ├── feed.xml              ├ gerados por scripts/gerar_paginas.py (não edite à mão)
-│   │   ├── noticia/<id>-<titulo>/┘ uma página por notícia, para o Google
+│   │   ├── noticia/<id>-<titulo>/│ uma página por notícia (endereço próprio)
+│   │   ├── ofertas/              │ página das ofertas da semana
+│   │   ├── comentarios/          │ página de comentários e feedback
+│   │   ├── 404.html              ┘ página de "não encontrado"
 │   │   ├── admin/index.html      painel admin (endereço /admin, sem link no site)
-│   │   ├── 404.html
 │   │   ├── site.webmanifest, favicon.ico
 │   │   ├── assets/
 │   │   │   ├── css/style.css     visual do site
 │   │   │   ├── css/admin.css     visual do painel
 │   │   │   ├── js/core.js        funções comuns (dados, arte em pixel, endereços)
-│   │   │   ├── js/app.js         página inicial: lista, paginação, destaque, ofertas
-│   │   │   ├── js/menu.js        menu lateral
+│   │   │   ├── js/tema.js        aplica o tema e o menu recolhido antes de desenhar a página
+│   │   │   ├── js/site.js        menu lateral e tema (todas as páginas)
+│   │   │   ├── js/app.js         página inicial: lista, paginação, destaque
+│   │   │   ├── js/ofertas.js     página de ofertas
 │   │   │   ├── js/artigo.js      páginas das notícias
-│   │   │   ├── js/comunidade.js  comentários e caixa "Fale com a gente"
+│   │   │   ├── js/comunidade.js  comentários e caixa "Fale com a gente" (todas as páginas)
 │   │   │   ├── js/admin.js       painel admin
 │   │   │   └── icons/
 │   │   ├── data/ofertas.json     ofertas da semana (gerado pelo robô)
@@ -49,6 +53,11 @@ https://nizzera-games.vercel.app. Criado por Eduardo Nizer.
 3. A Vercel publica a pasta `nizzera-games/SITE` a cada commit.
 
 As notícias ficam dentro do `index.html`. O painel e o robô editam só esse bloco de dados.
+O menu lateral, o rodapé e o chat das páginas internas são copiados do `index.html` pelo
+`gerar_paginas.py`: para mudar algo neles, edite o `index.html` e rode o gerador.
+
+**Toda notícia precisa de foto.** O robô pula notícias sem imagem, e o painel e o servidor
+recusam salvar notícia sem foto.
 
 ## Google
 

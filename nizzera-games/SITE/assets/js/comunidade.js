@@ -7,7 +7,8 @@
       .then(function(r){return r.json().catch(function(){return {}}).then(function(j){j.status=r.status;return j})});
   }
 
-  /* ---------- comentários ---------- */
+  /* ---------- comentários (página /comentarios/) ---------- */
+  if($("fb-form"))(function(){
   var list=$("cmlist"),form=$("fb-form"),fmsg=$("fb-msg"),fname=$("fb-name"),fst=$("fb-status"),fsend=$("fb-send"),fcount=$("fb-count");
   function say(el,t,cls){el.textContent=t;el.className="fb-status"+(cls?" "+cls:"")}
   function dt(ts){var d=new Date(ts);return isNaN(d)?"":d.toLocaleDateString("pt-BR",{day:"numeric",month:"short",year:"numeric"})}
@@ -35,7 +36,10 @@
   });
   load();
 
-  /* ---------- botão flutuante: caixa de mensagem ---------- */
+  })();
+
+  /* ---------- botão flutuante: caixa de mensagem (todas as páginas) ---------- */
+  if($("chat-fab"))(function(){
   var fab=$("chat-fab"),panel=$("chat"),cb=$("chat-b"),cf=$("chat-f"),cmsg=$("chat-msg"),cname=$("chat-name"),cmail=$("chat-mail"),csend=$("chat-send"),greeted=false;
   function bub(t,cls){var d=document.createElement("div");d.className="bub "+cls;d.textContent=t;cb.appendChild(d);cb.scrollTop=cb.scrollHeight;return d}
   function openChat(){
@@ -65,4 +69,5 @@
     },function(){fail("Não consegui falar com o servidor.")});
   });
   window.nzChat={open:openChat,close:closeChat};
+  })();
 })();

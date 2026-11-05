@@ -25,6 +25,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/style.css">
+<script src="/assets/js/tema.js"></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
  {"@type":"WebSite","@id":"https://nizzera-games.vercel.app/#site","name":"Nizzera Games","url":"https://nizzera-games.vercel.app/","inLanguage":"pt-BR","publisher":{"@id":"https://nizzera-games.vercel.app/#org"}},
@@ -53,7 +54,7 @@
         <h1 id="typed" class="typed" aria-label="Tudo que rolou no mundo dos games."></h1>
         <p id="intro">Lançamentos, Nintendo, Xbox e esports, em textos curtos e sem enrolação. Mova o mouse sobre o fundo e acenda os pixels.</p>
       </div>
-      <div class="heroside"><button class="feat" id="feat" type="button"></button><div class="fdots" id="fdots" role="tablist" aria-label="Notícias em destaque"></div></div>
+      <div class="heroside"><a class="feat" id="feat" href="/#noticias"></a><div class="fdots" id="fdots" role="tablist" aria-label="Notícias em destaque"></div></div>
     </div>
   </div>
 </header>
@@ -71,40 +72,6 @@
   <p class="pinfo meta" id="pinfo" aria-live="polite"></p>
   <noscript><p class="empty">Ative o JavaScript para ver a lista de notícias, ou navegue pelo <a href="/sitemap.xml">mapa do site</a>.</p></noscript>
 </main>
-
-<section class="wrap fb" id="feedback" aria-labelledby="fb-t">
-  <h2 class="sec" id="fb-t">Comentários e feedback</h2>
-  <p class="fb-intro">Gostou do site? Tem sugestão, correção ou pedido de pauta? Deixe seu comentário: ele aparece aqui para todo mundo.</p>
-  <div class="fb-grid">
-    <form class="fb-form" id="fb-form" novalidate>
-      <label for="fb-name">Seu nome (opcional)</label>
-      <input class="fb-in" id="fb-name" maxlength="40" autocomplete="nickname">
-      <label for="fb-msg">Comentário</label>
-      <textarea class="fb-in" id="fb-msg" maxlength="500" rows="4"></textarea>
-      <div class="hp" aria-hidden="true"><label>Não preencha este campo<input id="fb-hp" tabindex="-1" autocomplete="off"></label></div>
-      <div class="fb-row"><span class="fb-count" id="fb-count">0/500</span><button class="fb-btn" id="fb-send" type="submit">Enviar comentário</button></div>
-      <div class="fb-status" id="fb-status" role="status"></div>
-    </form>
-    <div class="fb-list" id="cmlist" aria-live="polite"></div>
-  </div>
-</section>
-
-<dialog id="dmodal" aria-labelledby="dtitle">
-  <div class="dhead">
-    <button class="close" id="dclose" type="button" aria-label="Fechar ofertas">✕</button>
-    <h2 id="dtitle">Ofertas da semana na Steam</h2>
-    <div class="dtabs" id="dtabs" role="tablist" aria-label="Loja"></div>
-  </div>
-  <div class="dbody">
-    <div class="deals" id="deals" aria-live="polite"></div>
-    <p class="meta" id="dmeta"></p>
-  </div>
-</dialog>
-
-<dialog id="modal" aria-label="Notícia">
-  <button class="close" id="close" type="button" aria-label="Fechar">✕</button>
-  <div id="mbody"></div>
-</dialog>
 
 <footer><div class="wrap"><span id="ftxt"></span><p class="contact">Contato: <a href="mailto:nizzeragames@gmail.com">nizzeragames@gmail.com</a></p><p class="by">Criado por <strong id="fcredit"></strong></p></div></footer>
 <button class="chat-fab" id="chat-fab" type="button" aria-label="Abrir caixa de mensagem" aria-expanded="false" aria-controls="chat">
@@ -414,142 +381,6 @@
    "slug": "30-analise-call-of-duty-modern-warfare-4"
   },
   {
-   "id": 21,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Steam",
-   "title": "Steam vai reunir as ofertas de Black Friday em um espaço próprio",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "Os descontos de Black Friday estão no calendário de novembro, mas as datas ainda não saíram.",
-   "body": "O calendário da Valve prevê descontos de Black Friday em novembro, com datas a divulgar. Em vez de uma campanha tradicional, a ideia é reunir os jogos com desconto em uma seção própria do espaço de ofertas e eventos da Steam.",
-   "src": "Contilnet Notícias",
-   "url": "https://contilnetnoticias.com.br/esports/calendario-de-ofertas-saiba-qual-e-a-proxima-promocao-do-steam-em-2026/",
-   "featured": false,
-   "slug": "21-steam-vai-reunir-as-ofertas-de-black-friday-em-um-espaco"
-  },
-  {
-   "id": 20,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Steam",
-   "title": "Festival de RPGs com Batalha Automática chega à Steam em 16 de novembro",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "É a única campanha temática da Valve marcada para novembro, e vai até o dia 23.",
-   "body": "Segundo o calendário publicado pelo Canaltech, novembro terá só uma campanha na Steam: o Festival de RPGs com Batalha Automática, de 16 a 23 de novembro. O mês seguinte traz a Promoção de Fim de Ano, de 17 de dezembro de 2026 a 4 de janeiro de 2027.",
-   "src": "Canaltech",
-   "url": "https://canaltech.com.br/games/quais-sao-as-datas-de-promocao-no-steam-em-2026/",
-   "featured": false,
-   "slug": "20-festival-de-rpgs-com-batalha-automatica-chega-a-steam-em-16"
-  },
-  {
-   "id": 14,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Game Pass",
-   "title": "Tanuki: Pon’s Summer e Hope in the City estreiam direto no Game Pass",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "Dois lançamentos diretos no catálogo, nos dias 10 e 11 de novembro, para Ultimate e PC Game Pass.",
-   "body": "Em 10 de novembro, Tanuki: Pon’s Summer coloca o jogador na pele de um tanuki que entrega encomendas de bicicleta, cozinha sushi e disputa sumô para restaurar um santuário antes de um festival.\n\nEm 11 de novembro chega Hope in the City, um mistério em que a protagonista, Hope Song, volta para casa e encontra os pais desaparecidos. As pistas vêm de transformar desenhos em evidências.",
-   "src": "Xbox Power",
-   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
-   "featured": false,
-   "slug": "14-tanuki-pon-s-summer-e-hope-in-the-city-estreiam-direto-no"
-  },
-  {
-   "id": 12,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Game Pass",
-   "title": "Dragon Ball Xenoverse 2, GoldenEye 007 e Wreckfest deixam o Game Pass em 15 de novembro",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "A lista de saídas tem mais de uma dezena de jogos; quem quer terminar algum tem até o dia 15.",
-   "body": "Os jogos que saem do Xbox Game Pass em 15 de novembro incluem Dragon Ball Xenoverse 2, GoldenEye 007, Wreckfest, Moonlighter, Winter Burrow, 1000xResist, Police Simulator: Patrol Officers e Pigeon Simulator, entre outros.",
-   "src": "Xbox Power",
-   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
-   "featured": false,
-   "slug": "12-dragon-ball-xenoverse-2-goldeneye-007-e-wreckfest-deixam-o"
-  },
-  {
-   "id": 11,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Game Pass",
-   "title": "Game Pass Essential recebe Banjo-Kazooie, Perfect Dark e outros clássicos em 15 de novembro",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "Oito jogos entram no plano Essential, entre eles os três Banjo e Gears of War: Judgment.",
-   "body": "Em 15 de novembro, o Game Pass Essential ganha oito jogos: Banjo-Kazooie, Banjo-Tooie, Banjo-Kazooie: Nuts & Bolts, Gears of War: Judgment, Halo: Spartan Assault, Perfect Dark, Viva Piñata e Viva Piñata: Trouble in Paradise. A lista junta clássicos da Rare com títulos de Gears e Halo.",
-   "src": "Xbox Power",
-   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
-   "featured": false,
-   "slug": "11-game-pass-essential-recebe-banjo-kazooie-perfect-dark-e"
-  },
-  {
-   "id": 10,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Game Pass",
-   "title": "Vampire Crawlers e Aphelion chegam ao Game Pass Premium",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "Dois jogos que já estavam no Ultimate e no PC Game Pass entram no plano Premium.",
-   "body": "Vampire Crawlers, dos criadores de Vampire Survivors, mistura roguelite, construção de baralho e batalhas por turnos aceleradas em primeira pessoa. Ele entra no Game Pass Premium em 4 de novembro.\n\nEm 17 de novembro é a vez de Aphelion, aventura de ficção científica da Don’t Nod em que a astronauta Ariane tenta salvar o companheiro Thomas em um planeta congelado. O projeto foi feito em parceria com a Agência Espacial Europeia.",
-   "src": "Xbox Power",
-   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
-   "featured": false,
-   "slug": "10-vampire-crawlers-e-aphelion-chegam-ao-game-pass-premium"
-  },
-  {
-   "id": 9,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Game Pass",
-   "title": "Thronefall e Toxic Commando chegam ao Game Pass em 11 e 12 de novembro",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "Estratégia de reino de um lado e zumbis cooperativos do outro, ambos nos planos Ultimate, Premium e PC.",
-   "body": "Thronefall entra em 11 de novembro. É um jogo de estratégia em que o dia serve para administrar recursos e fortalecer o reino, e a noite para sobreviver aos ataques inimigos.\n\nNo dia seguinte, 12, chega John Carpenter’s Toxic Commando, ação cooperativa para até quatro jogadores contra hordas de zumbis, com veículos armados e ambientes semiabertos.",
-   "src": "Xbox Power",
-   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
-   "featured": false,
-   "slug": "9-thronefall-e-toxic-commando-chegam-ao-game-pass-em-11-e-12"
-  },
-  {
-   "id": 8,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Game Pass",
-   "title": "Warhammer Survivors chega direto ao Game Pass em 10 de novembro",
-   "date": "2026-11-03",
-   "read": 1,
-   "sum": "O bullet heaven no universo de Warhammer estreia no catálogo no dia do lançamento.",
-   "body": "Warhammer Survivors, parceria entre a Auroch Digital e a poncle, entra no Game Pass em 10 de novembro, já no lançamento, para os planos Ultimate e PC Game Pass. É um bullet heaven em que heróis do universo Warhammer enfrentam hordas enormes e desbloqueiam melhorias cada vez mais exageradas. Quem curte Vampire Survivors deve se sentir em casa.",
-   "src": "Xbox Power",
-   "url": "https://www.xboxpower.com.br/2026/11/03/xbox-game-pass-confira-todos-os-jogos-que-chegam-ao-catalogo-em-novembro/",
-   "featured": false,
-   "slug": "8-warhammer-survivors-chega-direto-ao-game-pass-em-10-de"
-  },
-  {
    "id": 7,
    "img": "https://xboxpower-wp.s3.amazonaws.com/wp-content/uploads/2026/11/xpg-nov-2026-w1-featured.jpg",
    "alt": "Jogos que chegam ao Xbox Game Pass em novembro de 2026",
@@ -582,23 +413,6 @@
    "url": "https://www.otakupt.com/jogos/nintendo-mostra-mais-de-pikmin-4-nintendo-switch-2-edition-dandori-academy/",
    "featured": false,
    "slug": "5-pikmin-4-ganha-edicao-para-switch-2-com-academia-dandori-em"
-  },
-  {
-   "id": 15,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Game Pass",
-   "title": "Game Pass tem 10 jogos confirmados para novembro, antes e depois de GTA 6",
-   "date": "2026-11-01",
-   "read": 1,
-   "sum": "O calendário do mês gira em torno de 19 de novembro, data de estreia de GTA 6.",
-   "body": "Em 1º de novembro, o OtakuPT contabilizava dez jogos confirmados para o Xbox Game Pass no mês, num calendário que gira em torno de 19 de novembro, dia em que GTA 6 chega ao PS5 e ao Xbox Series X|S. A lista oficial da primeira leva saiu dois dias depois.",
-   "src": "OtakuPT",
-   "url": "https://www.otakupt.com/jogos/xbox-game-pass-10-jogos-novembro-2026-gta-6/",
-   "featured": false,
-   "slug": "15-game-pass-tem-10-jogos-confirmados-para-novembro-antes-e"
   },
   {
    "id": 4,
@@ -652,23 +466,6 @@
    "slug": "13-final-fantasy-vii-remake-intergrade-e-plants-vs-zombies"
   },
   {
-   "id": 3,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Esports",
-   "title": "Worlds 2026 está em andamento e a final será em Nova York",
-   "date": "2026-10-15",
-   "read": 2,
-   "sum": "São 19 equipes disputando a Copa do Invocador até 14 de novembro.",
-   "body": "O Mundial de League of Legends começou em 15 de outubro e vai até 14 de novembro, com partidas em Los Angeles, no Texas e em Nova York. O CBLOL ganhou uma vaga extra e tem duas representantes no torneio. A grande final acontece em Nova York, no dia 14.",
-   "src": "RDY.GG",
-   "url": "https://rdy.gg/pt/lol/news/league-of-legends-lol-worlds-2026-details",
-   "featured": false,
-   "slug": "3-worlds-2026-esta-em-andamento-e-a-final-sera-em-nova-york"
-  },
-  {
    "id": 1,
    "img": "https://classic.exame.com/wp-content/uploads/2026/08/GTA6.jpg",
    "alt": "Cena do trailer de lançamento de GTA 6",
@@ -684,74 +481,6 @@
    "url": "https://exame.com/pop/gta-6-ganha-trailer-de-lancamento-a-um-mes-da-estreia-e-surpreende-fas-com-cenas-ineditas/",
    "featured": false,
    "slug": "1-gta-6-ganha-trailer-de-lancamento-e-segue-marcado-para-19"
-  },
-  {
-   "id": 22,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Steam",
-   "title": "Deadlock, da Valve, chega a 262 mil jogadores simultâneos",
-   "date": "2026-10-13",
-   "read": 1,
-   "sum": "O pico foi em 9 de outubro, dois dias antes do recorde geral da Steam.",
-   "body": "O shooter em terceira pessoa da própria Valve, ainda em desenvolvimento ativo, chegou a 262.145 jogadores simultâneos em 9 de outubro, impulsionado por uma atualização.\n\nDois dias depois, em 11 de outubro, a Steam bateu seu recorde geral de usuários online. Segundo o site, esse pico reuniu o público de Counter-Strike 2, Dota 2, PUBG, Deadlock e WARDOGS.",
-   "src": "Shattered",
-   "url": "https://shattered.io/pt/steam-recorde-43-5-milhoes-utilizadores-2026/",
-   "featured": false,
-   "slug": "22-deadlock-da-valve-chega-a-262-mil-jogadores-simultaneos"
-  },
-  {
-   "id": 16,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Steam",
-   "title": "Steam bate recorde com mais de 43,5 milhões de usuários simultâneos",
-   "date": "2026-10-13",
-   "read": 1,
-   "sum": "O pico foi em 11 de outubro; 14,4 milhões estavam com algum jogo aberto.",
-   "body": "Segundo o SteamDB, a Steam chegou a 43.505.724 usuários online no domingo, 11 de outubro, o maior número de sua história. Cerca de 14,4 milhões estavam com algum jogo aberto na hora do pico. O recorde anterior, de 42,7 milhões, era de março de 2026.",
-   "src": "GameBlast",
-   "url": "https://www.gameblast.com.br/2026/10/steam-registra-novo-recorde-usuarios-simultaneos-ultrapassando-43-milhoes.html",
-   "featured": false,
-   "slug": "16-steam-bate-recorde-com-mais-de-43-5-milhoes-de-usuarios"
-  },
-  {
-   "id": 18,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Steam",
-   "title": "Steam Frame usa chip Snapdragon 8 Gen 3 e não vem com carregador",
-   "date": "2026-09-14",
-   "read": 1,
-   "sum": "O headset roda SteamOS 3 e funciona de forma independente.",
-   "body": "O Steam Frame é um headset de realidade virtual autônomo, movido por um processador Snapdragon 8 Gen 3 e pelo SteamOS 3. Ele não traz fonte de energia na caixa: a Valve diz que funciona com o carregador do Steam Deck ou com qualquer carregador USB-C de 45 W ou mais.",
-   "src": "Dexerto",
-   "url": "https://www.dexerto.com/gaming/valve-reveals-steam-frame-price-and-release-date-starting-at-1059-3408909/",
-   "featured": false,
-   "slug": "18-steam-frame-usa-chip-snapdragon-8-gen-3-e-nao-vem-com"
-  },
-  {
-   "id": 17,
-   "img": "",
-   "alt": "",
-   "pos": "",
-   "credit": "",
-   "cat": "Steam",
-   "title": "Steam Frame ganha preço de US$ 1.059 e vendas por sorteio",
-   "date": "2026-09-14",
-   "read": 2,
-   "sum": "O headset de realidade virtual da Valve tem versões de 256 GB e de 1 TB.",
-   "body": "Em 14 de setembro, a Valve revelou o preço do Steam Frame: US$ 1.059 pela versão de 256 GB e US$ 1.299 pela de 1 TB.\n\nEm vez de vender por ordem de chegada, a empresa abriu inscrições até 17 de setembro e sorteou a posição na fila, com os primeiros convites de compra saindo em 18 de setembro. A ideia é reduzir a vantagem de bots e revendedores. Até o anúncio, a Valve não havia confirmado venda oficial no Brasil.",
-   "src": "Game Over Drive",
-   "url": "https://gameoverdrive.com.br/steam-frame-preco-data-venda-valve/",
-   "featured": false,
-   "slug": "17-steam-frame-ganha-preco-de-us-1-059-e-vendas-por-sorteio"
   },
   {
    "id": 2,
@@ -827,7 +556,7 @@
 
 <script src="/assets/js/core.js"></script>
 <script src="/assets/js/app.js"></script>
-<script src="/assets/js/menu.js"></script>
+<script src="/assets/js/site.js"></script>
 <script src="/assets/js/comunidade.js"></script>
 </body>
 </html>

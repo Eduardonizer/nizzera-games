@@ -3,8 +3,14 @@
 
 Cria, dentro de SITE/:
   noticia/<id>-<titulo>/index.html   uma página estática por notícia (com dados estruturados)
+  ofertas/index.html                 página das ofertas da semana
+  comentarios/index.html             página de comentários e feedback
+  404.html                           página de "não encontrado"
   sitemap.xml                        lista de todas as páginas, para o Google
   feed.xml                           feed RSS das notícias mais recentes
+
+Todas usam o mesmo menu lateral, rodapé e caixa "Fale com a gente" do index.html
+(copiados de lá a cada execução, para nunca ficarem diferentes).
 
 Também grava um "slug" (o pedaço do endereço) em cada notícia que ainda não tem,
 para o endereço não mudar se o título for editado depois.
@@ -119,10 +125,126 @@ def cabeca_comum():
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/style.css">
+<script src="/assets/js/tema.js"></script>
 <script defer src="/_vercel/insights/script.js"></script>"""
 
 
-def pagina(n, todas, site):
+def casca(texto, site):
+    """Pega do index.html o menu lateral, o rodapé e a caixa de mensagem."""
+    def pedaco(ini, fim):
+        i = texto.index(ini)
+        return texto[i:texto.index(fim, i) + len(fim)]
+    menu = pedaco('<button class="mbtn"', "</aside>").replace('href="#topo" data-go="topo"', 'href="/"')
+    rodape = pedaco("<footer>", "</footer>")
+    rodape = rodape.replace('<span id="ftxt"></span>', f'<span id="ftxt">{e(site.get("footer"))}</span>')
+    if site.get("credit"):
+        rodape = rodape.replace('<strong id="fcredit"></strong>', f'<strong id="fcredit">{e(site["credit"])}</strong>')
+    else:
+        rodape = re.sub(r'<p class="by">.*?</p>', "", rodape, flags=re.S)
+    chat = pedaco('<button class="chat-fab"', '<section class="chat"') [:-len('<section class="chat"')]
+    chat += pedaco('<section class="chat"', "</section>")
+    return {"menu": menu, "rodape": rodape, "chat": chat}
+
+
+def layout(c, nome, cabeca, corpo, scripts=""):
+    """Esqueleto comum: menu lateral + barra do topo + conteúdo + rodapé + chat."""
+    return f"""<!DOCTYPE html>
+{MARCA}
+<html lang="pt-BR">
+<head>
+{cabeca_comum()}
+{cabeca}
+</head>
+<body>
+{c['menu']}
+<header class="topbar">
+  <div class="wrap">
+    <a class="logo" href="/"><i></i><span>{e(nome)}</span></a>
+    <button class="tbtn" id="theme" type="button">Alternar tema</button>
+  </div>
+</header>
+{corpo}
+{c['rodape']}
+{c['chat']}
+<script src="/assets/js/core.js"></script>
+<script src="/assets/js/site.js"></script>
+<script src="/assets/js/comunidade.js"></script>
+{scripts}</body>
+</html>
+"""
+
+
+def meta_pagina(titulo, desc, url, nome, tipo="website", indexar=True):
+    return f"""<title>{e(titulo)}</title>
+<meta name="description" content="{e(desc)}">
+<link rel="canonical" href="{e(url)}">
+<meta name="robots" content="{'index, follow, max-image-preview:large' if indexar else 'noindex'}">
+<meta property="og:type" content="{tipo}">
+<meta property="og:site_name" content="{e(nome)}">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="{e(titulo)}">
+<meta property="og:description" content="{e(desc)}">
+<meta property="og:url" content="{e(url)}">"""
+
+
+def trilha(atual):
+    return (f'<nav class="crumbs" aria-label="Você está em"><ol><li><a href="/">Início</a></li>'
+            f'<li aria-current="page">{e(atual)}</li></ol></nav>')
+
+
+def pagina_ofertas(c, site):
+    nome = site.get("name") or "Nizzera Games"
+    cab = meta_pagina(f"Ofertas da semana na Steam | {nome}",
+                      "Os maiores descontos da semana na Steam, com preço em reais, atualizados automaticamente.",
+                      SITE_URL + "/ofertas/", nome)
+    corpo = f"""<main class="wrap page">
+  {trilha("Ofertas da semana")}
+  <h1 class="ph">Ofertas da semana na Steam</h1>
+  <p class="lead">Os maiores descontos do momento, com preço em reais. Atualizado automaticamente.</p>
+  <div class="dtabs" id="dtabs" role="tablist" aria-label="Loja"></div>
+  <div class="deals" id="deals" aria-live="polite"><p class="soon">Carregando ofertas…</p></div>
+  <p class="meta" id="dmeta"></p>
+</main>"""
+    return layout(c, nome, cab, corpo, '<script src="/assets/js/ofertas.js"></script>\n')
+
+
+def pagina_comentarios(c, site):
+    nome = site.get("name") or "Nizzera Games"
+    cab = meta_pagina(f"Comentários e feedback | {nome}",
+                      "Deixe sua sugestão, correção ou pedido de pauta para o Nizzera Games.",
+                      SITE_URL + "/comentarios/", nome)
+    corpo = f"""<main class="wrap page fb" id="feedback">
+  {trilha("Comentários")}
+  <h1 class="ph" id="fb-t">Comentários e feedback</h1>
+  <p class="fb-intro">Gostou do site? Tem sugestão, correção ou pedido de pauta? Deixe seu comentário: ele aparece aqui para todo mundo.</p>
+  <div class="fb-grid">
+    <form class="fb-form" id="fb-form" novalidate>
+      <label for="fb-name">Seu nome (opcional)</label>
+      <input class="fb-in" id="fb-name" maxlength="40" autocomplete="nickname">
+      <label for="fb-msg">Comentário</label>
+      <textarea class="fb-in" id="fb-msg" maxlength="500" rows="4"></textarea>
+      <div class="hp" aria-hidden="true"><label>Não preencha este campo<input id="fb-hp" tabindex="-1" autocomplete="off"></label></div>
+      <div class="fb-row"><span class="fb-count" id="fb-count">0/500</span><button class="fb-btn" id="fb-send" type="submit">Enviar comentário</button></div>
+      <div class="fb-status" id="fb-status" role="status"></div>
+    </form>
+    <div class="fb-list" id="cmlist" aria-live="polite"><p class="soon">Carregando comentários…</p></div>
+  </div>
+</main>"""
+    return layout(c, nome, cab, corpo)
+
+
+def pagina_404(c, site):
+    nome = site.get("name") or "Nizzera Games"
+    cab = meta_pagina(f"Página não encontrada | {nome}", "Essa página não existe.", SITE_URL + "/", nome, indexar=False)
+    corpo = """<main class="wrap notfound">
+  <h1>Game over: 404</h1>
+  <p class="meta">Essa página não existe ou a notícia saiu do ar.</p>
+  <a class="a" href="/">Voltar para as notícias</a>
+</main>"""
+    return layout(c, nome, cab, corpo)
+
+
+def pagina(n, todas, site, c):
     nome = site.get("name") or "Nizzera Games"
     url = url_noticia(n)
     titulo = n.get("title", "")
@@ -167,35 +289,13 @@ def pagina(n, todas, site):
     bloco_fonte = (f'<p class="src">Leia a matéria completa em <a href="{e(link_fonte)}" target="_blank" rel="noopener">{e(fonte or link_fonte)}</a>.</p>'
                    if link_fonte else "")
 
-    return f"""<!DOCTYPE html>
-{MARCA}
-<html lang="pt-BR" class="solo">
-<head>
-{cabeca_comum()}
-<title>{e(titulo)} | {e(nome)}</title>
-<meta name="description" content="{e(desc)}">
-<link rel="canonical" href="{e(url)}">
-<meta name="robots" content="index, follow, max-image-preview:large">
-<meta property="og:type" content="article">
-<meta property="og:site_name" content="{e(nome)}">
-<meta property="og:locale" content="pt_BR">
-<meta property="og:title" content="{e(titulo)}">
-<meta property="og:description" content="{e(desc)}">
-<meta property="og:url" content="{e(url)}">
+    cab = meta_pagina(f"{titulo} | {nome}", desc, url, nome, tipo="article") + f"""
 {meta_og_img}
 <meta property="article:published_time" content="{e(data)}">
 <meta property="article:section" content="{e(n.get('cat'))}">
 <script type="application/ld+json">{json_ld(ld_artigo)}</script>
-<script type="application/ld+json">{json_ld(ld_trilha)}</script>
-</head>
-<body>
-<header class="topbar">
-  <div class="wrap">
-    <a class="logo" href="/"><i></i><span>{e(nome)}</span></a>
-    <a class="back" href="/#noticias">← Todas as notícias</a>
-  </div>
-</header>
-<main class="wrap">
+<script type="application/ld+json">{json_ld(ld_trilha)}</script>"""
+    corpo = f"""<main class="wrap">
   <nav class="crumbs" aria-label="Você está em">
     <ol><li><a href="/">Início</a></li><li><a href="/?categoria={e(slugify(n.get('cat')))}#noticias">{e(n.get('cat'))}</a></li><li aria-current="page">Notícia</li></ol>
   </nav>
@@ -207,15 +307,11 @@ def pagina(n, todas, site):
     <figure>{arte(n, prioridade=True)}{('<figcaption>' + ' · '.join(credito) + '</figcaption>') if credito else ''}</figure>
     <div class="body">{paragrafos(n.get('body') or resumo)}</div>
     {bloco_fonte}
+    <p class="share"><span>Link desta notícia:</span> <a href="{e(url)}">{e(url)}</a></p>
   </article>
   {('<section class="related" aria-label="Leia também"><h2 class="sec">Leia também</h2><div class="cards">' + ''.join(card(x) for x in rel) + '</div></section>') if rel else ''}
-</main>
-<footer><div class="wrap"><span>{e(site.get('footer'))}</span>{('<p class="by">Criado por <strong>' + e(site['credit']) + '</strong></p>') if site.get('credit') else ''}</div></footer>
-<script src="/assets/js/core.js"></script>
-<script src="/assets/js/artigo.js"></script>
-</body>
-</html>
-"""
+</main>"""
+    return layout(c, nome, cab, corpo, '<script src="/assets/js/artigo.js"></script>\n')
 
 
 def sitemap(todas):
@@ -223,7 +319,9 @@ def sitemap(todas):
     mais_nova = max([n.get("date", "") for n in todas] + [""]) or hoje
     linhas = ['<?xml version="1.0" encoding="UTF-8"?>',
               '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-              f"  <url><loc>{SITE_URL}/</loc><lastmod>{mais_nova}</lastmod></url>"]
+              f"  <url><loc>{SITE_URL}/</loc><lastmod>{mais_nova}</lastmod></url>",
+              f"  <url><loc>{SITE_URL}/ofertas/</loc></url>",
+              f"  <url><loc>{SITE_URL}/comentarios/</loc></url>"]
     for n in todas:
         lm = f"<lastmod>{e(n['date'])}</lastmod>" if re.match(r"^\d{4}-\d{2}-\d{2}$", n.get("date", "")) else ""
         linhas.append(f"  <url><loc>{e(url_noticia(n))}</loc>{lm}</url>")
@@ -284,7 +382,11 @@ def main():
 
     # 2) páginas das notícias (mais recentes primeiro, para as "leia também")
     todas = sorted(noticias, key=lambda n: (n.get("date", ""), n.get("id", 0)), reverse=True)
-    mudou = sum(gravar(os.path.join(PASTA, n["slug"], "index.html"), pagina(n, todas, site)) for n in todas)
+    c = casca(texto, site)
+    mudou = sum(gravar(os.path.join(PASTA, n["slug"], "index.html"), pagina(n, todas, site, c)) for n in todas)
+    mudou += gravar(os.path.join(SITE, "ofertas", "index.html"), pagina_ofertas(c, site))
+    mudou += gravar(os.path.join(SITE, "comentarios", "index.html"), pagina_comentarios(c, site))
+    mudou += gravar(os.path.join(SITE, "404.html"), pagina_404(c, site))
 
     # 3) apaga páginas de notícias que saíram do site (só as que este script criou)
     removidas = 0
