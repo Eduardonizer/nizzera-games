@@ -1,0 +1,42 @@
+name: Atualizar notícias
+
+on:
+  schedule:
+    - cron: "0 */4 * * *"   # a cada 4 horas (horário UTC). Para 3 horas, troque */4 por */3
+  workflow_dispatch:         # permite rodar na mão: aba Actions > Atualizar notícias > Run workflow
+
+permissions:
+  contents: write            # deixa o robô salvar o resultado no repositório
+
+concurrency:
+  group: atualizar-noticias
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Rodar o script de notícias
+        working-directory: nizzera-games
+        run: python atualizar_noticias.py
+
+      - name: Salvar no GitHub se mudou
+        run: |
+          if [ -n "$(git status --porcelain nizzera-games/SITE/index.html)" ]; then
+            git config user.name "nizzera-bot"
+            git config user.email "actions@users.noreply.github.com"
+            git add nizzera-games/SITE/index.html
+            git commit -m "Atualiza notícias automaticamente"
+            git pull --rebase origin main
+            git push origin main
+          else
+            echo "Sem notícias novas."
+          fi
