@@ -1,14 +1,6 @@
 {
- "updated": "2026-11-05T12:45:46Z",
+ "updated": "2026-11-05T19:08:24Z",
  "steam": [
-  {
-   "id": 1449690,
-   "name": "The Walking Dead: The Telltale Definitive Series",
-   "discount": 90,
-   "orig": "R$ 134,99",
-   "price": "R$ 13,49",
-   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1449690/header.jpg?t=1760651835"
-  },
   {
    "id": 391220,
    "name": "Rise of the Tomb Raider™",
@@ -16,6 +8,14 @@
    "orig": "R$ 124,99",
    "price": "R$ 12,49",
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/391220/29279804029df9b7540caef5c086c9f0393e2e2d/header_alt_assets_0.jpg?t=1792675385"
+  },
+  {
+   "id": 275850,
+   "name": "No Man's Sky",
+   "discount": 60,
+   "orig": "R$ 162,00",
+   "price": "R$ 64,80",
+   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/275850/9f1ca9e3b7d1dccb7b5af404a6739ddc1118ef32/header_alt_assets_26.jpg?t=1793196605"
   },
   {
    "id": 3159330,
@@ -26,14 +26,6 @@
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3159330/header.jpg?t=1792778493"
   },
   {
-   "id": 3240220,
-   "name": "Grand Theft Auto V Enhanced",
-   "discount": 50,
-   "orig": "R$ 149,90",
-   "price": "R$ 74,95",
-   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3240220/header.jpg?t=1781187782"
-  },
-  {
    "id": 3768760,
    "name": "007 First Light",
    "discount": 40,
@@ -42,12 +34,12 @@
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3768760/c5b553fd05ba41aefa6daeddac95849a10c93022/header_alt_assets_4.jpg?t=1791886607"
   },
   {
-   "id": 3527290,
-   "name": "PEAK",
+   "id": 4715160,
+   "name": "Finals Week: Descolado",
    "discount": 38,
-   "orig": "R$ 23,99",
-   "price": "R$ 14,87",
-   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3527290/31bac6b2eccf09b368f5e95ce510bae2baf3cfcd/header.jpg?t=1792684718"
+   "orig": "R$ 27,49",
+   "price": "R$ 17,04",
+   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4715160/3d05c4f85866620b0b47754e30414cb4414b42dc/header.jpg?t=1793289966"
   },
   {
    "id": 3241660,
@@ -66,6 +58,14 @@
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3669870/1e0c76e4253d347bb1304c3f213570251d924edf/header.jpg?t=1793357289"
   },
   {
+   "id": 1677110,
+   "name": "Lightyear Frontier",
+   "discount": 20,
+   "orig": "R$ 89,99",
+   "price": "R$ 71,99",
+   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1677110/f4aec944f634f189990fe69e6d353b5609787955/header_alt_assets_7.jpg?t=1793891345"
+  },
+  {
    "id": 1799840,
    "name": "Queen's Domain",
    "discount": 15,
@@ -79,7 +79,7 @@
    "discount": 10,
    "orig": "R$ 44,99",
    "price": "R$ 40,49",
-   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4348910/b241a3bc1cb144e70a4840157e127212738ea5b3/header_alt_assets_3.jpg?t=1793801444"
+   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4348910/b241a3bc1cb144e70a4840157e127212738ea5b3/header_alt_assets_3.jpg?t=1793890375"
   }
  ]
 }
