@@ -1,0 +1,77 @@
+{
+ "updated": "2026-11-05T01:27:23Z",
+ "steam": [
+  {
+   "id": 1449690,
+   "name": "The Walking Dead: The Telltale Definitive Series",
+   "discount": 90,
+   "orig": "R$ 134,99",
+   "price": "R$ 13,49"
+  },
+  {
+   "id": 3240220,
+   "name": "Grand Theft Auto V Enhanced",
+   "discount": 50,
+   "orig": "R$ 149,90",
+   "price": "R$ 74,95"
+  },
+  {
+   "id": 3527290,
+   "name": "PEAK",
+   "discount": 38,
+   "orig": "R$ 23,99",
+   "price": "R$ 14,87"
+  },
+  {
+   "id": 4715160,
+   "name": "Finals Week: Descolado",
+   "discount": 38,
+   "orig": "R$ 27,49",
+   "price": "R$ 17,04"
+  },
+  {
+   "id": 3241660,
+   "name": "R.E.P.O.",
+   "discount": 35,
+   "orig": "R$ 29,99",
+   "price": "R$ 19,49"
+  },
+  {
+   "id": 2060160,
+   "name": "The Farmer Was Replaced",
+   "discount": 30,
+   "orig": "R$ 30,99",
+   "price": "R$ 21,69"
+  },
+  {
+   "id": 1677110,
+   "name": "Lightyear Frontier",
+   "discount": 20,
+   "orig": "R$ 89,99",
+   "price": "R$ 71,99"
+  },
+  {
+   "id": 3669870,
+   "name": "CONTROL Resonant",
+   "discount": 20,
+   "orig": "R$ 229,99",
+   "price": "R$ 183,99"
+  },
+  {
+   "id": 1799840,
+   "name": "Queen's Domain",
+   "discount": 15,
+   "orig": "R$ 63,99",
+   "price": "R$ 54,39"
+  },
+  {
+   "id": 4348910,
+   "name": "Probably Stolen - Cyberpunk Shopkeeper Sim",
+   "discount": 10,
+   "orig": "R$ 44,99",
+   "price": "R$ 40,49"
+  }
+ ],
+ "playstation": [],
+ "xbox": []
+}
