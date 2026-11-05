@@ -6,7 +6,7 @@ embutido do SITE/index.html (<script id="nz-data">). Só usa a biblioteca padrã
 
 Uso:  python scripts/atualizar_noticias.py [caminho/do/index.html]
 """
-import html, json, os, re, sys, urllib.request
+import html, json, os, re, sys, unicodedata, urllib.request
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from xml.etree import ElementTree as ET
@@ -26,6 +26,10 @@ MAX_POR_FEED = 4       # máximo de notícias novas por fonte a cada execução
 MAX_POR_RODADA = 12    # máximo de notícias novas no total por execução
 MAX_NO_SITE = 200      # quantas notícias ficam no site (as mais antigas saem); a paginação mostra 12 por vez
 DESTAQUE_DIAS = 3      # destaque é trocado se tiver mais que isso de idade
+MAX_IDADE_DIAS = 10    # notícia mais velha que isso não entra (alguns feeds trazem matérias de meses atrás)
+EXTRA_EM_ALTA = 2      # notícias a mais por fonte quando são de um "assunto em alta"
+# Os "assuntos em alta" (GTA 6, Zelda...) ficam no próprio site, em nz-data > trend,
+# e são editados no painel admin (Site e categorias). O robô dá preferência a eles.
 FUSO = timezone(timedelta(hours=-3))  # Brasília
 
 CATEGORIAS = [  # primeira que casar vence; senão "Lançamentos"
@@ -147,14 +151,39 @@ def chave(u):
     return re.sub(r"^https?://(www\.)?", "", (u or "").lower()).split("#")[0].split("?")[0].rstrip("/")
 
 
+def plano(t):
+    t = unicodedata.normalize("NFD", str(t or ""))
+    return re.sub(r"[^a-z0-9]+", " ", re.sub("[\u0300-\u036f]", "", t).lower())
+
+
+def assunto(titulo, resumo, trend):
+    """Igual a trendOf() de assets/js/core.js: posição do 1º assunto citado no título/resumo, ou None."""
+    txt = " " + plano(titulo + " " + resumo) + " "
+    for i, x in enumerate(trend):
+        for termo in x.get("terms", []):
+            termo = " " + plano(termo).strip() + " "
+            if len(termo) > 2 and termo in txt:
+                return i
+    return None
+
+
 def montar(dados, coletados, hoje):
     noticias = dados["news"]
+    trend = [x for x in dados.get("trend", []) if isinstance(x, dict) and x.get("terms")]
     vistas_url = {chave(n.get("url")) for n in noticias}
     vistos_tit = {re.sub(r"\W+", "", n.get("title", "").lower()) for n in noticias}
     prox_id = max([n.get("id", 0) for n in noticias] + [0]) + 1
     novas, por_feed = [], {}
-    for it in sorted(coletados, key=lambda x: x["data"], reverse=True):
-        if len(novas) >= MAX_POR_RODADA or por_feed.get(it["nome"], 0) >= MAX_POR_FEED:
+    limite_idade = hoje - timedelta(days=MAX_IDADE_DIAS)
+    for it in coletados:
+        it["alta"] = assunto(it["titulo"], primeira_frase(it["texto"]), trend)
+    # assuntos em alta primeiro (na ordem da lista), depois o resto; dentro de cada grupo, mais novas primeiro
+    fila = sorted(coletados, key=lambda x: (x["alta"] is None, x["alta"] or 0, -x["data"].toordinal()))
+    for it in fila:
+        if it["data"] < limite_idade:
+            continue
+        cota = MAX_POR_FEED + (EXTRA_EM_ALTA if it["alta"] is not None else 0)
+        if len(novas) >= MAX_POR_RODADA or por_feed.get(it["nome"], 0) >= cota:
             continue
         k, t = chave(it["link"]), re.sub(r"\W+", "", it["titulo"].lower())
         if k in vistas_url or t in vistos_tit or it["data"] > hoje + timedelta(days=1):
@@ -213,7 +242,7 @@ def main():
     open(caminho, "w", encoding="utf-8").write(texto)
     print(f"{len(novas)} notícias novas adicionadas; {len(dados['news'])} no site.")
     for n in novas:
-        print(f" + [{n['cat']}] {n['title']}  ({'com foto' if n['img'] else 'sem foto'})")
+        print(f" + [{n['cat']}] {n['title']}")
 
 
 if __name__ == "__main__":

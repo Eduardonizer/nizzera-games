@@ -28,6 +28,24 @@ function slugify(t){
 function newsSlug(n){return /^[a-z0-9-]{1,90}$/.test(n.slug||"")?n.slug:(+n.id||0)+"-"+slugify(n.title)}
 function newsUrl(n){return "/noticia/"+newsSlug(n)+"/"}
 
+/* ---- assuntos em alta (lista "trend" do nz-data, editável no painel em Site e categorias) ---- */
+function plain(t){return String(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()}
+var TREND_DIAS=21; /* notícia mais velha que isso não sobe para o "Em alta", mesmo sendo do assunto */
+function trends(){var d=DATA&&Array.isArray(DATA.trend)?DATA:BASE;return d&&Array.isArray(d.trend)?d.trend.filter(function(x){return x&&x.name&&Array.isArray(x.terms)&&x.terms.length}):[]}
+/* devolve {i: posição na lista, name} do primeiro assunto citado no título ou no resumo, ou null */
+function trendOf(n){
+  var txt=" "+plain(n.title+" "+n.sum).replace(/[^a-z0-9]+/g," ")+" ",l=trends();
+  for(var i=0;i<l.length;i++)for(var k=0;k<l[i].terms.length;k++){
+    var term=" "+plain(l[i].terms[k]).replace(/[^a-z0-9]+/g," ").trim()+" ";
+    if(term.length>2&&txt.indexOf(term)>-1)return {i:i,name:l[i].name};
+  }
+  return null;
+}
+function ageDays(n){var d=new Date((n.date||"")+"T12:00:00");return isNaN(d)?999:Math.max(0,(Date.now()-d)/864e5)}
+/* selo "em alta" para colocar no card */
+var FLAME='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 01-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-4-1-6 1-9.5z"/></svg>';
+function hotTag(n){var t=trendOf(n);return t&&ageDays(n)<=TREND_DIAS?'<span class="hot">'+FLAME+esc(t.name)+'</span>':""}
+
 var PAL = [["#ff5c7a","#ffd23f"],["#2433f0","#7be0ff"],["#12b886","#0e1033"],["#9b5cff","#ffd23f"],["#ff8a3d","#2433f0"],["#0e1033","#ff5c7a"]];
 
 /* ===== util: arte pixelada gerada por semente ===== */

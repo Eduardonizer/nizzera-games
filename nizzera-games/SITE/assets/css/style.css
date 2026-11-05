@@ -277,3 +277,17 @@ a.feat{display:block;text-decoration:none}
 .topbar .tbtn{flex:none}
 @media (max-width:899px){.topbar .logo{margin-left:56px}}
 @media (max-width:560px){.topbar .tbtn{display:none}.topbar .logo{font-size:1.25rem}}
+
+/* ===== assuntos em alta ===== */
+.tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.hot{display:inline-flex;align-items:center;gap:4px;font-weight:800;font-size:.78rem;padding:2px 10px 2px 7px;border-radius:99px;background:linear-gradient(90deg,var(--coral),#ff8a3d);color:#fff;letter-spacing:.01em;box-shadow:0 0 0 0 rgba(255,92,122,.55);animation:hotpulse 2.2s ease-out infinite}
+.hot svg,.tchip svg,.hotchip svg{width:14px;height:14px;fill:currentColor;flex:none}
+@keyframes hotpulse{0%{box-shadow:0 0 0 0 rgba(255,92,122,.55)}70%{box-shadow:0 0 0 8px rgba(255,92,122,0)}100%{box-shadow:0 0 0 0 rgba(255,92,122,0)}}
+.trendbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:14px 0 0}
+.trendbar[hidden]{display:none}
+.tlabel{font:700 .75rem/1 "DM Sans",sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+.tchip{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:99px;text-decoration:none;font-weight:700;font-size:.92rem;color:#fff;background:linear-gradient(90deg,var(--coral),#ff8a3d);box-shadow:3px 3px 0 var(--sun);transition:transform .2s,box-shadow .2s}
+.tchip:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--sun)}
+.tchip.on{background:var(--cobalt);box-shadow:3px 3px 0 var(--coral)}
+.chip.hotchip{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(90deg,var(--coral),#ff8a3d);border-color:transparent;color:#fff}
+.feat .tags{margin-bottom:2px}

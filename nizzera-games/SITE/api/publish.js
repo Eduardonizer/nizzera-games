@@ -68,7 +68,17 @@ function clean(d) {
       featured: n.featured === true,
     };
   });
-  return { site, cats, news };
+  // assuntos em alta: [{ name: "GTA 6", terms: ["gta 6", "gta vi"] }, ...]
+  const rawTrend = Array.isArray(d.trend) ? d.trend : [];
+  if (rawTrend.length > 12) throw new Bad("Assuntos em alta demais (máximo 12).");
+  const trend = rawTrend.map((x) => {
+    if (!x || typeof x !== "object" || !Array.isArray(x.terms) || x.terms.length > 15) throw new Bad("Há um assunto em alta inválido.");
+    const name = str(x.name, 30, "O nome de um assunto").trim();
+    const terms = x.terms.map((w) => str(w, 40, "Uma palavra-chave").trim()).filter(Boolean);
+    if (!name || !terms.length) throw new Bad("Cada assunto em alta precisa de nome e de pelo menos uma palavra-chave.");
+    return { name, terms };
+  });
+  return { site, cats, trend, news };
 }
 
 // Notícias que o robô colocou no site depois que você começou a editar
@@ -138,7 +148,7 @@ module.exports = async (req, res) => {
 
       let current = null;
       try { current = JSON.parse(html.slice(m.index + m[1].length, m.index + m[0].length - m[2].length)); } catch (_) {}
-      const out = { site: data.site, cats: data.cats.slice(), news: data.news.slice() };
+      const out = { site: data.site, cats: data.cats.slice(), trend: data.trend, news: data.news.slice() };
       const merged = mergeRobot(out, current, known);
 
       const json = JSON.stringify(out, null, 1).replace(/</g, "\\u003c");

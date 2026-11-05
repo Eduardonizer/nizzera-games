@@ -19,12 +19,17 @@ Roda sozinho no GitHub Actions. Uso manual:  python scripts/gerar_paginas.py
 Só usa a biblioteca padrão.
 """
 import html, json, os, re, shutil, sys, unicodedata
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from atualizar_noticias import assunto  # mesma regra de "assunto em alta" do robô e do site
 
 # ---------------- CONFIGURAÇÃO ----------------
 SITE_URL = "https://nizzera-games.vercel.app"   # sem barra no final; troque se tiver domínio próprio
 RELACIONADAS = 3                                # quantas "leia também" no fim de cada notícia
 NO_FEED = 30                                    # quantas notícias entram no feed RSS
+TREND_DIAS = 21                                 # igual a TREND_DIAS de assets/js/core.js
+FLAME = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 01-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-4-1-6 1-9.5z"/></svg>'
 # ----------------------------------------------
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -106,9 +111,9 @@ def arte(n, prioridade=False):
             f'decoding="async" referrerpolicy="no-referrer" data-fid="{int(n.get("id") or 0)}"{estilo}></div>')
 
 
-def card(n):
+def card(n, trend=()):
     return (f'<a class="card" href="/noticia/{e(n["slug"])}/">{arte(n)}<div class="tx">'
-            f'<span class="tag">{e(n.get("cat"))}</span><h3>{e(n.get("title"))}</h3>'
+            f'<span class="tags"><span class="tag">{e(n.get("cat"))}</span>{selo(n, trend)}</span><h3>{e(n.get("title"))}</h3>'
             f'<p>{e(n.get("sum"))}</p><span class="meta">{e(data_br(n.get("date", "")))}</span></div></a>')
 
 
@@ -244,7 +249,22 @@ def pagina_404(c, site):
     return layout(c, nome, cab, corpo)
 
 
-def pagina(n, todas, site, c):
+def em_alta(n, trend):
+    """Nome do assunto em alta da notícia (se for recente), ou ""."""
+    i = assunto(n.get("title", ""), n.get("sum", ""), trend)
+    try:
+        idade = (date.today() - date.fromisoformat(n.get("date", ""))).days
+    except ValueError:
+        idade = 999
+    return trend[i]["name"] if i is not None and idade <= TREND_DIAS else ""
+
+
+def selo(n, trend):
+    nome = em_alta(n, trend)
+    return f'<span class="hot">{FLAME}{e(nome)}</span>' if nome else ""
+
+
+def pagina(n, todas, site, c, trend):
     nome = site.get("name") or "Nizzera Games"
     url = url_noticia(n)
     titulo = n.get("title", "")
@@ -277,9 +297,12 @@ def pagina(n, todas, site, c):
              "item": f"{SITE_URL}/?categoria={slugify(n.get('cat'))}"},
             {"@type": "ListItem", "position": 3, "name": titulo[:110], "item": url}]}
 
-    mesma = [x for x in todas if x is not n and x.get("cat") == n.get("cat")]
-    outras = [x for x in todas if x is not n and x.get("cat") != n.get("cat")]
-    rel = (mesma + outras)[:RELACIONADAS]
+    # "leia também": primeiro o mesmo assunto em alta, depois a mesma categoria, depois as mais novas
+    meu = em_alta(n, trend)
+    tema = [x for x in todas if x is not n and meu and em_alta(x, trend) == meu]
+    mesma = [x for x in todas if x is not n and x not in tema and x.get("cat") == n.get("cat")]
+    outras = [x for x in todas if x is not n and x not in tema and x not in mesma]
+    rel = (tema + mesma + outras)[:RELACIONADAS]
 
     credito = []
     if n.get("credit"):
@@ -300,7 +323,7 @@ def pagina(n, todas, site, c):
     <ol><li><a href="/">Início</a></li><li><a href="/?categoria={e(slugify(n.get('cat')))}#noticias">{e(n.get('cat'))}</a></li><li aria-current="page">Notícia</li></ol>
   </nav>
   <article class="post">
-    <span class="tag">{e(n.get('cat'))}</span>
+    <span class="tags"><span class="tag">{e(n.get('cat'))}</span>{selo(n, trend)}</span>
     <h1>{e(titulo)}</h1>
     <p class="lead">{e(resumo)}</p>
     <p class="meta"><time datetime="{e(data)}">{e(data_br(data))}</time> · {int(n.get('read') or 1)} min de leitura{(' · Fonte: ' + e(fonte)) if fonte else ''}</p>
@@ -309,7 +332,7 @@ def pagina(n, todas, site, c):
     {bloco_fonte}
     <p class="share"><span>Link desta notícia:</span> <a href="{e(url)}">{e(url)}</a></p>
   </article>
-  {('<section class="related" aria-label="Leia também"><h2 class="sec">Leia também</h2><div class="cards">' + ''.join(card(x) for x in rel) + '</div></section>') if rel else ''}
+  {('<section class="related" aria-label="Leia também"><h2 class="sec">Leia também</h2><div class="cards">' + ''.join(card(x, trend) for x in rel) + '</div></section>') if rel else ''}
 </main>"""
     return layout(c, nome, cab, corpo, '<script src="/assets/js/artigo.js"></script>\n')
 
@@ -383,7 +406,8 @@ def main():
     # 2) páginas das notícias (mais recentes primeiro, para as "leia também")
     todas = sorted(noticias, key=lambda n: (n.get("date", ""), n.get("id", 0)), reverse=True)
     c = casca(texto, site)
-    mudou = sum(gravar(os.path.join(PASTA, n["slug"], "index.html"), pagina(n, todas, site, c)) for n in todas)
+    trend = [x for x in dados.get("trend", []) if isinstance(x, dict) and x.get("terms")]
+    mudou = sum(gravar(os.path.join(PASTA, n["slug"], "index.html"), pagina(n, todas, site, c, trend)) for n in todas)
     mudou += gravar(os.path.join(SITE, "ofertas", "index.html"), pagina_ofertas(c, site))
     mudou += gravar(os.path.join(SITE, "comentarios", "index.html"), pagina_comentarios(c, site))
     mudou += gravar(os.path.join(SITE, "404.html"), pagina_404(c, site))

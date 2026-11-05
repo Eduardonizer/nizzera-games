@@ -59,6 +59,16 @@ O menu lateral, o rodapé e o chat das páginas internas são copiados do `index
 **Toda notícia precisa de foto.** O robô pula notícias sem imagem, e o painel e o servidor
 recusam salvar notícia sem foto.
 
+## Assuntos em alta
+
+No painel admin, aba **Site e categorias → Assuntos em alta**, você lista os assuntos do
+momento (ex.: `GTA 6: gta 6, gta vi, grand theft auto vi`), em ordem de importância.
+
+- Notícias recentes (até 21 dias) sobre eles abrem o "Em alta" e o destaque do topo e ganham o selo 🔥.
+- Viram botões de filtro acima do carrossel (`/?assunto=gta-6`).
+- O robô dá preferência a eles ao escolher notícias novas (e ignora matérias com mais de 10 dias).
+- O assunto é reconhecido pelo título e pelo resumo da notícia. Troque a lista quando a moda mudar.
+
 ## Google
 
 - Cada notícia tem endereço próprio (`/noticia/12-titulo/`), com HTML pronto, dados

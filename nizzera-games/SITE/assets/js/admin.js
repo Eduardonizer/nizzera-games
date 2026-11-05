@@ -224,9 +224,37 @@
     $("#a-body").innerHTML='<div class="a-wrap"><form id="a-site" class="a-card" novalidate><h2>Textos do site</h2>'
       +fld("Nome do site","s-name",S.name)+fld("Frase animada do topo","s-tag",S.tagline)+area("Texto abaixo da frase","s-intro",S.intro,3)+area("Texto do rodapé","s-foot",S.footer,3)+fld("Criado por (deixe vazio para ocultar)","s-cred",S.credit)
       +'<div class="a-act"><button class="a-btn pri" type="submit">Salvar textos</button></div></form>'
+      +'<div class="a-card"><h2>Assuntos em alta</h2><p class="a-hint">As notícias recentes (até '+TREND_DIAS+' dias) sobre estes assuntos sobem para o “Em alta” e o destaque do topo, ganham o selo 🔥 e viram botões de filtro. O robô também dá preferência a elas. Um assunto por linha, na ordem de importância, no formato <b>Nome: palavra, palavra</b>. O assunto é reconhecido pelo título e pelo resumo da notícia.</p>'
+      +'<label for="t-list">Assuntos</label><textarea class="a-in" id="t-list" rows="6" placeholder="GTA 6: gta 6, gta vi, grand theft auto vi">'+esc(trendText())+'</textarea><p class="a-hint" id="t-prev"></p>'
+      +'<div class="a-err" id="t-err" role="alert"></div><div class="a-act"><button class="a-btn pri" type="button" id="a-savetrend">Salvar assuntos</button></div></div>'
       +'<div class="a-card"><h2>Categorias</h2><p class="a-hint">A ordem aqui é a ordem dos filtros e do menu lateral. Uma categoria só pode ser excluída quando não tem notícias.</p><div id="a-cats"></div>'
       +'<div class="a-err" id="c-err" role="alert"></div><div class="a-act"><button class="a-btn" type="button" id="a-addcat">+ Adicionar categoria</button><button class="a-btn pri" type="button" id="a-savecats">Salvar categorias</button></div></div></div>';
-    catRows();
+    catRows();trendPreview();
+  }
+  function trendText(){return (DATA.trend||[]).map(function(x){return x.name+": "+x.terms.join(", ")}).join("\n")}
+  function parseTrend(txt){
+    var out=[],err="";
+    String(txt||"").split("\n").forEach(function(line,i){
+      line=line.trim();if(!line||err)return;
+      var k=line.indexOf(":"),name=(k>-1?line.slice(0,k):line).trim(),terms=(k>-1?line.slice(k+1):line).split(",").map(function(w){return w.trim()}).filter(Boolean);
+      if(!name||name.length>30){err="Linha "+(i+1)+": o nome do assunto precisa ter de 1 a 30 caracteres.";return}
+      if(!terms.length||terms.length>15||terms.some(function(w){return w.length>40})){err="Linha "+(i+1)+": use de 1 a 15 palavras-chave, separadas por vírgula.";return}
+      out.push({name:name,terms:terms});
+    });
+    if(!err&&out.length>12)err="Use no máximo 12 assuntos.";
+    return {list:out,err:err};
+  }
+  /* mostra quantas notícias atuais cada assunto pega, para conferir as palavras-chave */
+  function trendPreview(){
+    var box=$("#t-prev"),ta=$("#t-list");if(!box||!ta)return;
+    var r=parseTrend(ta.value);if(r.err){box.textContent="";return}
+    var keep=DATA.trend;DATA.trend=r.list;
+    var parts=r.list.map(function(x){var n=DATA.news.filter(function(m){var t=trendOf(m);return t&&t.name===x.name}).length;return x.name+": "+n+" notícia(s)"});
+    DATA.trend=keep;box.textContent=parts.length?"Hoje: "+parts.join(" · "):"";
+  }
+  function saveTrend(){
+    var r=parseTrend($("#t-list").value),err=$("#t-err");err.textContent=r.err;if(r.err)return;
+    mutate(function(){DATA.trend=r.list},"Assuntos em alta salvos.");
   }
   function catCount(c){return DATA.news.filter(function(n){return n.cat===c}).length}
   function catRows(){
@@ -259,7 +287,8 @@
   }
   function norm(d){
     if(!d||!Array.isArray(d.news))return null;
-    var o={site:{},cats:[],news:[]},s=d.site||{},seen={};
+    var o={site:{},cats:[],trend:[],news:[]},s=d.site||{},seen={};
+    if(Array.isArray(d.trend))o.trend=d.trend.filter(function(x){return x&&x.name&&Array.isArray(x.terms)}).map(function(x){return {name:String(x.name),terms:x.terms.map(String)}});
     ["name","tagline","intro","footer","credit"].forEach(function(k){o.site[k]=String(s[k]==null?BASE.site[k]:s[k])});
     d.news.forEach(function(n,i){
       if(!n||!n.title)return;var id=+n.id||i+1;while(seen[id])id++;seen[id]=1;
@@ -297,6 +326,7 @@
     if(id==="a-del"){delNews();return}
     if(id==="a-addcat"){st.cats.push({orig:null,name:""});catRows();var ins=adm.querySelectorAll(".a-crow input[data-ci]");var li=ins[ins.length-1];if(li)li.focus();return}
     if(id==="a-savecats"){saveCats();return}
+    if(id==="a-savetrend"){saveTrend();return}
     if(id==="a-pub"){
       if(!confirm("Publicar as alterações no site agora?"))return;
       t.disabled=true;t.textContent="Publicando…";
@@ -339,6 +369,7 @@
   adm.addEventListener("input",function(e){
     var t=e.target;
     if(t.id==="a-q"){st.q=t.value;items();return}
+    if(t.id==="t-list"){trendPreview();return}
     if(t.dataset&&t.dataset.ci!==undefined&&t.tagName==="INPUT"){st.cats[+t.dataset.ci].name=t.value;return}
     if(!t.closest||!t.closest("#a-form")||!st.draft)return;
     st.dirty=true;readForm();
