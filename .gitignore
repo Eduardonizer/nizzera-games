@@ -1,1 +1,9 @@
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+.vscode/
+.env
+
+# arquivos extras que o Windows cria ao copiar para o WSL
 *:Zone.Identifier

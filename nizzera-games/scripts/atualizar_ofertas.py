@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Busca as ofertas da semana da Steam e grava em SITE/ofertas.json.
+"""Busca as ofertas da semana da Steam e grava em SITE/data/ofertas.json.
 
 Se a busca falhar, o script avisa e mantém as ofertas anteriores: nunca apaga o que já funcionava.
 """
 import json, os, re, urllib.request
 from datetime import datetime, timezone
 
-AQUI = os.path.dirname(os.path.abspath(__file__))
-SAIDA = os.path.join(AQUI, "SITE", "ofertas.json")
+RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SAIDA = os.path.join(RAIZ, "SITE", "data", "ofertas.json")
 URL = "https://store.steampowered.com/api/featuredcategories?cc=br&l=brazilian"
 UA = "Mozilla/5.0 (nizzera-games)"
 LIMITE = 12

@@ -1,7 +1,7 @@
-const { setSession, send } = require("./_lib");
+const { setSession, send, rejectPost } = require("./_lib");
 
 module.exports = (req, res) => {
-  if (req.method !== "POST") return send(res, 405, { ok: false });
+  if (rejectPost(req, res)) return;
   setSession(res, "", 0);
   send(res, 200, { ok: true });
 };

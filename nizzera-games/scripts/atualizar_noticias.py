@@ -4,12 +4,15 @@
 Lê feeds RSS, pega título, trecho, link e imagem de cada matéria e grava no JSON
 embutido do SITE/index.html (<script id="nz-data">). Só usa a biblioteca padrão.
 
-Uso:  python atualizar_noticias.py [caminho/do/index.html]
+Uso:  python scripts/atualizar_noticias.py [caminho/do/index.html]
 """
-import html, json, re, sys, urllib.request
+import html, json, os, re, sys, urllib.request
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from xml.etree import ElementTree as ET
+
+RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PADRAO = os.path.join(RAIZ, "SITE", "index.html")
 
 # ---------------- CONFIGURAÇÃO (edite aqui) ----------------
 FEEDS = [  # (nome mostrado como fonte/crédito, url do RSS, só_games?)
@@ -21,7 +24,7 @@ FEEDS = [  # (nome mostrado como fonte/crédito, url do RSS, só_games?)
 ]
 MAX_POR_FEED = 4       # máximo de notícias novas por fonte a cada execução
 MAX_POR_RODADA = 12    # máximo de notícias novas no total por execução
-MAX_NO_SITE = 40       # quantas notícias ficam no site (as mais antigas saem)
+MAX_NO_SITE = 200      # quantas notícias ficam no site (as mais antigas saem); a paginação mostra 12 por vez
 DESTAQUE_DIAS = 3      # destaque é trocado se tiver mais que isso de idade
 FUSO = timezone(timedelta(hours=-3))  # Brasília
 
@@ -182,7 +185,7 @@ def montar(dados, coletados, hoje):
 
 
 def main():
-    caminho = sys.argv[1] if len(sys.argv) > 1 else "SITE/index.html"
+    caminho = sys.argv[1] if len(sys.argv) > 1 else PADRAO
     texto = open(caminho, encoding="utf-8").read()
     m = re.search(r'(<script id="nz-data" type="application/json">\s*)(.*?)(\s*</script>)', texto, re.S)
     if not m:

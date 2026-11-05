@@ -64,6 +64,14 @@ function readBody(req) {
   try { return JSON.parse(b || "{}"); } catch { return {}; }
 }
 
+// recusa pedidos que não vieram do próprio site (o navegador sempre manda Origin em POST/DELETE via fetch)
+function sameOrigin(req) {
+  const host = String(req.headers["x-forwarded-host"] || req.headers.host || "").split(",")[0].trim().toLowerCase();
+  const origin = req.headers.origin;
+  if (origin) { try { return new URL(origin).host.toLowerCase() === host; } catch { return false; } }
+  return req.headers["sec-fetch-site"] === "same-origin";
+}
+
 async function readAll() {
   const [flat] = await redis([["HGETALL", KEY]]);
   let pairs = [];
@@ -84,6 +92,9 @@ export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   if (!redisUrl() || !redisToken()) {
     return res.status(503).json({ ok: false, error: "Os comentários ainda não foram configurados no servidor." });
+  }
+  if ((req.method === "POST" || req.method === "DELETE") && !sameOrigin(req)) {
+    return res.status(403).json({ ok: false, error: "Origem não permitida." });
   }
   try {
     if (req.method === "GET") {

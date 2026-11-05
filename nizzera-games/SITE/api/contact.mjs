@@ -47,12 +47,21 @@ function readBody(req) {
   try { return JSON.parse(b || "{}"); } catch { return {}; }
 }
 
+// recusa pedidos que não vieram do próprio site (o navegador sempre manda Origin em POST/DELETE via fetch)
+function sameOrigin(req) {
+  const host = String(req.headers["x-forwarded-host"] || req.headers.host || "").split(",")[0].trim().toLowerCase();
+  const origin = req.headers.origin;
+  if (origin) { try { return new URL(origin).host.toLowerCase() === host; } catch { return false; } }
+  return req.headers["sec-fetch-site"] === "same-origin";
+}
+
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ ok: false, error: "Método não permitido." });
   }
+  if (!sameOrigin(req)) return res.status(403).json({ ok: false, error: "Origem não permitida." });
   try {
     const b = readBody(req);
     if (b.hp) return res.status(200).json({ ok: true }); // robô: finge que deu certo

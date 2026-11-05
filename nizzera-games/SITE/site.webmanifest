@@ -1,0 +1,14 @@
+{
+ "name": "Nizzera Games",
+ "short_name": "Nizzera",
+ "description": "Notícias de games em textos curtos e sem enrolação.",
+ "lang": "pt-BR",
+ "start_url": "/",
+ "display": "standalone",
+ "background_color": "#2433f0",
+ "theme_color": "#0b0b12",
+ "icons": [
+  {"src": "/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+  {"src": "/assets/icons/apple-touch-icon.png", "sizes": "180x180", "type": "image/png"}
+ ]
+}
