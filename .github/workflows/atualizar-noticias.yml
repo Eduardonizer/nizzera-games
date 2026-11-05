@@ -1,4 +1,4 @@
-name: Atualizar notícias
+name: Atualizar notícias e ofertas
 
 on:
   schedule:
@@ -24,19 +24,24 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Rodar o script de ofertas
+        working-directory: nizzera-games
+        continue-on-error: true      # se as lojas falharem, as notícias ainda são salvas
+        run: python atualizar_ofertas.py
+
       - name: Rodar o script de notícias
         working-directory: nizzera-games
         run: python atualizar_noticias.py
 
       - name: Salvar no GitHub se mudou
         run: |
-          if [ -n "$(git status --porcelain nizzera-games/SITE/index.html)" ]; then
+          if [ -n "$(git status --porcelain nizzera-games/SITE)" ]; then
             git config user.name "nizzera-bot"
             git config user.email "actions@users.noreply.github.com"
-            git add nizzera-games/SITE/index.html
-            git commit -m "Atualiza notícias automaticamente"
+            git add nizzera-games/SITE/index.html nizzera-games/SITE/ofertas.json
+            git commit -m "Atualiza notícias e ofertas automaticamente"
             git pull --rebase origin main
             git push origin main
           else
-            echo "Sem notícias novas."
+            echo "Sem novidades."
           fi

@@ -65,8 +65,16 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0
 .deal b{font-size:.98rem;line-height:1.25}
 .dp{display:flex;align-items:center;gap:8px}
 .dd{background:var(--sun);color:var(--ink);font-weight:800;border-radius:6px;padding:2px 8px}
-.dp s{color:var(--muted);font-size:.9rem}.dp strong{margin-left:auto}
+.dp{flex-wrap:wrap}.dp s{color:var(--muted);font-size:.9rem;white-space:nowrap}.dp strong{margin-left:auto;white-space:nowrap}
 #dmeta{margin:14px 0 0}
+#dmodal{max-width:1040px;max-height:calc(100vh - 32px);overflow:auto}
+#dmodal .dhead{position:sticky;top:0;z-index:2;background:var(--card);padding:22px 70px 14px 24px;border-bottom:1px solid var(--line)}
+#dmodal h2{font-size:1.6rem;margin:0}
+#dmodal .dtabs{margin:12px 0 0}
+#dmodal .dbody{padding:20px 24px 26px}
+#dmodal .deals{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+#dmodal a.deal{text-decoration:none;font-weight:400}
+.dnoimg{display:grid;place-items:center;aspect-ratio:460/215;background:linear-gradient(135deg,var(--cobalt),#7a3cff);color:#fff;font:800 1.7rem "Bricolage Grotesque",sans-serif;letter-spacing:.04em}
 .soon{grid-column:1/-1;text-align:center;padding:36px 12px;color:var(--muted);border:2px dashed var(--line);border-radius:14px}
 .feat .art{aspect-ratio:16/9}
 .feat .tx{padding:18px 20px 22px}
@@ -280,18 +288,23 @@ footer .adminlink{margin:10px 0 0;font-size:.82rem;opacity:.7}
   <div class="marq" id="carr" aria-live="off"></div>
 </section>
 
-<section class="wrap ofertas" id="ofertas" aria-label="Ofertas da semana">
-  <h2 class="sec">Ofertas da semana</h2>
-  <div class="dtabs" id="dtabs" role="tablist"></div>
-  <div class="deals" id="deals" aria-live="polite"></div>
-  <p class="meta" id="dmeta"></p>
-</section>
-
 <main class="wrap" id="noticias">
   <h2 class="sec">Todas as notícias</h2>
   <div class="tools" role="group" aria-label="Filtrar por categoria" id="chips"></div>
   <div class="cards" id="cards" aria-live="polite"></div>
 </main>
+
+<dialog id="dmodal" aria-labelledby="dtitle">
+  <div class="dhead">
+    <button class="close" id="dclose" type="button" aria-label="Fechar ofertas">✕</button>
+    <h2 id="dtitle">Ofertas da semana na Steam</h2>
+    <div class="dtabs" id="dtabs" role="tablist" aria-label="Loja"></div>
+  </div>
+  <div class="dbody">
+    <div class="deals" id="deals" aria-live="polite"></div>
+    <p class="meta" id="dmeta"></p>
+  </div>
+</dialog>
 
 <dialog id="modal" aria-label="Notícia">
   <button class="close" id="close" type="button" aria-label="Fechar">✕</button>
@@ -1038,23 +1051,50 @@ function render(){
   cards.className="cards";
   cards.innerHTML=list.map(function(n,i){return cardHtml(n,i,false,false)}).join("");
 }
-/* ===== ofertas da semana (dados em ofertas.json, atualizados pelo robô) ===== */
-var DEALS=null, dealTab="steam", DNAMES={steam:"Steam",playstation:"PlayStation",xbox:"Xbox"};
-var dtabs=document.getElementById("dtabs"), dealsEl=document.getElementById("deals"), dmeta=document.getElementById("dmeta");
+/* ===== ofertas da semana (dados em ofertas.json, atualizados pelo robô) — abrem num painel pelo menu lateral ===== */
+var DEALS=null, dealTab="steam", DNAMES={steam:"Steam"};
+var dtabs=document.getElementById("dtabs"), dealsEl=document.getElementById("deals"), dmeta=document.getElementById("dmeta"), dmodal=document.getElementById("dmodal");
+function dealImgs(d){
+  var l=[],id=+d.id||0;
+  if(typeof d.img==="string"&&/^https:\/\/\S+$/.test(d.img))l.push(d.img);
+  if(dealTab==="steam"&&id)l.push(
+    "https://cdn.akamai.steamstatic.com/steam/apps/"+id+"/header.jpg",
+    "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/"+id+"/header.jpg",
+    "https://cdn.cloudflare.steamstatic.com/steam/apps/"+id+"/header.jpg",
+    "https://cdn.akamai.steamstatic.com/steam/apps/"+id+"/capsule_616x353.jpg");
+  return l;
+}
+function initials(n){var w=String(n||"").replace(/[^\p{L}\p{N} ]/gu,"").split(/\s+/).filter(Boolean);return (w.slice(0,2).map(function(x){return x[0]}).join("")||"?").toUpperCase()}
+function dealImgHtml(d){
+  var l=dealImgs(d),ph=initials(d.name);
+  if(!l.length)return '<div class="dnoimg" aria-hidden="true">'+esc(ph)+'</div>';
+  return '<img src="'+esc(l[0])+'" data-next="'+esc(l.slice(1).join(" "))+'" data-ph="'+esc(ph)+'" alt="" loading="lazy" referrerpolicy="no-referrer">';
+}
+/* se uma imagem não existe, tenta a próxima; no fim, mostra um quadrado colorido com as iniciais */
+dealsEl.addEventListener("error",function(e){
+  var im=e.target;if(!im||im.tagName!=="IMG")return;
+  var nx=(im.getAttribute("data-next")||"").split(" ").filter(Boolean);
+  if(nx.length){im.setAttribute("data-next",nx.slice(1).join(" "));im.src=nx[0];return}
+  var ph=document.createElement("div");ph.className="dnoimg";ph.setAttribute("aria-hidden","true");ph.textContent=im.getAttribute("data-ph")||"?";im.replaceWith(ph);
+},true);
 function renderDeals(){
-  dtabs.innerHTML=Object.keys(DNAMES).map(function(k){return '<button type="button" class="chip" role="tab" data-deal="'+k+'" aria-pressed="'+(k===dealTab)+'">'+DNAMES[k]+'</button>'}).join("");
+  if(Object.keys(DNAMES).length<2){dtabs.style.display="none";dtabs.innerHTML=""}
+  else{dtabs.style.display="";dtabs.innerHTML=Object.keys(DNAMES).map(function(k){return '<button type="button" class="chip" role="tab" data-deal="'+k+'" aria-pressed="'+(k===dealTab)+'">'+DNAMES[k]+'</button>'}).join("")}
   var l=DEALS&&Array.isArray(DEALS[dealTab])?DEALS[dealTab]:[];
   if(!l.length){
-    dealsEl.innerHTML='<p class="soon">'+(dealTab==="steam"?"As ofertas da Steam aparecem aqui assim que a atualização automática rodar.":"As ofertas de "+DNAMES[dealTab]+" chegam em breve.")+'</p>';dmeta.textContent="";return;
+    dealsEl.innerHTML='<p class="soon">'+(DEALS?"Nenhuma oferta de "+DNAMES[dealTab]+" disponível no momento.":"As ofertas ainda não foram carregadas.")+'</p>';dmeta.textContent="";return;
   }
   dealsEl.innerHTML=l.map(function(d){
-    var id=+d.id||0,url=dealTab==="steam"?"https://store.steampowered.com/app/"+id+"/":safeUrl(d.url);
-    return '<a class="deal" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+(dealTab==="steam"?'<img src="https://cdn.akamai.steamstatic.com/steam/apps/'+id+'/header.jpg" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+'<div class="dx"><b>'+esc(d.name||"")+'</b><div class="dp"><span class="dd">-'+(+d.discount||0)+'%</span>'+(d.orig?'<s>'+esc(d.orig)+'</s>':'')+'<strong>'+esc(d.price||"")+'</strong></div></div></a>';
+    var id=+d.id||0,url=(dealTab==="steam"&&id)?"https://store.steampowered.com/app/"+id+"/":safeUrl(d.url);
+    return '<a class="deal" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+dealImgHtml(d)+'<div class="dx"><b>'+esc(d.name||"")+'</b><div class="dp"><span class="dd">-'+(+d.discount||0)+'%</span>'+(d.orig?'<s>'+esc(d.orig)+'</s>':'')+'<strong>'+esc(d.price||"")+'</strong></div></div></a>';
   }).join("");
-  dmeta.textContent=DEALS.updated?"Atualizado em "+fmt(String(DEALS.updated).slice(0,10))+". Preços e descontos podem mudar; confira na loja.":"";
+  dmeta.textContent=DEALS.updated?"Atualizado em "+fmt(String(DEALS.updated).slice(0,10)).replace(/\.$/,"")+". Preços e descontos podem mudar; confira na loja.":"";
 }
 function setDeal(k){if(DNAMES[k]){dealTab=k;renderDeals()}}
-dtabs.onclick=function(e){var b=e.target.closest("button");if(b){setDeal(b.dataset.deal);if(window.updateSide)window.updateSide()}};
+function openDeals(k){if(k)setDeal(k);if(!dmodal.open)dmodal.showModal()}
+dtabs.onclick=function(e){var b=e.target.closest("button");if(b)setDeal(b.dataset.deal)};
+document.getElementById("dclose").onclick=function(){dmodal.close()};
+dmodal.addEventListener("click",function(e){if(e.target===dmodal)dmodal.close()});
 renderDeals();
 try{fetch("ofertas.json",{cache:"no-cache"}).then(function(r){return r.ok?r.json():null}).then(function(d){if(d&&typeof d==="object"){DEALS=d;renderDeals()}}).catch(function(){})}catch(_){}
 var _pt;
@@ -1187,10 +1227,8 @@ refreshAll();
     var lab=esc(c==="Todas"?"Todas as notícias":c);
     h+='<button class="item" type="button" data-cat="'+esc(c)+'" title="'+lab+'">'+svg(CATICON[c]||"tag")+'<span class="lbl">'+lab+'</span><span class="n">'+fmtN(count(c))+'</span></button>';
   });
-  h+='<div class="grp">Ofertas da semana</div>';
-  [["steam","Steam","monitor"],["playstation","PlayStation","pad"],["xbox","Xbox","ticket"]].forEach(function(o){
-    h+='<button class="item" type="button" data-deal="'+o[0]+'" title="Ofertas da semana: '+o[1]+'">'+svg(o[2])+'<span class="lbl">'+o[1]+'</span></button>';
-  });
+  h+='<div class="grp">Ofertas</div>'
+   +'<button class="item" type="button" data-act="deals" title="Ofertas da semana na Steam">'+svg("tag")+'<span class="lbl">Ofertas da semana</span></button>';
   h+='<div class="grp">Ferramentas</div>'
    +'<button class="item" type="button" data-act="search" title="Buscar notícia">'+svg("search")+'<span class="lbl">Buscar</span></button>'
    +'<button class="item" type="button" data-act="theme" title="Alternar tema claro/escuro">'+svg("theme")+'<span class="lbl">Tema claro/escuro</span></button>'
@@ -1204,14 +1242,13 @@ refreshAll();
   var smooth=!matchMedia("(prefers-reduced-motion:reduce)").matches;
   function go(id){var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:smooth?"smooth":"auto",block:"start"})}
   function setCat(c){var b=[].filter.call(document.querySelectorAll("#chips .chip"),function(x){return x.textContent===c})[0];if(b)b.click()}
-  function section(){var s="topo";["ofertas","noticias"].forEach(function(id){var el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<=100)s=id});return s}
+  function section(){var s="topo";["noticias"].forEach(function(id){var el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<=100)s=id});return s}
   function update(){
     var s=section();
     items.forEach(function(it){
       var on=false;
       if(it.dataset.go)on=it.dataset.go===s;
       else if(it.dataset.cat)on=(s==="noticias"&&cat===it.dataset.cat);
-      else if(it.dataset.deal)on=(s==="ofertas"&&dealTab===it.dataset.deal);
       if(on)it.setAttribute("aria-current","true");else it.removeAttribute("aria-current");
     });
   }
@@ -1225,7 +1262,7 @@ refreshAll();
     var it=e.target.closest(".item,.brand");if(!it)return;
     if(it.dataset.go){e.preventDefault();go(it.dataset.go);closeMenu()}
     else if(it.dataset.cat){setCat(it.dataset.cat);go("noticias");closeMenu()}
-    else if(it.dataset.deal){setDeal(it.dataset.deal);go("ofertas");closeMenu();update()}
+    else if(it.dataset.act==="deals"){closeMenu();openDeals()}
     else if(it.dataset.act==="search"){closeMenu();go("noticias");setTimeout(function(){var q=document.querySelector(".search");if(q)q.focus({preventScroll:true})},smooth?450:0)}
     else if(it.dataset.act==="theme"){document.getElementById("theme").click()}
     else if(it.dataset.act==="admin"){closeMenu();if(location.hash==="#admin")dispatchEvent(new Event("hashchange"));else location.hash="admin"}
@@ -1474,7 +1511,7 @@ refreshAll();
     var t=c.querySelector("#a-toast");if(t)t.remove();
     var g=c.querySelector("#grid");if(g)["width","height","style"].forEach(function(k){g.removeAttribute(k)});
     var mb=c.querySelector("#mbtn");if(mb)mb.setAttribute("aria-expanded","false");
-    var m=c.querySelector("#modal");if(m)m.removeAttribute("open");
+    var m=c.querySelector("#modal");if(m)m.removeAttribute("open");var dm=c.querySelector("#dmodal");if(dm)dm.removeAttribute("open");
     var d=c.querySelector("#nz-data");d.textContent="\n"+jsonForHtml(DATA)+"\n";
     return "<!DOCTYPE html>\n"+c.outerHTML;
   }
