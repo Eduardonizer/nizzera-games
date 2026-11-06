@@ -50,8 +50,8 @@ function buildChips(){
 
 /* curtidas mostradas nos cards da lista (só leitura; curtir é na página da notícia) */
 var LIKES={},HEART='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>';
-function likeHtml(c){return c==null?"":HEART+c}   /* c==null: ainda não carregou */
-function likeLabel(c){return c==null?"":(c===1?"1 curtida":c+" curtidas")}
+function likeHtml(c){return c>0?HEART+c:""}   /* sem curtidas (ou ainda carregando): não mostra nada */
+function likeLabel(c){return c>0?(c===1?"1 curtida":c+" curtidas"):""}
 function loadLikes(list){
   var slugs=list.map(newsSlug);if(!slugs.length||!window.fetch)return;
   fetch("/api/likes?posts="+encodeURIComponent(slugs.join(",")),{cache:"no-store",credentials:"same-origin"}).then(function(r){return r.json()}).then(function(j){
