@@ -6,6 +6,14 @@
       "includeFiles": "api/_rascunho_ia.json"
     }
   },
+  "redirects": [
+    {
+      "source": "/:path(.*)",
+      "has": [{ "type": "host", "value": "nizzera-games.vercel.app" }],
+      "destination": "https://www.nizzeragames.com.br/:path",
+      "statusCode": 301
+    }
+  ],
   "rewrites": [
     {
       "source": "/admin",

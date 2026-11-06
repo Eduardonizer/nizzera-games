@@ -5,7 +5,7 @@
    A montagem fica salva no navegador, por tema. A imagem para compartilhar é desenhada no canvas. */
 (function(){
   var root=document.getElementById("tierlist");if(!root)return;
-  var SITE_URL="nizzera-games.vercel.app";
+  var SITE_URL="nizzeragames.com.br";
   /* faixas: letra e cor (as mesmas cores da paleta do site) */
   var TIERS=[["S","#ff5c7a"],["A","#ff8a3d"],["B","#ffd23f"],["C","#12b886"],["D","#4f7cff"]];
   var KEYS=TIERS.map(function(t){return t[0]});

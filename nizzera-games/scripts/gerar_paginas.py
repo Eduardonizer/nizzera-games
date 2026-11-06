@@ -31,7 +31,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from atualizar_noticias import assunto  # mesma regra de "assunto em alta" do robô e do site
 
 # ---------------- CONFIGURAÇÃO ----------------
-SITE_URL = "https://nizzera-games.vercel.app"   # sem barra no final; troque se tiver domínio próprio
+SITE_URL = "https://www.nizzeragames.com.br"   # sem barra no final (domínio próprio desde 2026-11)
 RELACIONADAS = 3                                # quantas "leia também" no fim de cada notícia
 NO_FEED = 30                                    # quantas notícias entram no feed RSS
 STEAM_PERFIL = ""                               # endereço do seu perfil na Steam (vazio = página Sobre sem o botão)
