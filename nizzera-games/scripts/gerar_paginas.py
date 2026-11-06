@@ -701,6 +701,10 @@ def pagina(n, todas, site, c, trend):
     # data com hora e fuso (o robô grava "pub"; notícias antigas ou do painel ficam às 9h de Brasília)
     publicado = n.get("pub") if re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}", str(n.get("pub") or "")) else (f"{data}T09:00:00-03:00" if data else "")
     fonte, link_fonte = n.get("src", ""), http(n.get("url", ""))
+    # matérias dos rascunhos com IA trazem todas as fontes usadas (painel admin, aba Rascunhos)
+    fontes = [(str(x.get("name") or "").strip(), http(x.get("url", ""))) for x in (n.get("sources") or []) if isinstance(x, dict)]
+    fontes = [(nm, u) for nm, u in fontes if nm and u]
+    tags = [str(t).strip() for t in (n.get("tags") or []) if str(t).strip()]
 
     ld_artigo = {
         "@context": "https://schema.org", "@type": "NewsArticle",
@@ -719,8 +723,12 @@ def pagina(n, todas, site, c, trend):
         ld_artigo["thumbnailUrl"] = foto
     if opiniao:  # o texto próprio do site, que o Google valoriza
         ld_artigo["abstract"] = opiniao
-    if link_fonte:
+    if fontes:
+        ld_artigo["isBasedOn"] = [u for _, u in fontes]
+    elif link_fonte:
         ld_artigo["isBasedOn"] = link_fonte
+    if tags:
+        ld_artigo["keywords"] = ", ".join(tags)
     ld_trilha = {
         "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": 1, "name": "Início", "item": SITE_URL + "/"},
@@ -740,6 +748,10 @@ def pagina(n, todas, site, c, trend):
         credito.append("Imagem: " + e(n["credit"]))
     bloco_fonte = (f'<p class="src">Leia a matéria completa em <a href="{e(link_fonte)}" target="_blank" rel="noopener">{e(fonte or link_fonte)}</a>.</p>'
                    if link_fonte else "")
+    if fontes:
+        bloco_fonte = ('<p class="src"><b>Fontes:</b> ' + ", ".join(
+            f'<a href="{e(u)}" target="_blank" rel="noopener">{e(nm)}</a>' for nm, u in fontes) + '.</p>')
+    nomes_fonte = ", ".join(nm for nm, _ in fontes) if fontes else fonte
 
     cab = meta_pagina(titulo_seo(titulo, nome), desc, url, nome, tipo="article", og_titulo=titulo, foto=foto) + f"""
 <meta property="article:published_time" content="{e(publicado)}">
@@ -755,10 +767,10 @@ def pagina(n, todas, site, c, trend):
     <span class="tags"><span class="tag">{e(n.get('cat'))}</span>{selo(n, trend)}</span>
     <h1>{e(titulo)}</h1>
     <p class="lead">{e(resumo)}</p>
-    <p class="meta"><time datetime="{e(data)}">{e(data_br(data))}</time> · {int(n.get('read') or 1)} min de leitura{(' · Fonte: ' + e(fonte)) if fonte else ''}</p>
+    <p class="meta"><time datetime="{e(data)}">{e(data_br(data))}</time> · {int(n.get('read') or 1)} min de leitura{((' · Fontes: ' if len(fontes) > 1 else ' · Fonte: ') + e(nomes_fonte)) if nomes_fonte else ''}</p>
     <figure>{arte(n, prioridade=True)}{('<figcaption>' + ' · '.join(credito) + '</figcaption>') if credito else ''}</figure>
     <div class="body">{paragrafos(n.get('body') or resumo)}</div>
-    {('<aside class="take" aria-label="Nossa opinião"><h2>Nossa opinião</h2>' + paragrafos(opiniao) + '</aside>') if opiniao else ''}
+    {('<aside class="take" aria-label="Na opinião do Nizzera"><h2>Na opinião do Nizzera</h2>' + paragrafos(opiniao) + '</aside>') if opiniao else ''}
     {bloco_fonte}
     <p class="share"><span>Link desta notícia:</span> <a href="{e(url)}">{e(url)}</a></p>
     <p class="likes"><button class="like" id="like" type="button" aria-pressed="false" data-post="{e(n['slug'])}" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span class="like-t">Curtir</span><b id="like-n"></b></button></p>

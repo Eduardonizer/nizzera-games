@@ -56,8 +56,10 @@ https://nizzera-games.vercel.app. Criado por Eduardo Nizer.
 
 ## Como funciona
 
-1. Uma vez por dia (07:23, horário de Brasília) o GitHub Actions busca notícias e ofertas, gera as páginas e faz commit.
-   Notícias com mais de 15 dias saem do site sozinhas (a página delas é apagada).
+1. Uma vez por dia (07:23, horário de Brasília) o GitHub Actions atualiza ofertas, jogos grátis e mais jogados,
+   gera as páginas e faz commit. Notícias com mais de 15 dias saem do site sozinhas (a página delas é apagada;
+   as 12 mais novas ficam sempre).
+   As notícias dos feeds **não entram mais direto no site**: viram rascunhos (veja "Rascunhos com IA" abaixo).
 2. Quando você publica pelo painel admin, o mesmo robô roda na hora e gera as páginas novas.
 3. A Vercel publica a pasta `nizzera-games/SITE` a cada commit.
 
@@ -67,6 +69,25 @@ O menu lateral, o rodapé e o chat das páginas internas são copiados do `index
 
 **Toda notícia precisa de foto.** O robô pula notícias sem imagem, e o painel e o servidor
 recusam salvar notícia sem foto.
+
+## Rascunhos com IA
+
+Todo dia às 03:40 (Brasília) o workflow `.github/workflows/rascunhos-ia.yml` roda `scripts/rascunhos_ia.py`:
+
+1. lê os feeds de `scripts/atualizar_noticias.py` e, para cada notícia nova, procura a mesma notícia nos
+   outros feeds (até 3 fontes; com uma só, gera mesmo assim);
+2. pede ao Google Gemini (modelo em `MODELO`, no topo do script) uma matéria original que combine as fontes.
+   O texto do pedido (tom, tamanho, regras de fatos) fica em `SITE/api/_rascunho_ia.json`;
+3. grava o rascunho no Upstash Redis (o mesmo banco dos comentários). Nada vai para o site sozinho.
+
+No painel, aba **Rascunhos**: edite título, subtítulo, texto e o bloco **Na opinião do Nizzera**, e clique em
+**Publicar** (vira notícia normal, com "Fontes:" no fim), **Descartar** ou **Gerar de novo**.
+Limites do plano grátis: no máximo `MAX_POR_EXECUCAO` (10) por dia, com pausa entre as chamadas.
+Teste sem gastar nada: `python nizzera-games/scripts/rascunhos_ia.py --teste` (mostra o que seria gerado).
+Para voltar ao modo antigo (notícia dos feeds direto no site): `PUBLICAR_DIRETO = True` em `atualizar_noticias.py`.
+
+Secrets no GitHub (Settings → Secrets and variables → Actions → New repository secret):
+`GEMINI_API_KEY`, `UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN` (copie os dois da Vercel).
 
 ## Reviews
 
@@ -116,6 +137,7 @@ Variáveis na Vercel (Settings → Environment Variables), depois faça um novo 
 | `GITHUB_BRANCH` | opcional, padrão `main` |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | comentários, curtidas e votação do GOTY (Vercel → Storage → Upstash Redis). `KV_REST_API_URL`/`KV_REST_API_TOKEN` também servem |
 | `RESEND_API_KEY` | envio da caixa "Fale com a gente" (resend.com) |
+| `GEMINI_API_KEY` | botão "Gerar de novo" da aba Rascunhos (aistudio.google.com/apikey). Os rascunhos diários usam o secret do GitHub |
 | `CONTACT_TO` / `CONTACT_FROM` | opcionais: quem recebe e quem envia o e-mail |
 
 **E-mail da caixa "Fale com a gente" (Resend):**

@@ -1,5 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/drafts.mjs": {
+      "maxDuration": 60,
+      "includeFiles": "api/_rascunho_ia.json"
+    }
+  },
   "rewrites": [
     {
       "source": "/admin",

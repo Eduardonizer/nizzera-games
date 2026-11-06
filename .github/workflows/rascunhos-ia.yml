@@ -1,0 +1,42 @@
+name: Rascunhos de matérias com IA
+
+# Todo dia de madrugada: lê os feeds de notícias, junta a mesma notícia de até 3 sites e pede ao
+# Google Gemini uma matéria original. Os rascunhos vão para o banco (Upstash Redis) e aparecem no
+# painel admin, aba "Rascunhos". Nada é publicado sozinho e nada é gravado no repositório.
+#
+# Secrets necessários (GitHub > Settings > Secrets and variables > Actions > New repository secret):
+#   GEMINI_API_KEY            chave da API do Gemini (aistudio.google.com/apikey)
+#   UPSTASH_REDIS_REST_URL    copie da Vercel (Settings > Environment Variables; pode estar como KV_REST_API_URL)
+#   UPSTASH_REDIS_REST_TOKEN  copie da Vercel (pode estar como KV_REST_API_TOKEN)
+
+on:
+  schedule:
+    - cron: "40 6 * * *"   # 1 vez por dia, às 06:40 UTC = 03:40 em Brasília (hora de Brasília + 3 = UTC)
+  workflow_dispatch:       # rodar na mão: aba Actions > Rascunhos de matérias com IA > Run workflow
+
+permissions:
+  contents: read           # só lê o repositório (as notícias publicadas, para não repetir)
+
+concurrency:
+  group: rascunhos-ia
+  cancel-in-progress: false
+
+jobs:
+  rascunhos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Gerar rascunhos com o Gemini
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+        run: python nizzera-games/scripts/rascunhos_ia.py

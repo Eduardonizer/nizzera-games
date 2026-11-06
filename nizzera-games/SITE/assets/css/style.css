@@ -596,7 +596,7 @@ html{-webkit-tap-highlight-color:transparent}
   .rv-ficha{grid-column:1/-1;grid-template-columns:1fr 1fr;gap:10px 14px}
 }
 
-/* "Nossa opinião": texto próprio do site no fim da notícia (scripts/gerar_paginas.py) */
+/* "Na opinião do Nizzera": texto próprio do site no fim da notícia (scripts/gerar_paginas.py) */
 .post .take{margin:26px 0 0;padding:16px 20px 6px;border-radius:16px;background:var(--card);border-left:6px solid var(--cobalt);box-shadow:4px 4px 0 var(--sun)}
 .post .take h2{font-size:1.15rem;margin:0 0 8px;display:flex;align-items:center;gap:8px}
 .post .take h2::before{content:"";width:10px;height:10px;background:var(--sun);box-shadow:3px 3px 0 var(--coral)}
