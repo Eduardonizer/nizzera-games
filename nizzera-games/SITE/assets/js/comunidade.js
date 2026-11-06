@@ -9,8 +9,8 @@
 
   /* ---------- comentários (página /comentarios/ e abaixo de cada notícia) ---------- */
   if($("fb-form"))(function(){
-  var list=$("cmlist"),form=$("fb-form"),fmsg=$("fb-msg"),fname=$("fb-name"),fst=$("fb-status"),fsend=$("fb-send"),fcount=$("fb-count"),more=$("cm-more"),stat=$("cm-stat");
-  var ITEMS=[],SHOWN=10,PER=10,fresh="";
+  var list=$("cmlist"),form=$("fb-form"),fmsg=$("fb-msg"),fname=$("fb-name"),fst=$("fb-status"),fsend=$("fb-send"),fcount=$("fb-count"),pager=$("cm-pager"),stat=$("cm-stat");
+  var ITEMS=[],PER=4,page=1,fresh=""; /* PER: comentários por página */
   /* na página de uma notícia o formulário traz data-post: os comentários ficam ligados a ela */
   var POST=form.getAttribute("data-post")||"",PTITLE=form.getAttribute("data-title")||"";
   var COLORS=["#2433f0","#ff5c7a","#12b886","#9b5cff","#ff8a3d","#0e8fb8"];
@@ -33,18 +33,39 @@
   function draw(){
     list.setAttribute("aria-busy","false");
     stat.textContent=ITEMS.length?(ITEMS.length===1?"1 comentário":ITEMS.length+" comentários"):"";
-    if(!ITEMS.length){list.innerHTML='<div class="cm-empty"><b>Ainda não há comentários.</b><span>'+(POST?"Seja a primeira pessoa a comentar esta notícia!":"Seja a primeira pessoa a escrever!")+'</span></div>';more.hidden=true;return}
-    list.innerHTML=ITEMS.slice(0,SHOWN).map(item).join("");
-    more.hidden=ITEMS.length<=SHOWN;
-    more.textContent="Ver mais comentários ("+(ITEMS.length-SHOWN)+")";
+    var pages=Math.max(1,Math.ceil(ITEMS.length/PER));if(page>pages)page=pages;if(page<1)page=1;
+    if(!ITEMS.length){list.innerHTML='<div class="cm-empty"><b>Ainda não há comentários.</b><span>'+(POST?"Seja a primeira pessoa a comentar"+(/^review-/.test(POST)?" esta review!":" esta notícia!"):"Seja a primeira pessoa a escrever!")+'</span></div>';drawPager(1);return}
+    list.innerHTML=ITEMS.slice((page-1)*PER,page*PER).map(item).join("");
+    drawPager(pages);
   }
-  function unavailable(){list.setAttribute("aria-busy","false");list.innerHTML='<div class="cm-empty"><b>Os comentários não estão disponíveis agora.</b><span>Tente de novo em alguns minutos.</span></div>'}
+  /* paginação: 1 … 4 5 6 … 20, com Anterior/Próxima (o mesmo visual da lista de notícias) */
+  function pageList(c,t){
+    var out=[],last=0;
+    for(var i=1;i<=t;i++){if(i===1||i===t||Math.abs(i-c)<=1||(c<=3&&i<=4)||(c>=t-2&&i>=t-3)){if(last&&i-last>1)out.push(0);out.push(i);last=i}}
+    return out;
+  }
+  function pgBtn(p,label,cls,aria,cur){return '<button type="button" class="pg'+(cls?" "+cls:"")+'" data-pg="'+p+'" aria-label="'+aria+'"'+(cur?' aria-current="page"':"")+'>'+label+'</button>'}
+  function drawPager(pages){
+    if(!pager)return;
+    if(pages<2){pager.innerHTML="";pager.hidden=true;return}
+    var h=page>1?pgBtn(page-1,"← Anterior","nav","Página anterior dos comentários"):'<span class="pg nav" aria-disabled="true">← Anterior</span>';
+    pageList(page,pages).forEach(function(p){h+=p?pgBtn(p,p,"","Página "+p+" dos comentários",p===page):'<span class="pg gap" aria-hidden="true">…</span>'});
+    h+=page<pages?pgBtn(page+1,"Próxima →","nav","Próxima página dos comentários"):'<span class="pg nav" aria-disabled="true">Próxima →</span>';
+    pager.innerHTML=h;pager.hidden=false;
+  }
+  function unavailable(){list.setAttribute("aria-busy","false");drawPager(1);list.innerHTML='<div class="cm-empty"><b>Os comentários não estão disponíveis agora.</b><span>Tente de novo em alguns minutos.</span></div>'}
   function load(){
     return jreq("GET","/api/comments"+(POST?"?post="+encodeURIComponent(POST):"")).then(function(j){
       if(j.ok&&Array.isArray(j.items)){ITEMS=j.items;draw()}else unavailable();
     },unavailable);
   }
-  more.addEventListener("click",function(){SHOWN+=PER;draw()});
+  if(pager)pager.addEventListener("click",function(e){
+    var b=e.target.closest("button[data-pg]");if(!b)return;
+    page=+b.getAttribute("data-pg");draw();
+    /* volta para o começo da lista se ele saiu da tela */
+    var top=list.getBoundingClientRect().top;if(top<0||top>innerHeight*.6)list.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth",block:"start"});
+    var cur=pager.querySelector('[aria-current="page"]');if(cur)cur.focus({preventScroll:true});
+  });
   fmsg.addEventListener("input",function(){fcount.textContent=fmsg.value.length+"/500";fcount.classList.toggle("warn",fmsg.value.length>450)});
   fmsg.addEventListener("keydown",function(e){if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();if(form.requestSubmit)form.requestSubmit();else fsend.click()}});
   form.addEventListener("submit",function(e){
@@ -55,7 +76,7 @@
     jreq("POST","/api/comments",{name:fname.value.trim(),msg:msg,hp:$("fb-hp").value,post:POST||undefined,title:POST?PTITLE:undefined}).then(function(r){
       fsend.disabled=false;
       if(r.ok){
-        fmsg.value="";fcount.textContent="0/500";say(fst,"Obrigado! Seu comentário foi publicado.","ok");fresh=r.id||"";
+        fmsg.value="";fcount.textContent="0/500";say(fst,"Obrigado! Seu comentário foi publicado.","ok");fresh=r.id||"";page=1; /* o comentário novo aparece na 1ª página */
         load().then(function(){var n=list.querySelector(".cm-item.new");if(n&&innerWidth<900)n.scrollIntoView({behavior:"smooth",block:"center"})});
       }
       else if(r.status===429)say(fst,"Muitos comentários em pouco tempo. Tente de novo em alguns minutos.","err");

@@ -274,7 +274,7 @@ def pagina_comentarios(c, site):
       <div class="cm-list" id="cmlist" aria-live="polite" aria-busy="true">
         <div class="cm-skel"></div><div class="cm-skel"></div><div class="cm-skel"></div>
       </div>
-      <button class="cm-more" id="cm-more" type="button" hidden>Ver mais comentários</button>
+      <nav class="cm-pager" id="cm-pager" aria-label="Páginas dos comentários" hidden></nav>
     </section>
   </div>
 </main>"""
@@ -390,7 +390,9 @@ def pagina_review(r, c, site, noticias):
     {('<section class="rv-sec rv-public"><h2>O que o público está achando</h2><div class="body">' + paragrafos(r["public"]) + '</div></section>') if r.get("public") else ''}
     {('<section class="rv-sec"><h2>Fontes</h2><ul class="rv-src">' + fontes + '</ul></section>') if fontes else ''}
     <p class="share"><span>Link desta review:</span> <a href="{e(url)}">{e(url)}</a></p>
+    <p class="likes"><button class="like" id="like" type="button" aria-pressed="false" data-post="review-{e(rv_slug(r))}" data-what="esta review" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span class="like-t">Curtir</span><b id="like-n"></b></button></p>
   </article>
+  {comentarios_bloco("review-" + rv_slug(r), "Review: " + jogo, "O que você achou de " + jogo + "? Concorda com a nota?")}
   {('<section class="related" aria-label="Notícias sobre o jogo"><h2 class="sec">Notícias sobre o jogo</h2><div class="cards">' + ''.join(card(x) for x in rel) + '</div></section>') if rel else ''}
 </main>"""
     return layout(c, nome, cab, corpo, '<script src="/assets/js/artigo.js"></script>\n')
@@ -507,21 +509,26 @@ def pagina(n, todas, site, c, trend):
 
 
 def comentarios_noticia(n, titulo):
-    """Comentários abaixo da notícia (usa o mesmo formulário e script da página /comentarios/)."""
+    return comentarios_bloco(n["slug"], titulo, "O que você achou dessa notícia?")
+
+
+def comentarios_bloco(chave, titulo, dica):
+    """Comentários abaixo de uma notícia ou review (mesmo formulário e script da página /comentarios/).
+    chave: o slug da notícia, ou "review-" + slug da review (assim nunca se misturam)."""
     return f"""<section class="post-cm" id="comentarios" aria-labelledby="cm-list-t">
     <header class="cm-head"><h2 class="cm-title" id="cm-list-t">Comentários</h2><p class="cm-stat" id="cm-stat" aria-live="polite"></p></header>
-    <form class="cm-form" id="fb-form" data-post="{e(n['slug'])}" data-title="{e(titulo)}" novalidate>
+    <form class="cm-form" id="fb-form" data-post="{e(chave)}" data-title="{e(titulo)}" novalidate>
       <label for="fb-name">Seu nome <small>(opcional)</small></label>
       <input class="fb-in" id="fb-name" maxlength="40" autocomplete="nickname" placeholder="Como você quer aparecer">
       <label for="fb-msg">Comentário</label>
-      <textarea class="fb-in" id="fb-msg" maxlength="500" rows="4" placeholder="O que você achou dessa notícia?"></textarea>
+      <textarea class="fb-in" id="fb-msg" maxlength="500" rows="4" placeholder="{e(dica)}"></textarea>
       <div class="hp" aria-hidden="true"><label>Não preencha este campo<input id="fb-hp" tabindex="-1" autocomplete="off"></label></div>
       <div class="fb-row"><span class="fb-count" id="fb-count">0/500</span><button class="fb-btn" id="fb-send" type="submit">Publicar comentário</button></div>
       <div class="fb-status" id="fb-status" role="status"></div>
       <p class="cm-note">Seja respeitoso: ofensas e spam são removidos. Links não são permitidos.</p>
     </form>
     <div class="cm-list" id="cmlist" aria-live="polite" aria-busy="true"><div class="cm-skel"></div></div>
-    <button class="cm-more" id="cm-more" type="button" hidden>Ver mais comentários</button>
+    <nav class="cm-pager" id="cm-pager" aria-label="Páginas dos comentários" hidden></nav>
   </section>"""
 
 

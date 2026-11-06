@@ -6,8 +6,10 @@
 //   DELETE /api/comments?id=XXXX      -> remove um comentário — exige login de admin
 //
 // Guarda os dados no Upstash Redis (Vercel → Storage). Veja api/_redis.mjs.
+// Palavras ofensivas: veja api/_filtro.mjs (recusa no envio e esconde da lista pública).
 import { randomBytes } from "node:crypto";
 import { redis, redisReady, tooMany, readBody, sameOrigin, POST_OK } from "./_redis.mjs";
+import { ofensivo } from "./_filtro.mjs";
 
 const KEY = "nz:comments";
 const MAX_STORED = 2000;
@@ -65,9 +67,10 @@ export default async function handler(req, res) {
       const post = String((req.query && req.query.post) || "");
       if (post && !POST_OK.test(post)) return res.status(400).json({ ok: false, error: "Notícia inválida." });
       const items = await readAll();
-      if (all) return res.status(200).json({ ok: true, items: items.slice(0, 500) });
-      // sem ?post= mostra só os comentários gerais; com ?post= só os daquela notícia
-      const pub = items.filter((c) => c.post === post).map(({ title, ...c }) => c);
+      if (all) return res.status(200).json({ ok: true, items: items.slice(0, 500).map((c) => (ofensivo(c.name, c.msg) ? { ...c, blocked: true } : c)) });
+      // sem ?post= mostra só os comentários gerais; com ?post= só os daquela notícia.
+      // os que caem no filtro (ex.: palavra adicionada depois) não aparecem para o público
+      const pub = items.filter((c) => c.post === post && !ofensivo(c.name, c.msg)).map(({ title, ...c }) => c);
       return res.status(200).json({ ok: true, items: pub.slice(0, post ? 300 : 100) });
     }
 
@@ -79,6 +82,9 @@ export default async function handler(req, res) {
       if (msg.length < 3) return res.status(400).json({ ok: false, error: "Escreva pelo menos algumas palavras." });
       if (/https?:\/\/|www\./i.test(msg) || /https?:\/\/|www\./i.test(name)) {
         return res.status(400).json({ ok: false, error: "Por segurança, comentários não podem ter links." });
+      }
+      if (ofensivo(name, msg)) {
+        return res.status(400).json({ ok: false, error: "Seu comentário tem palavras ofensivas e não foi publicado. Reescreva sem xingamentos ou preconceito." });
       }
       if (await tooMany(req, "cm", 3, 600)) {
         return res.status(429).json({ ok: false, error: "Muitos comentários em pouco tempo. Tente de novo em alguns minutos." });

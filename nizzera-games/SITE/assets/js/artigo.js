@@ -18,11 +18,11 @@ fillArt();
 /* botão de curtir: aparece só quando o servidor responde (cada visitante curte uma vez; clicar de novo desfaz) */
 (function(){
   var b=document.getElementById("like");if(!b||!window.fetch)return;
-  var post=b.getAttribute("data-post"),n=document.getElementById("like-n"),t=b.querySelector(".like-t"),busy=false;
+  var post=b.getAttribute("data-post"),what=b.getAttribute("data-what")||"esta notícia",n=document.getElementById("like-n"),t=b.querySelector(".like-t"),busy=false;
   function show(j){
     b.hidden=false;b.setAttribute("aria-pressed",j.liked?"true":"false");b.classList.toggle("on",!!j.liked);
     t.textContent=j.liked?"Curtido":"Curtir";n.textContent=j.count>0?String(j.count):"";
-    b.setAttribute("aria-label",(j.liked?"Você curtiu esta notícia":"Curtir esta notícia")+(j.count>0?" ("+j.count+(j.count===1?" curtida)":" curtidas)"):""));
+    b.setAttribute("aria-label",(j.liked?"Você curtiu "+what:"Curtir "+what)+(j.count>0?" ("+j.count+(j.count===1?" curtida)":" curtidas)"):""));
   }
   function req(method,body){
     return fetch("/api/likes"+(method==="GET"?"?post="+encodeURIComponent(post):""),{method:method,credentials:"same-origin",cache:"no-store",

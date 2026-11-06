@@ -234,7 +234,8 @@ dialog .mlink{margin:18px 0 0}
 .ssr-more{width:100%;margin:0;padding-left:20px;display:grid;gap:6px;line-height:1.4}
 .ssr-more .meta{font-size:.8rem}
 .pg{min-width:44px;height:44px;padding:0 14px;display:inline-grid;place-items:center;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--fg);font:700 .95rem "DM Sans",sans-serif;text-decoration:none;transition:border-color .2s,transform .2s,box-shadow .2s}
-a.pg:hover{border-color:var(--cobalt);transform:translateY(-2px);box-shadow:3px 3px 0 var(--sun)}
+a.pg:hover,button.pg:hover{border-color:var(--cobalt);transform:translateY(-2px);box-shadow:3px 3px 0 var(--sun)}
+button.pg{cursor:pointer}
 .pg[aria-current="page"]{background:var(--cobalt);border-color:var(--cobalt);color:#fff;box-shadow:3px 3px 0 var(--sun)}
 .pg[aria-disabled="true"]{opacity:.4}
 .pg.gap{border-color:transparent;background:transparent;min-width:24px;padding:0}
@@ -342,6 +343,8 @@ a.feat{display:block;text-decoration:none}
 .cm-more{margin:16px auto 0;display:block;border:2px solid var(--line);background:var(--card);color:var(--fg);border-radius:99px;padding:10px 22px;font:700 .95rem "DM Sans",sans-serif;cursor:pointer}
 .cm-more:hover{border-color:var(--cobalt)}
 .cm-more[hidden]{display:none}
+.cm-pager{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;margin:16px 0 0}
+.cm-pager[hidden]{display:none}
 @media (max-width:899px){.cm-grid{grid-template-columns:1fr}.cm-side{position:static}}
 
 /* ===== reviews ===== */

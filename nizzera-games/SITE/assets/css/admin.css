@@ -72,6 +72,7 @@ a.a-btn{display:inline-flex;align-items:center;text-decoration:none}
 .a-cm+.a-cm{margin-top:10px}
 .a-cm-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .a-cm-top small{color:var(--muted)}
+.a-flag{background:#ffe0e6;color:#b3243f;font-size:.78rem;font-weight:700;border-radius:99px;padding:2px 10px}
 .a-cm p{margin:6px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
 .a-svc{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px}
 .a-svc li{display:grid;gap:2px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
