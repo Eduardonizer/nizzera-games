@@ -17,6 +17,7 @@
     ext:'<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5"/>',
     out:'<path d="M15 4h4a1 1 0 011 1v14a1 1 0 01-1 1h-4M10 8l-4 4 4 4M6 12h10"/>',
     back:'<path d="M15 6l-6 6 6 6"/>',
+    tiers:'<rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="13" height="4" rx="1"/><rect x="3" y="16" width="8" height="4" rx="1"/>',
     trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'
   };
   function svg(n){return '<svg viewBox="0 0 24 24" aria-hidden="true">'+IC[n]+'</svg>'}
@@ -101,7 +102,7 @@
 
   /* ---- estrutura ---- */
   /* abas: [id, ícone, nome, nome curto (barra do celular)] */
-  var TABS=[["home","home","Início"],["news","news","Notícias"],["rv","star","Reviews"],["cm","chat","Comentários","Coment."],["site","gear","Site e categorias","Site"],["back","upload","Publicar e backup","Publicar"]];
+  var TABS=[["home","home","Início"],["news","news","Notícias"],["rv","star","Reviews"],["tl","tiers","Tier List","Tier"],["cm","chat","Comentários","Coment."],["site","gear","Site e categorias","Site"],["back","upload","Publicar e backup","Publicar"]];
   function shell(){
     adm.innerHTML='<header class="a-top"><span class="a-logo" aria-hidden="true"></span><strong class="a-title">Painel</strong><span class="a-chip" id="a-status"></span><span class="a-sp"></span>'
       +'<button class="a-ico" type="button" id="a-bell" aria-label="Notificações" title="Notificações">'+svg("bell")+'<b class="a-badge" data-badge hidden></b></button>'
@@ -113,11 +114,11 @@
     status();badge();ntStart();
   }
   function tab(n){
-    if(n!==st.tab){if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;st.dirty=false;st.draft=null;st.sel=null;st.isNew=false;st.rvDraft=null;st.rvSel=null;st.rvNew=false}
+    if(n!==st.tab){if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;st.dirty=false;st.draft=null;st.sel=null;st.isNew=false;st.rvDraft=null;st.rvSel=null;st.rvNew=false;st.tlDraft=null;st.tlSel=null;st.tlNew=false}
     st.tab=n;
     [].forEach.call(adm.querySelectorAll(".a-tab"),function(b){b.setAttribute("aria-selected",b.dataset.tab===n)});
     var body=$("#a-body");if(body)body.scrollTop=0;
-    ({home:homeView,news:newsView,rv:rvView,cm:cmView,site:siteView,back:backView})[n]();
+    ({home:homeView,news:newsView,rv:rvView,tl:tlView,cm:cmView,site:siteView,back:backView})[n]();
     if(n==="back")svcView();
   }
 
@@ -258,6 +259,7 @@
     if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;
     st.dirty=false;
     if(k==="news"){st.draft=null;st.sel=null;st.isNew=false;items();editor()}
+    else if(k==="tl"){st.tlDraft=null;st.tlSel=null;st.tlNew=false;tlItems();tlEditor()}
     else{st.rvDraft=null;st.rvSel=null;st.rvNew=false;rvItems();rvEditor()}
     toTop();
   }
@@ -438,6 +440,104 @@
     var id=rvList().reduce(function(m,r){return Math.max(m,+r.id||0)},0)+1;
     st.rvDraft={id:id,slug:"",game:"",title:"",verdict:"",img:"",alt:"",credit:"",platforms:"",release:"",dev:"",genre:"",score:0,scoreMax:100,scoreLabel:"Metacritic (média da crítica)",myScore:"",critics:[],synopsis:"",changes:[],pros:[],cons:[],public:"",sources:[],date:today()};
     rvItems();rvEditor();toTop();var f=$("#r-game");if(f)f.focus({preventScroll:true});
+  }
+
+  /* ---- aba Tier List: temas em data/tierlists/<slug>.json (gravados no GitHub por /api/tierlist) ---- */
+  var TL={themes:null,err:""};
+  function tlView(){
+    $("#a-body").innerHTML='<div class="a-news"><aside class="a-list" aria-label="Lista de temas"><div class="a-lhead"><button class="a-btn pri" type="button" id="tl-new">+ Novo tema</button></div><div class="a-items" id="tl-items"></div></aside><section id="tl-edit"></section></div>';
+    tlItems();tlEditor();
+    if(!TL.themes)tlLoad();
+  }
+  function tlLoad(){
+    fetch("/data/tierlists/index.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+      TL.themes=Array.isArray(d.themes)?d.themes:[];TL.err="";if(st.tab==="tl")tlItems();
+    },function(){TL.themes=[];TL.err="Não consegui carregar a lista de temas.";if(st.tab==="tl")tlItems()});
+  }
+  function tlItems(){
+    var box=$("#tl-items");if(!box)return;
+    if(!TL.themes){box.innerHTML='<p class="a-hint">Carregando…</p>';return}
+    box.innerHTML=(TL.err?'<p class="a-err">'+esc(TL.err)+'</p>':"")+(TL.themes.map(function(t){
+      var c=(t.covers||[])[0];
+      return '<div class="a-rowi'+(t.slug===st.tlSel?" on":"")+'"><div class="a-th">'+(/^\/assets\/tierlist\/[a-z0-9._-]+$/.test(c||"")?'<img src="'+esc(c)+'" alt="" loading="lazy">':"")+'</div><button type="button" class="a-pick" data-tlpick="'+esc(t.slug)+'"><b>'+esc(t.title)+'</b><small>'+(+t.count||0)+' jogos · /tierlist/?tema='+esc(t.slug)+'</small></button><span></span></div>';
+    }).join("")||'<p class="a-hint">Nenhum tema ainda.</p>');
+  }
+  function tlLines(games){return (games||[]).map(function(g){return g.name+(g.appid?" | "+g.appid:g.src?" | "+g.src:"")}).join("\n")}
+  function tlEditor(){
+    var box=$("#tl-edit"),t=st.tlDraft;if(!box)return;
+    editing(!!t);
+    if(!t){box.innerHTML='<div class="a-card a-ph"><h2>Temas da Tier List</h2><p>Escolha um tema na lista ao lado ou crie um novo. Cada tema é uma lista de jogos que os visitantes arrastam para as faixas S, A, B, C e D na página <a href="/tierlist/" target="_blank" rel="noopener">/tierlist/</a>.</p></div>';return}
+    box.innerHTML='<form id="tl-form" class="a-card" novalidate>'+backBtn("tl")+'<h2>'+(st.tlNew?"Novo tema":"Editar tema")+'</h2>'
+      +fld("Título (ex.: Jogos do GTA)","tl-title",t.title)
+      +'<div class="a-row2"><div>'+fld("Endereço (só letras minúsculas, números e hífen)","tl-slug",t.slug)+'</div><div>'+fld("Posição no seletor (opcional; menor aparece primeiro)","tl-order",t.order,"number")+'</div></div>'
+      +fld("Descrição curta (aparece no card do tema)","tl-desc",t.description)
+      +area("Jogos: um por linha, no formato  Nome | AppID da Steam","tl-games",t.lines,12)
+      +'<p class="a-hint">O AppID é o número do endereço do jogo na loja da Steam: em store.steampowered.com/app/<b>271590</b>/… o AppID é 271590 (pode colar o endereço inteiro no lugar do número). Jogo fora da Steam: use  Nome | link https de uma imagem. Depois de salvar, o robô do GitHub baixa as capas e o tema aparece no site em 1 a 2 minutos.</p>'
+      +'<div class="a-err" id="tl-err" role="alert"></div><div class="a-act a-save"><button class="a-btn pri" type="submit" id="tl-save">Salvar tema</button><button type="button" class="a-btn" id="tl-disc">Descartar</button>'
+      +(st.tlNew?"":'<a class="a-btn" href="/tierlist/?tema='+esc(t.slug)+'" target="_blank" rel="noopener">Ver página ↗</a><button type="button" class="a-btn dan" id="tl-del">Excluir</button>')+'</div></form>';
+    var sl=$("#tl-slug");if(sl&&!st.tlNew)sl.readOnly=true;
+  }
+  function tlPick(slug){
+    if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;
+    st.dirty=false;st.tlNew=false;st.tlSel=slug;st.tlDraft=null;tlItems();
+    var box=$("#tl-edit");if(box)box.innerHTML='<div class="a-card"><p class="a-hint">Carregando o tema…</p></div>';
+    fetch("/data/tierlists/"+encodeURIComponent(slug)+".json",{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+      if(st.tlSel!==slug)return;
+      st.tlDraft={slug:slug,title:d.title||"",description:d.description||"",order:d.order||"",lines:tlLines(d.games)};tlEditor();toTop();
+    },function(){if(box)box.innerHTML='<div class="a-card"><p class="a-err">Não consegui carregar esse tema. Se ele acabou de ser criado, espere o site atualizar (1 a 2 minutos).</p></div>'});
+  }
+  function tlNew(){
+    if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;
+    st.dirty=false;st.tlNew=true;st.tlSel=null;st.tlDraft={slug:"",title:"",description:"",order:"",lines:""};
+    tlItems();tlEditor();toTop();var f=$("#tl-title");if(f)f.focus({preventScroll:true});
+  }
+  /* lê o formulário; devolve o tema no formato do JSON ou uma mensagem de erro */
+  function tlRead(){
+    var g=function(i){return $(i).value.trim()},t=st.tlDraft;
+    t.title=g("#tl-title");t.slug=g("#tl-slug");t.description=g("#tl-desc");t.order=g("#tl-order");t.lines=$("#tl-games").value;
+    var games=[],bad="";
+    parseLines(t.lines).forEach(function(l,i){
+      var p=l.split("|").map(trimS),name=p[0],v=p.slice(1).join("|").trim(),m;
+      if(!v&&/^(\d+|https?:\/\/store\.steampowered\.com\/app\/\d+.*)$/.test(name)){v=name;name=""} /* linha só com o AppID ou o endereço da loja */
+      if((m=/store\.steampowered\.com\/app\/(\d+)/.exec(v)))v=m[1];   /* colou o endereço da loja */
+      var o={name:name};
+      if(/^\d+$/.test(v))o.appid=+v;else if(/^https:\/\//i.test(v))o.src=v;
+      else if(v){bad=bad||"Linha "+(i+1)+": depois da barra vai o AppID (número) ou um link https da imagem.";return}
+      if(!o.appid&&!o.src&&!bad)bad="Linha "+(i+1)+" (“"+name+"”): falta o AppID da Steam ou o link da imagem.";
+      games.push(o);
+    });
+    if(!t.title)return {err:"Escreva o título do tema.",f:"#tl-title"};
+    if(!/^[a-z0-9-]{2,60}$/.test(t.slug))return {err:"O endereço precisa ter de 2 a 60 caracteres: letras minúsculas, números e hífen.",f:"#tl-slug"};
+    if(bad)return {err:bad,f:"#tl-games"};
+    if(games.length<2)return {err:"Coloque pelo menos 2 jogos.",f:"#tl-games"};
+    var th={slug:t.slug,title:t.title,description:t.description,games:games};if(+t.order>0)th.order=+t.order;
+    return {theme:th};
+  }
+  function tlSave(){
+    if(!st.tlDraft)return;var r=tlRead(),err=$("#tl-err"),btn=$("#tl-save");err.textContent="";
+    if(r.err){err.textContent=r.err;var f=$(r.f);if(f)f.focus();return}
+    btn.disabled=true;btn.textContent="Salvando…";
+    api("POST","/api/tierlist",{action:"save",theme:r.theme,isNew:st.tlNew}).then(function(x){
+      btn.disabled=false;btn.textContent="Salvar tema";
+      if(x.ok){
+        if(Array.isArray(x.themes))TL.themes=x.themes;
+        st.dirty=false;st.tlNew=false;st.tlSel=x.theme.slug;
+        st.tlDraft={slug:x.theme.slug,title:x.theme.title,description:x.theme.description,order:x.theme.order||"",lines:tlLines(x.theme.games)};
+        tlItems();tlEditor();toast("Tema salvo! Aparece no site em 1 a 2 minutos, com as capas.");
+      }
+      else if(x.status===401){authOk=false;toast("Sua sessão expirou. Entre de novo.",true);paint()}
+      else err.textContent=x.error||"Não consegui salvar.";
+    },function(){btn.disabled=false;btn.textContent="Salvar tema";err.textContent="Não consegui falar com o servidor."});
+  }
+  function tlDel(btn){
+    var t=st.tlDraft;if(!t||st.tlNew||!confirm("Excluir o tema “"+t.title+"”? A montagem salva dos visitantes deixa de abrir."))return;
+    btn.disabled=true;
+    api("POST","/api/tierlist",{action:"delete",slug:t.slug}).then(function(x){
+      btn.disabled=false;
+      if(x.ok){if(Array.isArray(x.themes))TL.themes=x.themes;st.dirty=false;st.tlDraft=null;st.tlSel=null;tlItems();tlEditor();toast("Tema excluído.")}
+      else if(x.status===401){authOk=false;toast("Sua sessão expirou. Entre de novo.",true);paint()}
+      else toast(x.error||"Não consegui excluir.",true);
+    },function(){btn.disabled=false;toast("Não consegui falar com o servidor.",true)});
   }
 
   /* ---- aba Comentários ---- */
@@ -656,6 +756,10 @@
     if(id==="rv-del"){rvDel();return}
     if(id==="rv-disc"){st.dirty=false;st.rvDraft=st.rvNew?null:clone(rvFind(st.rvSel));st.rvNew=false;rvItems();rvEditor();return}
     if(ds.cmdel){cmDel(ds.cmdel,t);return}
+    if(ds.tlpick){tlPick(ds.tlpick);return}
+    if(id==="tl-new"){tlNew();return}
+    if(id==="tl-del"){tlDel(t);return}
+    if(id==="tl-disc"){st.dirty=false;if(st.tlNew){st.tlNew=false;st.tlDraft=null;tlEditor()}else tlPick(st.tlSel);return}
     if(id==="cm-reload"){cmLoad();return}
     if(ds.mv){move(+ds.mid,+ds.mv);return}
     if(ds.cm!==undefined){var i=+ds.ci,j=i+(+ds.cm);if(j>=0&&j<st.cats.length){var x=st.cats[i];st.cats[i]=st.cats[j];st.cats[j]=x;catRows()}return}
@@ -710,6 +814,7 @@
       },function(){go.disabled=false;err.textContent="Não consegui falar com o servidor. Confira sua internet."});
     }
     else if(id==="a-form")saveNews();
+    else if(id==="tl-form")tlSave();
     else if(id==="a-site")saveSite();
     else if(id==="rv-form")rvSave();
 
@@ -720,6 +825,7 @@
     if(t.id==="t-list"){trendPreview();return}
     if(t.dataset&&t.dataset.ci!==undefined&&t.tagName==="INPUT"){st.cats[+t.dataset.ci].name=t.value;return}
     if(t.closest&&t.closest("#rv-form")){st.dirty=true;return}
+    if(t.closest&&t.closest("#tl-form")){st.dirty=true;if(t.id==="tl-title"&&st.tlNew){var sl=$("#tl-slug");if(sl&&!sl.dataset.touched)sl.value=t.value.trim()?slugify(t.value):""}if(t.id==="tl-slug")t.dataset.touched="1";return}
     if(!t.closest||!t.closest("#a-form")||!st.draft)return;
     st.dirty=true;readForm();
     if(t.id==="f-img")st.draft.img=t.value.trim();

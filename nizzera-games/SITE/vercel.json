@@ -22,6 +22,10 @@
       "destination": "/sobre/index.html"
     },
     {
+      "source": "/tierlist",
+      "destination": "/tierlist/index.html"
+    },
+    {
       "source": "/noticia/:slug",
       "destination": "/noticia/:slug/index.html"
     },

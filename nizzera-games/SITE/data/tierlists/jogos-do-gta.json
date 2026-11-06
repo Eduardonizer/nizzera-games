@@ -1,0 +1,44 @@
+{
+ "slug": "jogos-do-gta",
+ "title": "Jogos do GTA",
+ "description": "Do GTA III ao GTA V: qual é o melhor da série?",
+ "order": 1,
+ "games": [
+  {
+   "id": "gta-iii",
+   "name": "GTA III",
+   "appid": 12100,
+   "img": "/assets/tierlist/12100.jpg"
+  },
+  {
+   "id": "gta-vice-city",
+   "name": "GTA: Vice City",
+   "appid": 12110,
+   "img": "/assets/tierlist/12110.jpg"
+  },
+  {
+   "id": "gta-san-andreas",
+   "name": "GTA: San Andreas",
+   "appid": 12120,
+   "img": "/assets/tierlist/12120.jpg"
+  },
+  {
+   "id": "gta-iv",
+   "name": "GTA IV",
+   "appid": 12210,
+   "img": "/assets/tierlist/12210.jpg"
+  },
+  {
+   "id": "gta-episodes-from-liberty-city",
+   "name": "GTA: Episodes from Liberty City",
+   "appid": 12220,
+   "img": "/assets/tierlist/12220.jpg"
+  },
+  {
+   "id": "gta-v",
+   "name": "GTA V",
+   "appid": 271590,
+   "img": "/assets/tierlist/271590.jpg"
+  }
+ ]
+}

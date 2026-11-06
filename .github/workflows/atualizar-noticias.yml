@@ -10,6 +10,7 @@ on:
     paths:
       - "nizzera-games/SITE/index.html"
       - "nizzera-games/scripts/**"
+      - "nizzera-games/SITE/data/tierlists/**"   # temas da Tier List salvos pelo painel: baixa as capas na hora
 
 permissions:
   contents: write            # deixa o robô salvar o resultado no repositório
@@ -48,6 +49,10 @@ jobs:
       - name: Rodar o script de notícias
         if: github.event_name != 'push'
         run: python nizzera-games/scripts/atualizar_noticias.py
+
+      - name: Baixar as capas da Tier List
+        continue-on-error: true      # se a Steam falhar, ficam as capas anteriores
+        run: python nizzera-games/scripts/atualizar_tierlists.py
 
       - name: Gerar páginas das notícias, sitemap e feed
         run: python nizzera-games/scripts/gerar_paginas.py

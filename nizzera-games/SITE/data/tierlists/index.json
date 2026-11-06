@@ -1,0 +1,41 @@
+{
+ "updated": "2026-11-06T15:47:02Z",
+ "themes": [
+  {
+   "slug": "jogos-do-gta",
+   "title": "Jogos do GTA",
+   "description": "Do GTA III ao GTA V: qual é o melhor da série?",
+   "count": 6,
+   "covers": [
+    "/assets/tierlist/12100.jpg",
+    "/assets/tierlist/12110.jpg",
+    "/assets/tierlist/12120.jpg",
+    "/assets/tierlist/12210.jpg"
+   ]
+  },
+  {
+   "slug": "fromsoftware",
+   "title": "FromSoftware: Souls e companhia",
+   "description": "Dark Souls, Sekiro, Elden Ring e mais: monte o seu ranking da FromSoftware.",
+   "count": 7,
+   "covers": [
+    "/assets/tierlist/570940.jpg",
+    "/assets/tierlist/335300.jpg",
+    "/assets/tierlist/374320.jpg",
+    "/assets/tierlist/814380.jpg"
+   ]
+  },
+  {
+   "slug": "resident-evil",
+   "title": "Resident Evil",
+   "description": "Dos clássicos aos remakes: qual Resident Evil dá mais medo (e mais saudade)?",
+   "count": 9,
+   "covers": [
+    "/assets/tierlist/304240.jpg",
+    "/assets/tierlist/339340.jpg",
+    "/assets/tierlist/883710.jpg",
+    "/assets/tierlist/952060.jpg"
+   ]
+  }
+ ]
+}

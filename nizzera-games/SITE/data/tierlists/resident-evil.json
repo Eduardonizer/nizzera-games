@@ -1,0 +1,62 @@
+{
+ "slug": "resident-evil",
+ "title": "Resident Evil",
+ "description": "Dos clássicos aos remakes: qual Resident Evil dá mais medo (e mais saudade)?",
+ "order": 3,
+ "games": [
+  {
+   "id": "resident-evil-hd",
+   "name": "Resident Evil (HD)",
+   "appid": 304240,
+   "img": "/assets/tierlist/304240.jpg"
+  },
+  {
+   "id": "resident-evil-0",
+   "name": "Resident Evil 0",
+   "appid": 339340,
+   "img": "/assets/tierlist/339340.jpg"
+  },
+  {
+   "id": "resident-evil-2-remake",
+   "name": "Resident Evil 2 (remake)",
+   "appid": 883710,
+   "img": "/assets/tierlist/883710.jpg"
+  },
+  {
+   "id": "resident-evil-3-remake",
+   "name": "Resident Evil 3 (remake)",
+   "appid": 952060,
+   "img": "/assets/tierlist/952060.jpg"
+  },
+  {
+   "id": "resident-evil-4-remake",
+   "name": "Resident Evil 4 (remake)",
+   "appid": 2050650,
+   "img": "/assets/tierlist/2050650.jpg"
+  },
+  {
+   "id": "resident-evil-5",
+   "name": "Resident Evil 5",
+   "appid": 21690,
+   "img": "/assets/tierlist/21690.jpg"
+  },
+  {
+   "id": "resident-evil-6",
+   "name": "Resident Evil 6",
+   "appid": 221040,
+   "img": "/assets/tierlist/221040.jpg"
+  },
+  {
+   "id": "resident-evil-7",
+   "name": "Resident Evil 7",
+   "appid": 418370,
+   "img": "/assets/tierlist/418370.jpg"
+  },
+  {
+   "id": "resident-evil-village",
+   "name": "Resident Evil Village",
+   "appid": 1196590,
+   "img": "/assets/tierlist/1196590.jpg"
+  }
+ ]
+}

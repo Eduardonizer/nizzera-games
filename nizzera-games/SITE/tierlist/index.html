@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!-- gerado por scripts/gerar_paginas.py: não edite à mão -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b12">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/assets/icons/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="alternate" type="application/rss+xml" title="Nizzera Games" href="/feed.xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/style.css">
+<script src="/assets/js/tema.js"></script>
+<script defer src="/_vercel/insights/script.js"></script>
+<title>Tier List de jogos: monte e compartilhe | Nizzera Games</title>
+<meta name="description" content="Monte sua tier list de jogos: arraste as capas para as faixas S, A, B, C e D, no PC ou no celular, e compartilhe a imagem com os amigos.">
+<link rel="canonical" href="https://nizzera-games.vercel.app/tierlist/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Nizzera Games">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Monte sua Tier List de jogos | Nizzera Games">
+<meta property="og:description" content="Monte sua tier list de jogos: arraste as capas para as faixas S, A, B, C e D, no PC ou no celular, e compartilhe a imagem com os amigos.">
+<meta property="og:url" content="https://nizzera-games.vercel.app/tierlist/">
+</head>
+<body>
+<button class="mbtn" id="mbtn" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="side"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+<div class="scrim" id="scrim"></div>
+<aside class="side" id="side" aria-label="Menu lateral">
+  <a class="brand" href="/" title="Nizzera Games"><i></i><span class="lbl sname">Nizzera Games</span></a>
+  <button class="sclose" id="sclose" type="button" aria-label="Fechar menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <div class="slist" id="slist" role="navigation" aria-label="Menu principal"></div>
+</aside>
+<header class="topbar">
+  <div class="wrap">
+    <a class="logo" href="/"><i></i><span>Nizzera Games</span></a>
+    <button class="tbtn" id="theme" type="button">Alternar tema</button>
+  </div>
+</header>
+<main class="wrap page tl" id="tierlist">
+  <nav class="crumbs" aria-label="Você está em"><ol><li><a href="/">Início</a></li><li aria-current="page">Tier List</li></ol></nav>
+  <h1 class="ph">Tier List</h1>
+  <p class="lead">Escolha um tema, arraste os jogos para as faixas e compartilhe a sua com os amigos.</p>
+
+  <section class="tl-pick" id="tl-pick" aria-labelledby="tl-pick-t">
+    <h2 class="sec" id="tl-pick-t">Escolha um tema</h2>
+    <div class="tl-themes" id="tl-themes"><a class="tl-theme" href="/tierlist/?tema=jogos-do-gta" data-theme-slug="jogos-do-gta"><span class="tl-cov" aria-hidden="true"><img src="/assets/tierlist/12100.jpg" alt="" loading="lazy" decoding="async"><img src="/assets/tierlist/12110.jpg" alt="" loading="lazy" decoding="async"><img src="/assets/tierlist/12120.jpg" alt="" loading="lazy" decoding="async"><img src="/assets/tierlist/12210.jpg" alt="" loading="lazy" decoding="async"></span><span class="tl-ttx"><b>Jogos do GTA</b><span>Do GTA III ao GTA V: qual é o melhor da série?</span><small>6 jogos</small></span></a><a class="tl-theme" href="/tierlist/?tema=fromsoftware" data-theme-slug="fromsoftware"><span class="tl-cov" aria-hidden="true"><img src="/assets/tierlist/570940.jpg" alt="" loading="lazy" decoding="async"><img src="/assets/tierlist/335300.jpg" alt="" loading="lazy" decoding="async"><img src="/assets/tierlist/374320.jpg" alt="" loading="lazy" decoding="async"><img src="/assets/tierlist/814380.jpg" alt="" loading="lazy" decoding="async"></span><span class="tl-ttx"><b>FromSoftware: Souls e companhia</b><span>Dark Souls, Sekiro, Elden Ring e mais: monte o seu ranking da FromSoftware.</span><small>7 jogos</small></span></a><a class="tl-theme" href="/tierlist/?tema=resident-evil" data-theme-slug="resident-evil"><span class="tl-cov" aria-hidden="true"><img src="/assets/tierlist/304240.jpg" alt="" loading="lazy" decoding="async"><img src="/assets/tierlist/339340.jpg" alt="" loading="lazy" decoding="async"><img src="/assets/tierlist/883710.jpg" alt="" loading="lazy" decoding="async"><img src="/assets/tierlist/952060.jpg" alt="" loading="lazy" decoding="async"></span><span class="tl-ttx"><b>Resident Evil</b><span>Dos clássicos aos remakes: qual Resident Evil dá mais medo (e mais saudade)?</span><small>9 jogos</small></span></a></div>
+  </section>
+
+  <section class="tl-board" id="tl-board" aria-labelledby="tl-title" hidden>
+    <div class="tl-bar">
+      <h2 class="sec" id="tl-title" tabindex="-1"></h2>
+      <div class="tl-acts">
+        <button class="tl-btn ghost" type="button" id="tl-change">Trocar tema</button>
+        <button class="tl-btn ghost" type="button" id="tl-reset">Recomeçar</button>
+        <button class="tl-btn" type="button" id="tl-share">Baixar / Compartilhar imagem</button>
+      </div>
+    </div>
+    <p class="tl-hint" id="tl-hint">Arraste as capas para as faixas. No celular, segure a capa um instante e arraste, ou toque na capa e depois na faixa.</p>
+    <div class="tl-rows" id="tl-rows"></div>
+    <div class="tl-poolbox">
+      <h3>Jogos para colocar</h3>
+      <div class="tl-drop tl-pool" id="tl-pool" data-tier="pool" role="list" aria-label="Jogos ainda não colocados"></div>
+    </div>
+    <p class="tl-status" id="tl-status" role="status" aria-live="polite"></p>
+  </section>
+  <noscript><p class="empty">A Tier List precisa de JavaScript para funcionar.</p></noscript>
+</main>
+<footer><div class="wrap"><span id="ftxt">Nizzera Games © 2026 · Resumos de reportagens de games, com link para a fonte. Site em desenvolvimento.</span><p class="contact">Contato: <a href="mailto:nizzeragames@gmail.com">nizzeragames@gmail.com</a> · <a href="/sobre/">Sobre o site</a></p><p class="by">Criado por <strong id="fcredit">Eduardo Nizer</strong></p></div></footer>
+<button class="chat-fab" id="chat-fab" type="button" aria-label="Abrir caixa de mensagem" aria-expanded="false" aria-controls="chat">
+  <svg class="ic-c" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16a1 1 0 011 1v10a1 1 0 01-1 1H10l-5 4v-4H4a1 1 0 01-1-1V6a1 1 0 011-1z"/><path d="M8 10h8M8 13h5"/></svg>
+  <svg class="ic-x" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+</button>
+<section class="chat" id="chat" role="dialog" aria-label="Fale com a gente" hidden>
+  <div class="chat-h"><div><strong>Fale com a gente</strong><small>Sua mensagem chega direto no e-mail do site</small></div><button class="chat-x" id="chat-x" type="button" aria-label="Fechar">✕</button></div>
+  <div class="chat-b" id="chat-b" role="log" aria-live="polite"></div>
+  <form class="chat-f" id="chat-f" novalidate>
+    <input class="fb-in" id="chat-name" maxlength="60" placeholder="Seu nome (opcional)" aria-label="Seu nome (opcional)" autocomplete="name">
+    <input class="fb-in" id="chat-mail" type="email" maxlength="120" placeholder="Seu e-mail (para receber a resposta)" aria-label="Seu e-mail, para receber a resposta" autocomplete="email">
+    <textarea class="fb-in" id="chat-msg" rows="3" maxlength="1500" placeholder="Escreva sua pergunta ou mensagem…" aria-label="Mensagem"></textarea>
+    <div class="hp" aria-hidden="true"><input id="chat-hp" tabindex="-1" autocomplete="off"></div>
+    <button class="fb-btn" id="chat-send" type="submit">Enviar mensagem</button>
+  </form>
+</section>
+<script src="/assets/js/core.js"></script>
+<script src="/assets/js/site.js"></script>
+<script src="/assets/js/comunidade.js"></script>
+<script src="/assets/js/tierlist.js"></script>
+</body>
+</html>

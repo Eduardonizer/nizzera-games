@@ -1,0 +1,50 @@
+{
+ "slug": "fromsoftware",
+ "title": "FromSoftware: Souls e companhia",
+ "description": "Dark Souls, Sekiro, Elden Ring e mais: monte o seu ranking da FromSoftware.",
+ "order": 2,
+ "games": [
+  {
+   "id": "dark-souls-remastered",
+   "name": "Dark Souls Remastered",
+   "appid": 570940,
+   "img": "/assets/tierlist/570940.jpg"
+  },
+  {
+   "id": "dark-souls-ii",
+   "name": "Dark Souls II",
+   "appid": 335300,
+   "img": "/assets/tierlist/335300.jpg"
+  },
+  {
+   "id": "dark-souls-iii",
+   "name": "Dark Souls III",
+   "appid": 374320,
+   "img": "/assets/tierlist/374320.jpg"
+  },
+  {
+   "id": "sekiro-shadows-die-twice",
+   "name": "Sekiro: Shadows Die Twice",
+   "appid": 814380,
+   "img": "/assets/tierlist/814380.jpg"
+  },
+  {
+   "id": "elden-ring",
+   "name": "Elden Ring",
+   "appid": 1245620,
+   "img": "/assets/tierlist/1245620.jpg"
+  },
+  {
+   "id": "armored-core-vi",
+   "name": "Armored Core VI",
+   "appid": 1888160,
+   "img": "/assets/tierlist/1888160.jpg"
+  },
+  {
+   "id": "elden-ring-nightreign",
+   "name": "Elden Ring Nightreign",
+   "appid": 2622380,
+   "img": "/assets/tierlist/2622380.jpg"
+  }
+ ]
+}
