@@ -12,6 +12,7 @@ module.exports = (req, res) => {
       emailTo: env.CONTACT_TO || "nizzeragames@gmail.com",
       comments: !!((env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN) || (env.KV_REST_API_URL && env.KV_REST_API_TOKEN)),
       publish: !!(env.GITHUB_REPO && env.GITHUB_TOKEN),
+      gemini: !!env.GEMINI_API_KEY,
       totp: totpEnabled(),
     };
   }

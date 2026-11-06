@@ -18,7 +18,8 @@
     out:'<path d="M15 4h4a1 1 0 011 1v14a1 1 0 01-1 1h-4M10 8l-4 4 4 4M6 12h10"/>',
     back:'<path d="M15 6l-6 6 6 6"/>',
     tiers:'<rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="13" height="4" rx="1"/><rect x="3" y="16" width="8" height="4" rx="1"/>',
-    trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'
+    trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+    draft:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4M17 15l.8 1.7 1.7.8-1.7.8-.8 1.7-.8-1.7-1.7-.8 1.7-.8z"/>'
   };
   function svg(n){return '<svg viewBox="0 0 24 24" aria-hidden="true">'+IC[n]+'</svg>'}
   function refreshAll(){} /* nesta página não há site para redesenhar */
@@ -102,23 +103,23 @@
 
   /* ---- estrutura ---- */
   /* abas: [id, ícone, nome, nome curto (barra do celular)] */
-  var TABS=[["home","home","Início"],["news","news","Notícias"],["rv","star","Reviews"],["tl","tiers","Tier List","Tier"],["cm","chat","Comentários","Coment."],["site","gear","Site e categorias","Site"],["back","upload","Publicar e backup","Publicar"]];
+  var TABS=[["home","home","Início"],["news","news","Notícias"],["dr","draft","Rascunhos","Rascunho"],["rv","star","Reviews"],["tl","tiers","Tier List","Tier"],["cm","chat","Comentários","Coment."],["site","gear","Site e categorias","Site"],["back","upload","Publicar e backup","Publicar"]];
   function shell(){
     adm.innerHTML='<header class="a-top"><span class="a-logo" aria-hidden="true"></span><strong class="a-title">Painel</strong><span class="a-chip" id="a-status"></span><span class="a-sp"></span>'
       +'<button class="a-ico" type="button" id="a-bell" aria-label="Notificações" title="Notificações">'+svg("bell")+'<b class="a-badge" data-badge hidden></b></button>'
       +'<a class="a-ico" href="/" target="_blank" rel="noopener" title="Ver site">'+svg("ext")+'<span class="a-ilbl">Ver site</span></a>'
       +'<button class="a-ico" type="button" id="a-out" title="Sair">'+svg("out")+'<span class="a-ilbl">Sair</span></button></header>'
       +'<nav class="a-tabs" role="tablist" aria-label="Seções do painel">'+TABS.map(function(t){
-        return '<button class="a-tab" role="tab" type="button" data-tab="'+t[0]+'"><span class="a-ti">'+svg(t[1])+(t[0]==="home"?'<b class="a-badge" data-badge hidden></b>':'')+'</span><span class="a-tl">'+t[2]+'</span><span class="a-ts">'+(t[3]||t[2])+'</span></button>';
+        return '<button class="a-tab" role="tab" type="button" data-tab="'+t[0]+'"><span class="a-ti">'+svg(t[1])+(t[0]==="home"?'<b class="a-badge" data-badge hidden></b>':t[0]==="dr"?'<b class="a-badge" data-drn hidden></b>':'')+'</span><span class="a-tl">'+t[2]+'</span><span class="a-ts">'+(t[3]||t[2])+'</span></button>';
       }).join("")+'</nav><div class="a-body" id="a-body"></div>';
-    status();badge();ntStart();
+    status();badge();ntStart();drLoad();
   }
   function tab(n){
-    if(n!==st.tab){if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;st.dirty=false;st.draft=null;st.sel=null;st.isNew=false;st.rvDraft=null;st.rvSel=null;st.rvNew=false;st.tlDraft=null;st.tlSel=null;st.tlNew=false}
+    if(n!==st.tab){if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;st.dirty=false;st.draft=null;st.sel=null;st.isNew=false;st.rvDraft=null;st.rvSel=null;st.rvNew=false;st.tlDraft=null;st.tlSel=null;st.tlNew=false;st.drDraft=null;st.drSel=null}
     st.tab=n;
     [].forEach.call(adm.querySelectorAll(".a-tab"),function(b){b.setAttribute("aria-selected",b.dataset.tab===n)});
     var body=$("#a-body");if(body)body.scrollTop=0;
-    ({home:homeView,news:newsView,rv:rvView,tl:tlView,cm:cmView,site:siteView,back:backView})[n]();
+    ({home:homeView,news:newsView,dr:drView,rv:rvView,tl:tlView,cm:cmView,site:siteView,back:backView})[n]();
     if(n==="back")svcView();
   }
 
@@ -260,6 +261,7 @@
     st.dirty=false;
     if(k==="news"){st.draft=null;st.sel=null;st.isNew=false;items();editor()}
     else if(k==="tl"){st.tlDraft=null;st.tlSel=null;st.tlNew=false;tlItems();tlEditor()}
+    else if(k==="dr"){st.drDraft=null;st.drSel=null;drItems();drEditor()}
     else{st.rvDraft=null;st.rvSel=null;st.rvNew=false;rvItems();rvEditor()}
     toTop();
   }
@@ -291,7 +293,7 @@
       +'<div class="a-row3"><div><label for="f-cat">Categoria</label><select class="a-in" id="f-cat">'+opts+'</select></div><div><label for="f-date">Data</label><input class="a-in" id="f-date" type="date" value="'+esc(d.date)+'"></div><div><label for="f-read">Leitura (min)</label><input class="a-in" id="f-read" type="number" min="1" max="60" placeholder="auto" value="'+esc(d.read||"")+'"></div></div>'
       +area("Resumo (aparece no card)","f-sum",d.sum,2)
       +area("Texto completo (uma linha em branco separa os parágrafos)","f-body",d.body,8)
-      +'<div class="a-take"><label for="f-take">Nossa opinião <small>(texto seu: 2 ou 3 frases com opinião ou contexto)</small></label>'
+      +'<div class="a-take"><label for="f-take">Na opinião do Nizzera <small>(texto seu: 2 ou 3 frases com opinião ou contexto)</small></label>'
       +'<textarea class="a-in" id="f-take" rows="3" maxlength="2000" placeholder="Ex.: O que isso muda para quem joga? Vale a pena? Como se compara com o anterior?">'+esc(d.take||"")+'</textarea>'
       +'<p class="a-hint">O Google dá pouco valor a páginas que só repetem outro site. Este texto aparece em destaque na notícia e é o que torna a página sua.</p></div>'
       +'<div class="a-row2"><div>'+fld("Nome da fonte","f-src",d.src)+'</div><div>'+fld("Link da matéria original","f-url",d.url,"url")+'</div></div>'
@@ -540,6 +542,165 @@
     },function(){btn.disabled=false;toast("Não consegui falar com o servidor.",true)});
   }
 
+  /* ---- aba Rascunhos: matérias escritas com IA (Gemini) pelo robô diário, para revisar e publicar ----
+     O robô (scripts/rascunhos_ia.py) grava no Upstash Redis; esta aba lê e edita por /api/drafts. */
+  var DR={items:null,err:"",filter:"rascunho",gemini:false};
+  var DRF=[["rascunho","Pendentes"],["publicado","Publicados"],["descartado","Descartados"]];
+  function drFind(id){return (DR.items||[]).filter(function(d){return d.id===id})[0]}
+  function drWhen(iso){var d=new Date(iso);return isNaN(d)?"":d.toLocaleDateString("pt-BR",{day:"numeric",month:"short"})+", "+d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}
+  function drBadge(){
+    var n=(DR.items||[]).filter(function(d){return d.status==="rascunho"}).length;
+    [].forEach.call(adm.querySelectorAll("[data-drn]"),function(b){b.textContent=n>99?"99+":String(n);b.hidden=!n});
+  }
+  function drView(){
+    $("#a-body").innerHTML='<div class="a-news"><aside class="a-list" aria-label="Lista de rascunhos"><div class="a-lhead"><button class="a-btn" type="button" id="dr-reload">Atualizar</button></div>'
+      +'<div class="a-filters" role="group" aria-label="Filtrar rascunhos">'+DRF.map(function(f){return '<button type="button" class="a-fchip" data-drf="'+f[0]+'" aria-pressed="'+(DR.filter===f[0])+'">'+f[1]+'<b></b></button>'}).join("")+'</div>'
+      +'<div class="a-items" id="dr-items"></div></aside><section id="dr-edit"></section></div>';
+    drItems();drEditor();
+    if(!DR.items)drLoad();
+  }
+  function drLoad(){
+    var b=$("#dr-reload");if(b)b.disabled=true;
+    api("GET","/api/drafts").then(function(r){
+      if(b)b.disabled=false;
+      if(r.status===401){authOk=false;toast("Sua sessão expirou. Entre de novo.",true);paint();return}
+      if(!r.ok){DR.items=DR.items||[];DR.err=r.error||"Não consegui carregar os rascunhos.";}
+      else{DR.items=r.items||[];DR.err="";DR.gemini=!!r.gemini}
+      drBadge();if(st.tab==="dr")drItems();
+    },function(){if(b)b.disabled=false;DR.items=DR.items||[];DR.err="Não consegui falar com o servidor.";if(st.tab==="dr")drItems()});
+  }
+  function drItems(){
+    var box=$("#dr-items");if(!box)return;
+    var all=DR.items||[],cnt={};all.forEach(function(d){cnt[d.status]=(cnt[d.status]||0)+1});
+    [].forEach.call(adm.querySelectorAll("[data-drf]"),function(b){b.setAttribute("aria-pressed",b.dataset.drf===DR.filter);b.querySelector("b").textContent=cnt[b.dataset.drf]||0});
+    if(!DR.items){box.innerHTML='<div class="a-skel"></div><div class="a-skel"></div><div class="a-skel"></div>';return}
+    var list=all.filter(function(d){return d.status===DR.filter});
+    box.innerHTML=(DR.err?'<p class="a-err">'+esc(DR.err)+'</p>':"")+(list.map(function(d){
+      var nf=(d.fontes||[]).length,op=String(d.opiniao||"").trim();
+      return '<div class="a-rowi'+(d.id===st.drSel?" on":"")+'"><div class="art a-th">'+pic({id:0,img:d.img,alt:"",title:d.titulo})+'</div><button type="button" class="a-pick" data-drpick="'+esc(d.id)+'"><b>'+esc(d.titulo||"(sem título)")+'</b><small>'+esc(drWhen(d.criado))+' · '+nf+' fonte'+(nf===1?"":"s")+(d.alta?' · '+esc(d.alta):'')+'</small>'
+        +(d.status==="rascunho"?(op?'<span class="a-tk ok">✓ com opinião</span>':'<span class="a-tk">sem opinião</span>'):'')+'</button><span></span></div>';
+    }).join("")||'<div class="a-empty">'+svg("draft")+'<b>'+(DR.filter==="rascunho"?"Nenhum rascunho pendente.":"Nada por aqui.")+'</b><span>'+(DR.filter==="rascunho"?"O robô escreve os rascunhos 1 vez por dia, de madrugada, a partir das notícias novas dos feeds.":"")+'</span></div>');
+    fillArt(box);
+  }
+  function drEditor(){
+    var box=$("#dr-edit"),d=st.drDraft;if(!box)return;
+    editing(!!d);
+    if(!d){box.innerHTML='<div class="a-card a-ph"><h2>Rascunhos com IA</h2><p>Todo dia de madrugada, o robô pega as notícias novas dos feeds, junta a mesma notícia de até 3 sites e pede ao Google Gemini uma matéria original. Nada vai para o site sozinho: escolha um rascunho na lista, revise, escreva a sua opinião e publique.</p></div>';return}
+    var pend=d.status==="rascunho",opts=DATA.cats.map(function(c){return '<option'+(c===d.cat?" selected":"")+'>'+esc(c)+'</option>'}).join("");
+    if(d.cat&&DATA.cats.indexOf(d.cat)<0)opts='<option selected>'+esc(d.cat)+'</option>'+opts;
+    var fontes=(d.fontes||[]).map(function(f){return '<li><a href="'+esc(f.url)+'" target="_blank" rel="noopener"><b>'+esc(f.nome)+'</b> '+esc(f.titulo||"")+'</a></li>'}).join("");
+    var head=pend?'':(d.status==="publicado"?'<p class="a-note ok">✓ Publicado'+(d.publicado&&d.publicado.em?" em "+esc(drWhen(d.publicado.em)):"")+'.'+(d.publicado&&d.publicado.slug?' <a href="/noticia/'+esc(d.publicado.slug)+'/" target="_blank" rel="noopener">Ver no site ↗</a> (a página aparece em 1 a 2 minutos). Para mudar o texto agora, use a aba Notícias.':'')+'</p>':'<p class="a-note">Este rascunho foi descartado.</p>');
+    box.innerHTML='<form id="dr-form" class="a-card" novalidate>'+backBtn("dr")+'<h2>'+(pend?"Revisar rascunho":"Rascunho")+'</h2>'+head
+      +'<p class="a-hint">Escrito pelo '+esc(d.modelo||"Gemini")+' em '+esc(drWhen(d.criado))+(d.gerado_de_novo?" (gerado de novo "+d.gerado_de_novo+"×)":"")+'. Confira os fatos nas fontes antes de publicar.</p>'
+      +fld("Título","d-title",d.titulo)+fld("Subtítulo (uma linha; aparece no card e abaixo do título)","d-sub",d.subtitulo)
+      +'<div class="a-row2"><div><label for="d-cat">Categoria</label><select class="a-in" id="d-cat">'+opts+'</select></div><div>'+fld("Palavras-chave (separadas por vírgula)","d-tags",(d.tags||[]).join(", "))+'</div></div>'
+      +'<label for="d-body">Texto <small class="a-wc" id="d-wc"></small></label><textarea class="a-in" id="d-body" rows="14">'+esc(d.texto||"")+'</textarea><p class="a-hint">Uma linha em branco separa os parágrafos. As fontes entram sozinhas no fim da matéria.</p>'
+      +'<div class="a-take"><label for="d-take">Na opinião do Nizzera <small>(texto seu, em destaque no fim da matéria)</small></label>'
+      +'<textarea class="a-in" id="d-take" rows="4" maxlength="2000" placeholder="O que você acha dessa notícia?">'+esc(d.opiniao||"")+'</textarea>'
+      +(d.minha_opiniao?'<div class="a-sug"><span><b>Sugestão da IA:</b> '+esc(d.minha_opiniao)+'</span><button type="button" class="a-mini" id="d-usesug">Usar como ponto de partida</button></div>':'')+'</div>'
+      +'<h3>Capa</h3><div class="a-cover"><div class="art a-prev" id="d-prev"></div><div>'
+      +'<label for="d-img" style="margin-top:0">Endereço (link) da imagem</label><input class="a-in" id="d-img" type="url" placeholder="https://..." value="'+esc(d.img||"")+'">'
+      +fld("Crédito da imagem","d-credit",d.credito)+'<p class="a-hint">Aparece abaixo da foto como “Imagem: '+esc(d.credito||"divulgação / fonte")+'”.</p></div></div>'
+      +'<h3>Fontes</h3><ul class="a-srcs">'+fontes+'</ul>'
+      +'<div class="a-err" id="d-err" role="alert"></div>'
+      +'<div class="a-act a-save">'+(pend?'<button class="a-btn pri" type="button" id="d-pub">Publicar</button><button class="a-btn" type="submit" id="d-save">Salvar rascunho</button><button class="a-btn" type="button" id="d-regen"'+(DR.gemini?'':' title="Falta a GEMINI_API_KEY na Vercel"')+'>Gerar de novo</button><button class="a-btn dan" type="button" id="d-disc">Descartar</button>'
+        :(d.status==="descartado"?'<button class="a-btn" type="button" id="d-undo">Voltar para pendentes</button>':''))+'</div></form>';
+    if(!pend)[].forEach.call(box.querySelectorAll("input,textarea,select"),function(el){el.disabled=true});
+    drPrev();drCount();
+  }
+  function drPrev(){var d=st.drDraft,p=$("#d-prev");if(p&&d){p.innerHTML=pic({id:0,img:d.img,alt:"",title:d.titulo});fillArt(p)}}
+  function drCount(){var w=$("#d-wc"),b=$("#d-body");if(w&&b){var n=words(b.value);w.textContent="("+n+" palavras)"}}
+  function drRead(){
+    var d=st.drDraft;if(!d||!$("#dr-form"))return d;
+    var g=function(i){return $(i).value.trim()};
+    d.titulo=g("#d-title");d.subtitulo=g("#d-sub");d.cat=$("#d-cat").value;d.texto=g("#d-body");d.opiniao=g("#d-take");d.img=g("#d-img");d.credito=g("#d-credit");
+    d.tags=g("#d-tags").split(",").map(trimS).filter(Boolean);
+    return d;
+  }
+  function drPick(id){
+    if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;
+    st.dirty=false;st.drSel=id;st.drDraft=clone(drFind(id));drItems();drEditor();toTop();
+  }
+  function drPut(d){var i=(DR.items||[]).map(function(x){return x.id}).indexOf(d.id);if(i>-1)DR.items[i]=d;else(DR.items=DR.items||[]).unshift(d);drBadge()}
+  function drFail(r,err){
+    if(r&&r.status===401){authOk=false;toast("Sua sessão expirou. Entre de novo.",true);paint();return}
+    var m=(r&&r.error)||"Não consegui falar com o servidor.";if(err)err.textContent=m;else toast(m,true);
+  }
+  function drSave(quiet){
+    var d=drRead(),err=$("#d-err");if(!d)return Promise.reject();err.textContent="";
+    if(!d.titulo){err.textContent="Dê um título à matéria.";$("#d-title").focus();return Promise.reject()}
+    if(d.img&&!/^https?:\/\//i.test(d.img)){err.textContent="O link da imagem precisa começar com http:// ou https://";$("#d-img").focus();return Promise.reject()}
+    return api("POST","/api/drafts",{action:"save",id:d.id,draft:d}).then(function(r){
+      if(!r.ok){drFail(r,err);throw 0}
+      drPut(r.draft);st.dirty=false;st.drDraft=clone(r.draft);if(!quiet){drItems();toast("Rascunho salvo.")}
+      return r.draft;
+    },function(e){drFail(null,err);throw e});
+  }
+  function nowIso(){var d=new Date(),o=-d.getTimezoneOffset(),p=function(n){return ("0"+Math.floor(Math.abs(n))).slice(-2)};
+    return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"T"+p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds())+(o<0?"-":"+")+p(o/60)+":"+p(o%60)}
+  function drPublish(btn){
+    var d=drRead(),err=$("#d-err");if(!d)return;err.textContent="";
+    if(!d.titulo){err.textContent="Dê um título à matéria.";$("#d-title").focus();return}
+    if(words(d.texto)<30){err.textContent="O texto está vazio ou curto demais.";$("#d-body").focus();return}
+    if(!d.img){err.textContent="Toda notícia do site precisa de uma imagem: cole o link de uma foto em “Capa”.";$("#d-img").focus();return}
+    if(!DATA.cats.length){err.textContent="Crie uma categoria na aba “Site e categorias” antes de publicar.";return}
+    /* aviso, sem bloquear */
+    if(!d.opiniao&&!confirm("Você não escreveu nada em “Na opinião do Nizzera”.\n\nA sua opinião é o que torna a matéria sua (e o Google valoriza isso). Publicar mesmo assim?"))return;
+    if(d.opiniao&&d.minha_opiniao&&d.opiniao===d.minha_opiniao.trim()&&!confirm("A opinião está igual à sugestão da IA, sem nenhuma mudança. Publicar mesmo assim?"))return;
+    var extra=lsGet(UKEY)==="1";
+    if(!confirm("Publicar “"+d.titulo+"” no site agora?"+(extra?"\n\nAtenção: há outras alterações do painel ainda não publicadas, e elas vão junto.":"")))return;
+    btn.disabled=true;btn.textContent="Publicando…";
+    var done=function(){btn.disabled=false;btn.textContent="Publicar"};
+    drSave(true).then(function(saved){
+      var id=nextId(),fontes=(saved.fontes||[]).filter(function(f){return f.nome&&/^https?:\/\//i.test(f.url||"")});
+      var n={id:id,slug:id+"-"+slugify(saved.titulo),img:saved.img,alt:saved.titulo,credit:saved.credito||"",pos:"",cat:DATA.cats.indexOf(saved.cat)>-1?saved.cat:DATA.cats[0],
+        title:saved.titulo,date:today(),pub:nowIso(),take:saved.opiniao||"",read:Math.max(1,Math.round(words(saved.texto)/180)),sum:saved.subtitulo||"",body:saved.texto,
+        src:fontes[0]?fontes[0].nome:"",url:fontes[0]?fontes[0].url:"",featured:false};
+      if(fontes.length)n.sources=fontes.map(function(f){return {name:f.nome,url:f.url}});
+      if((saved.tags||[]).length)n.tags=saved.tags.slice(0,10);
+      if(!mutate(function(){DATA.news.unshift(n)})){done();return}
+      return publishData().then(function(r){
+        if(!r.ok){
+          mutate(function(){var i=idx(id);if(i>-1)DATA.news.splice(i,1)});done();drFail(r,err);return;
+        }
+        var pubN=DATA.news.filter(function(x){return x.slug===n.slug})[0]||n;
+        return api("POST","/api/drafts",{action:"status",id:saved.id,status:"publicado",newsId:pubN.id,slug:pubN.slug}).then(function(x){
+          done();
+          if(x.ok){drPut(x.draft);st.drDraft=clone(x.draft)}else drFail(x);
+          drItems();drEditor();
+          toast("Publicado! A matéria aparece no site em 1 a 2 minutos.");
+        },function(){done();toast("A matéria foi publicada, mas não consegui marcar o rascunho como publicado. Descarte-o na lista.",true)});
+      },function(){mutate(function(){var i=idx(id);if(i>-1)DATA.news.splice(i,1)});done();err.textContent="Não consegui falar com o servidor. Nada foi publicado."});
+    },function(){done()});
+  }
+  function drStatus(status,btn){
+    var d=st.drDraft;if(!d)return;
+    if(status==="descartado"&&!confirm("Descartar este rascunho? Ele sai da lista de pendentes (dá para trazer de volta na lista “Descartados”)."))return;
+    btn.disabled=true;
+    api("POST","/api/drafts",{action:"status",id:d.id,status:status}).then(function(r){
+      btn.disabled=false;
+      if(!r.ok){drFail(r);return}
+      drPut(r.draft);st.dirty=false;
+      if(status==="descartado"){st.drDraft=null;st.drSel=null;toast("Rascunho descartado.")}else{st.drDraft=clone(r.draft);toast("O rascunho voltou para os pendentes.")}
+      drItems();drEditor();
+    },function(){btn.disabled=false;drFail(null)});
+  }
+  function drRegen(btn){
+    var d=drRead();if(!d)return;
+    if(!DR.gemini){toast("Para gerar de novo pelo painel, cadastre a GEMINI_API_KEY na Vercel (Settings → Environment Variables) e faça um Redeploy.",true);return}
+    if(!confirm("Pedir ao Gemini uma nova versão?\n\nO título, o subtítulo, o texto e as palavras-chave atuais serão trocados. A sua opinião, a capa e a categoria ficam."))return;
+    var keep={opiniao:d.opiniao,img:d.img,credito:d.credito,cat:d.cat};
+    btn.disabled=true;btn.textContent="Gerando… (até 1 minuto)";
+    api("POST","/api/drafts",{action:"regen",id:d.id}).then(function(r){
+      btn.disabled=false;btn.textContent="Gerar de novo";
+      if(!r.ok){drFail(r,$("#d-err"));return}
+      var nd=r.draft,mud=false;
+      for(var k in keep){if((nd[k]||"")!==(keep[k]||"")){nd[k]=keep[k];mud=true}}
+      drPut(nd);st.drDraft=clone(nd);st.dirty=mud;drItems();drEditor();
+      toast("Nova versão pronta."+(mud?" Clique em Salvar rascunho para guardar a sua opinião e a capa.":""));
+    },function(){btn.disabled=false;btn.textContent="Gerar de novo";drFail(null,$("#d-err"))});
+  }
+
   /* ---- aba Comentários ---- */
   function cmView(){
     $("#a-body").innerHTML='<div class="a-wrap"><div class="a-card"><h2>Comentários e feedback</h2><p class="a-hint">O que os visitantes escreveram no site. Ao remover, o comentário some na hora para todo mundo.</p>'
@@ -648,6 +809,7 @@
       box.innerHTML=row(s.email,"E-mail (Fale com a gente)","Configurado. As mensagens vão para "+esc(s.emailTo)+".","Falta RESEND_API_KEY. Veja o passo a passo no README.")
         +row(s.comments,"Comentários","Configurado (Upstash Redis).","Falta o banco Upstash Redis.")
         +row(s.publish,"Publicar pelo painel","Configurado (GitHub).","Faltam GITHUB_REPO e GITHUB_TOKEN.")
+        +row(s.gemini,"Gerar de novo (rascunhos com IA)","Configurado (Google Gemini).","Falta GEMINI_API_KEY. Os rascunhos diários são feitos pelo GitHub e não dependem dela.")
         +row(s.totp,"Verificação em 2 etapas","Ativada.","Desativada (opcional). Use o assistente abaixo.");
       tfaCard(s.totp);
     },function(){var box=$("#a-svc");if(box)box.innerHTML='<li>Não consegui falar com o servidor.</li>'});
@@ -727,10 +889,25 @@
     d.news.forEach(function(n,i){
       if(!n||!n.title)return;var id=+n.id||i+1;while(seen[id])id++;seen[id]=1;
       o.news.push({id:id,slug:/^[a-z0-9-]{1,90}$/.test(n.slug||"")?n.slug:"",img:String(n.img||""),alt:String(n.alt||""),credit:String(n.credit||""),pos:/^(top|bottom)$/.test(n.pos)?n.pos:"",cat:String(n.cat||""),title:String(n.title),date:String(n.date||""),pub:String(n.pub||""),take:String(n.take||""),read:+n.read||0,sum:String(n.sum||""),body:String(n.body||""),src:String(n.src||""),url:String(n.url||""),featured:!!n.featured});
+      var last=o.news[o.news.length-1];
+      if(Array.isArray(n.sources)&&n.sources.length)last.sources=n.sources.filter(function(x){return x&&x.name&&/^https?:\/\//i.test(x.url||"")}).map(function(x){return {name:String(x.name),url:String(x.url)}});
+      if(Array.isArray(n.tags)&&n.tags.length)last.tags=n.tags.map(String);
     });
     var cs=(Array.isArray(d.cats)?d.cats:[]).map(String).filter(function(c){return c&&c!=="Todas"});
     o.news.forEach(function(n){if(n.cat&&cs.indexOf(n.cat)<0)cs.push(n.cat)});
     o.cats=cs;return o;
+  }
+  /* grava DATA no GitHub (/api/publish); usado pelo botão "Publicar no site agora" e pelo Publicar dos rascunhos */
+  function publishData(){
+    return api("POST","/api/publish",{data:DATA,known:knownIds()}).then(function(r){
+      if(r.ok){
+        if(r.data&&Array.isArray(r.data.news))DATA=r.data; /* inclui notícias que o robô adicionou nesse meio-tempo */
+        lsSet(DKEY,JSON.stringify(DATA));lsDel(UKEY);lsDel(KKEY);
+        BASE=clone(DATA);lsSet("nz-base-sig",baseSig());lsSet(PKEY,JSON.stringify({at:Date.now(),sig:baseSig()}));
+        status();if(st.tab==="news")items();
+      }
+      return r;
+    });
   }
   function jsonForHtml(o){return JSON.stringify(o,null,1).replace(/</g,"\\u003c")}
   /* cópia do index.html publicado com os dados atuais (só para backup manual) */
@@ -756,6 +933,14 @@
     if(id==="rv-del"){rvDel();return}
     if(id==="rv-disc"){st.dirty=false;st.rvDraft=st.rvNew?null:clone(rvFind(st.rvSel));st.rvNew=false;rvItems();rvEditor();return}
     if(ds.cmdel){cmDel(ds.cmdel,t);return}
+    if(ds.drpick){drPick(ds.drpick);return}
+    if(ds.drf){DR.filter=ds.drf;drItems();return}
+    if(id==="dr-reload"){drLoad();return}
+    if(id==="d-pub"){drPublish(t);return}
+    if(id==="d-regen"){drRegen(t);return}
+    if(id==="d-disc"){drStatus("descartado",t);return}
+    if(id==="d-undo"){drStatus("rascunho",t);return}
+    if(id==="d-usesug"&&st.drDraft){var ta=$("#d-take");if(ta){ta.value=st.drDraft.minha_opiniao||"";st.dirty=true;ta.focus();toast("Agora edite com as suas palavras.")}return}
     if(ds.tlpick){tlPick(ds.tlpick);return}
     if(id==="tl-new"){tlNew();return}
     if(id==="tl-del"){tlDel(t);return}
@@ -781,15 +966,9 @@
     if(id==="a-pub"){
       if(!confirm("Publicar as alterações no site agora?"))return;
       t.disabled=true;t.textContent="Publicando…";
-      api("POST","/api/publish",{data:DATA,known:knownIds()}).then(function(r){
+      publishData().then(function(r){
         t.disabled=false;t.textContent="Publicar no site agora";
-        if(r.ok){
-          if(r.data&&Array.isArray(r.data.news))DATA=r.data; /* inclui notícias que o robô adicionou nesse meio-tempo */
-          lsSet(DKEY,JSON.stringify(DATA));lsDel(UKEY);lsDel(KKEY);
-          BASE=clone(DATA);lsSet("nz-base-sig",baseSig());lsSet(PKEY,JSON.stringify({at:Date.now(),sig:baseSig()}));
-          status();if(st.tab==="news")items();
-          toast("Publicado! O site atualiza em 1 a 2 minutos."+(r.merged?" "+r.merged+" notícia(s) nova(s) do robô foram mantidas.":""));
-        }
+        if(r.ok)toast("Publicado! O site atualiza em 1 a 2 minutos."+(r.merged?" "+r.merged+" notícia(s) nova(s) do robô foram mantidas.":""));
         else if(r.status===401){authOk=false;toast("Sua sessão expirou. Entre de novo.",true);paint()}
         else toast(r.error||"Não consegui publicar.",true);
       },function(){t.disabled=false;t.textContent="Publicar no site agora";toast("Não consegui falar com o servidor.",true)});
@@ -815,6 +994,7 @@
     }
     else if(id==="a-form")saveNews();
     else if(id==="tl-form")tlSave();
+    else if(id==="dr-form")drSave().catch(function(){});
     else if(id==="a-site")saveSite();
     else if(id==="rv-form")rvSave();
 
@@ -824,6 +1004,7 @@
     if(t.id==="a-q"){st.q=t.value;items();return}
     if(t.id==="t-list"){trendPreview();return}
     if(t.dataset&&t.dataset.ci!==undefined&&t.tagName==="INPUT"){st.cats[+t.dataset.ci].name=t.value;return}
+    if(t.closest&&t.closest("#dr-form")){st.dirty=true;if(t.id==="d-body")drCount();if(t.id==="d-img"&&st.drDraft){st.drDraft.img=t.value.trim();drPrev()}return}
     if(t.closest&&t.closest("#rv-form")){st.dirty=true;return}
     if(t.closest&&t.closest("#tl-form")){st.dirty=true;if(t.id==="tl-title"&&st.tlNew){var sl=$("#tl-slug");if(sl&&!sl.dataset.touched)sl.value=t.value.trim()?slugify(t.value):""}if(t.id==="tl-slug")t.dataset.touched="1";return}
     if(!t.closest||!t.closest("#a-form")||!st.draft)return;

@@ -3,6 +3,8 @@
 
 Lê feeds RSS, pega título, trecho, link e imagem de cada matéria e grava no JSON
 embutido do SITE/index.html (<script id="nz-data">). Só usa a biblioteca padrão.
+Com PUBLICAR_DIRETO = False (o padrão), só tira as notícias vencidas e troca o destaque:
+as notícias novas viram rascunhos (scripts/rascunhos_ia.py), publicados pelo painel.
 
 Uso:  python scripts/atualizar_noticias.py [caminho/do/index.html]
 """
@@ -36,6 +38,10 @@ EXTRA_EM_ALTA = 2      # notícias a mais por fonte quando são de um "assunto e
 # Os "assuntos em alta" (GTA 6, Zelda...) ficam no próprio site, em nz-data > trend,
 # e são editados no painel admin (Site e categorias). O robô dá preferência a eles.
 FUSO = timezone(timedelta(hours=-3))  # Brasília
+# False: as notícias dos feeds NÃO entram mais direto no site. Elas viram rascunhos escritos com IA
+# (scripts/rascunhos_ia.py), que você revisa e publica no painel admin, aba "Rascunhos".
+# Este script continua tirando as notícias vencidas e trocando o destaque. Para voltar ao modo antigo: True.
+PUBLICAR_DIRETO = False
 
 CATEGORIAS = [  # primeira que casar vence; senão "Lançamentos". Steam vem primeiro: é o foco do site
     ("Steam",       ["steam", "valve", "deadlock", "half-life", "counter-strike 2", "epic games store", "para pc", "no pc", "jogos de pc"]),
@@ -212,11 +218,15 @@ def ler_feed(nome, url, so_games):
         if not titulo or not url_ok(link):
             continue
         texto = limpar(item.findtext("description") or item.findtext("content:encoded", namespaces=NS))
+        # texto completo da matéria, quando o feed traz (usado pelos rascunhos com IA: scripts/rascunhos_ia.py)
+        completo = limpar(item.findtext("content:encoded", namespaces=NS) or "")
+        if len(completo) < len(texto):
+            completo = texto
         if nome in FONTES_PT:
-            titulo, texto = abrasileirar(titulo), abrasileirar(texto)
+            titulo, texto, completo = abrasileirar(titulo), abrasileirar(texto), abrasileirar(completo)
         if so_games and not eh_game(titulo, texto):
             continue
-        achados.append({"nome": nome, "titulo": titulo, "link": link, "texto": texto,
+        achados.append({"nome": nome, "titulo": titulo, "link": link, "texto": texto, "completo": completo,
                         "data": (q := quando_do_item(item)).date(), "pub": q.isoformat(), "img": imagem_do_item(item)})
     return achados
 
@@ -328,7 +338,7 @@ def main():
         return
 
     coletados = []
-    for nome, url, so_games in FEEDS:
+    for nome, url, so_games in (FEEDS if PUBLICAR_DIRETO else []):
         try:
             itens = ler_feed(nome, url, so_games)
             print(f"[ok]   {nome}: {len(itens)} itens lidos")

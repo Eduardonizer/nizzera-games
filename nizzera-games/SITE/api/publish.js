@@ -50,7 +50,18 @@ function clean(d) {
     const date = str(n.date, 10, "Uma data");
     if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Bad("Há uma data inválida.");
     const slug = str(n.slug, 90, "Um endereço");
-    return {
+    // matérias dos rascunhos com IA: todas as fontes usadas (aparecem em "Fontes:" no fim) e palavras-chave
+    const rawSrc = n.sources == null ? [] : n.sources;
+    if (!Array.isArray(rawSrc) || rawSrc.length > 6) throw new Bad(`As fontes da notícia "${title.slice(0, 40)}" são inválidas (máximo 6).`);
+    const sources = rawSrc.map((x) => {
+      const name = str(x && x.name, 120, "O nome de uma fonte").trim(), u = str(x && x.url, 2000, "O link de uma fonte").trim();
+      if (!name || !HTTP.test(u)) throw new Bad(`Há uma fonte sem nome ou sem link na notícia "${title.slice(0, 40)}".`);
+      return { name, url: u };
+    });
+    const rawTags = n.tags == null ? [] : n.tags;
+    if (!Array.isArray(rawTags) || rawTags.length > 10) throw new Bad(`As palavras-chave da notícia "${title.slice(0, 40)}" são inválidas.`);
+    const tags = rawTags.map((t) => str(t, 40, "Uma palavra-chave").trim()).filter(Boolean);
+    const out = {
       id,
       slug: /^[a-z0-9-]{1,90}$/.test(slug) ? slug : "",
       img,
@@ -71,6 +82,9 @@ function clean(d) {
       url,
       featured: n.featured === true,
     };
+    if (sources.length) out.sources = sources;
+    if (tags.length) out.tags = tags;
+    return out;
   });
   // assuntos em alta: [{ name: "GTA 6", terms: ["gta 6", "gta vi"] }, ...]
   const rawTrend = Array.isArray(d.trend) ? d.trend : [];
