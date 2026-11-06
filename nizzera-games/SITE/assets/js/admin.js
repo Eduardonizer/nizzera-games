@@ -299,9 +299,9 @@
       +'<div class="a-row2"><div>'+fld("Nome da fonte","f-src",d.src)+'</div><div>'+fld("Link da matéria original","f-url",d.url,"url")+'</div></div>'
       +'<h3>Capa</h3><div class="a-cover"><div class="art a-prev" id="a-prev"></div><div>'
       +'<label for="f-img" style="margin-top:0">Endereço (link) da imagem</label><input class="a-in" id="f-img" type="url" placeholder="'+(isData?"Imagem enviada do computador":"https://...")+'" value="'+esc(isData?"":d.img)+'">'
-      +'<div class="a-act"><button type="button" class="a-btn" id="a-up">Enviar do computador</button></div><input type="file" id="a-file" accept="image/*" hidden>'
+      +'<div class="a-act"><button type="button" class="a-btn" id="a-up">Enviar do computador</button><button type="button" class="a-btn" data-imgfind="news">Buscar outras imagens</button></div><input type="file" id="a-file" accept="image/*" hidden>'
       +'<label for="f-pos">Enquadramento</label><select class="a-in" id="f-pos">'+pos+'</select>'
-      +fld("Texto alternativo (para leitores de tela)","f-alt",d.alt)+fld("Crédito da imagem (opcional)","f-credit",d.credit)+'</div></div>'
+      +fld("Texto alternativo (para leitores de tela)","f-alt",d.alt)+fld("Crédito da imagem (opcional)","f-credit",d.credit)+'</div></div><div class="a-imgs" id="news-imgs"></div>'
       +'<label class="a-chk"><input type="checkbox" id="f-feat"'+(d.featured?" checked":"")+'> Mostrar como destaque no topo do site</label>'
       +'<div class="a-err" id="f-err" role="alert"></div>'
       +'<div class="a-act a-save"><button class="a-btn pri" type="submit">Salvar</button><button type="button" class="a-btn" id="a-disc">Descartar</button>'+(st.isNew?"":'<button type="button" class="a-btn dan" id="a-del">Excluir</button>')+'</div></form>';
@@ -600,7 +600,8 @@
       +(d.minha_opiniao?'<div class="a-sug"><span><b>Sugestão da IA:</b> '+esc(d.minha_opiniao)+'</span><button type="button" class="a-mini" id="d-usesug">Usar como ponto de partida</button></div>':'')+'</div>'
       +'<h3>Capa</h3><div class="a-cover"><div class="art a-prev" id="d-prev"></div><div>'
       +'<label for="d-img" style="margin-top:0">Endereço (link) da imagem</label><input class="a-in" id="d-img" type="url" placeholder="https://..." value="'+esc(d.img||"")+'">'
-      +fld("Crédito da imagem","d-credit",d.credito)+'<p class="a-hint">Aparece abaixo da foto como “Imagem: '+esc(d.credito||"divulgação / fonte")+'”.</p></div></div>'
+      +(pend?'<div class="a-act"><button type="button" class="a-btn" data-imgfind="dr">Buscar outras imagens</button></div>':'')
+      +fld("Crédito da imagem","d-credit",d.credito)+'<p class="a-hint">Aparece abaixo da foto como “Imagem: '+esc(d.credito||"divulgação / fonte")+'”.</p></div></div><div class="a-imgs" id="dr-imgs"></div>'
       +'<h3>Fontes</h3><ul class="a-srcs">'+fontes+'</ul>'
       +'<div class="a-err" id="d-err" role="alert"></div>'
       +'<div class="a-act a-save">'+(pend?'<button class="a-btn pri" type="button" id="d-pub">Publicar</button><button class="a-btn" type="submit" id="d-save">Salvar rascunho</button><button class="a-btn" type="button" id="d-regen"'+(DR.gemini?'':' title="Falta a GEMINI_API_KEY na Vercel"')+'>Gerar de novo</button><button class="a-btn dan" type="button" id="d-disc">Descartar</button>'
@@ -700,6 +701,43 @@
       toast("Nova versão pronta."+(mud?" Clique em Salvar rascunho para guardar a sua opinião e a capa.":""));
     },function(){btn.disabled=false;btn.textContent="Gerar de novo";drFail(null,$("#d-err"))});
   }
+
+  /* ---- "Buscar outras imagens" (rascunhos e notícias): fotos das matérias de origem e da Steam, via /api/drafts ---- */
+  var IMGS={list:[],kind:""};
+  function imgItem(kind){
+    if(kind==="dr"){var d=drRead();return d&&{titulo:d.titulo,tags:d.tags||[],img:d.img,fontes:(d.fontes||[]).map(function(f){return {nome:f.nome,url:f.url}})}}
+    readForm();var n=st.draft;if(!n)return null;
+    var f=(n.sources&&n.sources.length?n.sources:[{name:n.src,url:n.url}]).filter(function(x){return x&&/^https?:\/\//i.test(x.url||"")}).map(function(x){return {nome:x.name||"fonte",url:x.url}});
+    return {titulo:n.title,tags:n.tags||[],img:/^https?:/i.test(n.img||"")?n.img:"",fontes:f};
+  }
+  function imgFind(kind,btn){
+    var item=imgItem(kind),box=$("#"+kind+"-imgs");if(!item||!box)return;
+    btn.disabled=true;btn.textContent="Buscando…";box.innerHTML='<p class="a-hint">Procurando fotos nas matérias de origem e na Steam…</p>';
+    api("POST","/api/drafts",{action:"images",item:item}).then(function(r){
+      btn.disabled=false;btn.textContent="Buscar outras imagens";
+      if(r.status===401){authOk=false;toast("Sua sessão expirou. Entre de novo.",true);paint();return}
+      if(!r.ok){box.innerHTML='<p class="a-err">'+esc(r.error||"Não consegui buscar imagens.")+'</p>';return}
+      IMGS={list:r.images||[],kind:kind};
+      box.innerHTML=IMGS.list.length?'<p class="a-hint">Clique numa imagem para usar como capa. O crédito é preenchido junto. Confira se a foto é mesmo do assunto.</p><div class="a-igrid">'
+        +IMGS.list.map(function(x,i){return '<button type="button" class="a-iopt" data-iopt="'+i+'" title="'+esc(x.origem)+'"><img src="'+esc(x.url)+'" alt="" loading="lazy" referrerpolicy="no-referrer"'+(x.menor?' data-menor="'+esc(x.menor)+'"':'')+'><small>'+esc(x.origem)+'</small></button>'}).join("")+'</div>'
+        :'<p class="a-hint">Não achei outras imagens. Isso acontece quando o site de origem bloqueia o robô e o jogo não está na Steam. Cole o link de uma imagem no campo acima'+(kind==="news"?' ou envie do computador':'')+'.</p>';
+    },function(){btn.disabled=false;btn.textContent="Buscar outras imagens";box.innerHTML='<p class="a-err">Não consegui falar com o servidor.</p>'});
+  }
+  function imgUse(i,el){
+    var x=IMGS.list[i];if(!x)return;
+    var im=el.querySelector("img"),url=im&&im.dataset.menor&&im.dataset.failed?im.dataset.menor:x.url;
+    if(IMGS.kind==="dr"){if(!st.drDraft)return;$("#d-img").value=url;$("#d-credit").value=x.credito;st.drDraft.img=url;st.drDraft.credito=x.credito;drPrev()}
+    else{if(!st.draft)return;$("#f-img").value=url;$("#f-credit").value=x.credito;st.draft.img=url;st.draft.credit=x.credito;preview()}
+    st.dirty=true;
+    [].forEach.call(adm.querySelectorAll(".a-iopt"),function(b){b.classList.toggle("on",b===el)});
+    toast(IMGS.kind==="dr"?"Capa trocada. Clique em Salvar rascunho (ou Publicar) para guardar.":"Capa trocada. Clique em Salvar para guardar.");
+  }
+  /* imagem que não abre: tenta a versão menor; se também falhar, some da lista */
+  adm.addEventListener("error",function(e){
+    var im=e.target;if(!im||im.tagName!=="IMG"||!im.closest(".a-iopt"))return;
+    if(im.dataset.menor&&!im.dataset.failed){im.dataset.failed="1";im.src=im.dataset.menor;return}
+    im.closest(".a-iopt").remove();
+  },true);
 
   /* ---- aba Comentários ---- */
   function cmView(){
@@ -933,6 +971,8 @@
     if(id==="rv-del"){rvDel();return}
     if(id==="rv-disc"){st.dirty=false;st.rvDraft=st.rvNew?null:clone(rvFind(st.rvSel));st.rvNew=false;rvItems();rvEditor();return}
     if(ds.cmdel){cmDel(ds.cmdel,t);return}
+    if(ds.imgfind){imgFind(ds.imgfind,t);return}
+    if(ds.iopt!==undefined){imgUse(+ds.iopt,t);return}
     if(ds.drpick){drPick(ds.drpick);return}
     if(ds.drf){DR.filter=ds.drf;drItems();return}
     if(id==="dr-reload"){drLoad();return}

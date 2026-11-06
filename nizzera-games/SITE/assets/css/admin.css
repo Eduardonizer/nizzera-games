@@ -265,3 +265,13 @@ a.a-btn{display:inline-flex;align-items:center;text-decoration:none}
 .a-note{margin:0 0 10px;padding:10px 14px;border-radius:10px;background:#ffe0e6;color:#b3243f;font-weight:600}
 .a-note.ok{background:#d3f5e8;color:#0b7a55}
 .a-wc{font-weight:400;color:var(--muted)}
+
+/* ---- "Buscar outras imagens" ---- */
+.a-imgs:empty{display:none}
+.a-imgs{margin-top:10px}
+.a-igrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:8px}
+.a-iopt{display:grid;gap:4px;padding:4px;border:2px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;cursor:pointer;text-align:left;font:inherit}
+.a-iopt img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block;background:var(--line)}
+.a-iopt small{font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a-iopt:hover{border-color:var(--cobalt)}
+.a-iopt.on{border-color:var(--cobalt);box-shadow:3px 3px 0 var(--sun)}
