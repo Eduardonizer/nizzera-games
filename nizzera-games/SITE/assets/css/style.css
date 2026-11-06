@@ -35,7 +35,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0
 .heroside{display:grid;gap:12px}
 .feat .slide{animation:fade .5s ease both}
 @keyframes fade{from{opacity:0;transform:translateX(14px)}}
-.feat h2{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.feat h2{display:-webkit-box;-webkit-line-clamp:3;line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .fdots{display:flex;gap:8px;justify-content:center}
 .fdots button{width:12px;height:12px;padding:0;border:0;border-radius:99px;background:rgba(255,255,255,.4);cursor:pointer;transition:width .25s,background .25s}
 .fdots button[aria-selected="true"]{width:30px;background:var(--sun)}
@@ -516,8 +516,8 @@ html{-webkit-tap-highlight-color:transparent}
   .marq.swipe{display:block;padding:12px 0 22px;-webkit-mask-image:none;mask-image:none;scroll-snap-type:x mandatory}
   .marq.swipe .track{display:flex;gap:14px;width:max-content;padding-inline:var(--gut);animation:none;pointer-events:auto;user-select:auto;-webkit-user-select:auto}
   .marq.swipe .card{width:min(80vw,330px);margin:0;scroll-snap-align:start;cursor:pointer}
-  .marq.swipe .card h3{font-size:1.12rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-  .marq.swipe .card p{font-size:.9rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .marq.swipe .card h3{font-size:1.12rem;display:-webkit-box;-webkit-line-clamp:3;line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .marq.swipe .card p{font-size:.9rem;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
   /* ---- filtros da lista: busca em cima, categorias numa linha só ---- */
   .tools{gap:12px;margin:14px 0 18px}
@@ -546,7 +546,7 @@ html{-webkit-tap-highlight-color:transparent}
   .cards .card .art{position:relative;flex:0 0 36%;aspect-ratio:auto}
   .cards .card .art img,.cards .card .art svg{position:absolute;inset:0}
   .cards .card .tx{padding:10px 12px 12px;gap:6px;min-width:0}
-  .cards .card h3{font-size:1rem;line-height:1.22;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .cards .card h3{font-size:1rem;line-height:1.22;display:-webkit-box;-webkit-line-clamp:3;line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
   .cards .card p{display:none}
   .cards .card .tag,.cards .card .hot{font-size:.7rem;padding:1px 8px}
   .cards .card .meta{font-size:.76rem;margin-top:auto}
@@ -554,8 +554,8 @@ html{-webkit-tap-highlight-color:transparent}
   .cards .card:first-child .art{flex:none;aspect-ratio:16/9}
   .cards .card:first-child .art img,.cards .card:first-child .art svg{position:static}
   .cards .card:first-child .tx{padding:14px 16px 16px;gap:8px}
-  .cards .card:first-child h3{font-size:1.25rem;-webkit-line-clamp:4}
-  .cards .card:first-child p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .cards .card:first-child h3{font-size:1.25rem;-webkit-line-clamp:4;line-clamp:4}
+  .cards .card:first-child p{display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .cards .card:first-child .tag,.cards .card:first-child .hot{font-size:.8rem;padding:2px 10px}
   .pager{margin-top:-16px}
   .pinfo{padding-bottom:36px}
@@ -565,7 +565,7 @@ html{-webkit-tap-highlight-color:transparent}
   .deal{border-radius:12px}
   .deal:only-child{grid-column:1/-1}
   .deal .dx{padding:9px 10px 11px;gap:6px}
-  .deal b{font-size:.86rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .deal b{font-size:.86rem;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .dp{gap:4px 6px}
   .dd{font-size:.76rem;padding:1px 6px}
   .dp s{font-size:.75rem}
