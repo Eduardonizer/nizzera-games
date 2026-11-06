@@ -1,7 +1,7 @@
 # Nizzera Games
 
 Site de notícias de games, feito em HTML, CSS e JavaScript puro e hospedado na Vercel:
-https://nizzera-games.vercel.app. Criado por Eduardo Nizer.
+https://www.nizzeragames.com.br. Criado por Eduardo Nizer.
 
 ## Estrutura
 
@@ -120,13 +120,16 @@ momento (ex.: `GTA 6: gta 6, gta vi, grand theft auto vi`), em ordem de importâ
 - O endereço é fixado na primeira publicação e não muda se o título for editado.
 - `sitemap.xml` lista todas as páginas. Depois do deploy, cadastre o site no
   [Google Search Console](https://search.google.com/search-console) e envie
-  `https://nizzera-games.vercel.app/sitemap.xml`.
-- Se mudar de domínio, troque `SITE_URL` em `scripts/gerar_paginas.py` e o endereço no
-  `<head>` do `index.html` e no `robots.txt`.
+  `https://www.nizzeragames.com.br/sitemap.xml`.
+- Domínio: **https://www.nizzeragames.com.br** (o sem www redireciona para ele, pela Vercel).
+  O endereço antigo `nizzera-games.vercel.app` redireciona com 301 para o domínio (`redirects` no `SITE/vercel.json`).
+- Se mudar de domínio de novo, troque `SITE_URL` em `scripts/gerar_paginas.py`, `SITE_URL` em
+  `SITE/assets/js/tierlist.js`, o endereço no `<head>` do `index.html`, no `robots.txt`, no
+  `scripts/og_banner.html` (e gere a imagem de novo) e o redirecionamento do `vercel.json`; depois rode o gerador.
 
 ## Painel admin
 
-Endereço: **https://nizzera-games.vercel.app/admin**. Não há botão no site, e o Google não indexa essa página.
+Endereço: **https://www.nizzeragames.com.br/admin**. Não há botão no site, e o Google não indexa essa página.
 
 Variáveis na Vercel (Settings → Environment Variables), depois faça um novo deploy:
 
