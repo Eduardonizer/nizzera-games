@@ -250,3 +250,6 @@ a.a-btn{display:inline-flex;align-items:center;text-decoration:none}
 .a-take label small{font-weight:400;color:var(--muted)}
 .a-tk{justify-self:start;font-size:.7rem;font-weight:800;border-radius:99px;padding:1px 8px;margin-top:3px;background:#ffe0e6;color:#b3243f}
 .a-tk.ok{background:#d3f5e8;color:#0b7a55}
+
+/* aba Tier List: miniatura da capa do tema */
+.a-th img{width:100%;height:100%;object-fit:cover;display:block;border-radius:8px}
