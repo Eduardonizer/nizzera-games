@@ -83,7 +83,7 @@ async function regenerate(d) {
   const P = prompt();
   // troca {campo} pelo valor numa passada só (com função: um "$" no texto da fonte não vira padrão de substituição)
   const fill = (tpl, m) => tpl.replace(/\{(\w+)\}/g, (all, k) => (k in m ? String(m[k] == null ? "" : m[k]) : all));
-  const blocks = src.fontes.map((f, i) => fill(P.fonte, { n: i + 1, nome: f.nome, titulo: f.titulo, pub: f.pub, url: f.url, texto: f.texto }));
+  const blocks = src.fontes.map((f, i) => fill(P.fonte, { n: i + 1, nome: f.nome, titulo: f.titulo, pub: f.pub, url: f.url, texto: f.texto, idioma: f.idioma || "português" }));
   if (src.contexto) blocks.push(fill(P.contexto, { contexto: src.contexto }));
   blocks.push(fill(P.pedido, { qtd: src.fontes.length }));
   blocks.push("Esta é uma NOVA versão: escreva diferente da anterior (outro título e outra abertura), mantendo os mesmos fatos.");

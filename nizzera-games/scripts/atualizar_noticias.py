@@ -26,6 +26,17 @@ FEEDS = [  # (nome mostrado como fonte/crédito, url do RSS, só_games?)
     ("Tecnoblog",   "https://tecnoblog.net/feed/",        True),
     ("OtakuPT",     "https://www.otakupt.com/feed/",      True),
 ]
+# Sites de fora, em inglês: entram SÓ nos rascunhos com IA (scripts/rascunhos_ia.py), onde o Gemini traduz
+# e escreve a matéria em português. Nunca são publicados direto no site, mesmo com PUBLICAR_DIRETO = True.
+FEEDS_EXTERIOR = [  # (nome, url do RSS, só_games?)
+    ("IGN",           "https://feeds.feedburner.com/ign/games-all",       False),
+    ("GameSpot",      "https://www.gamespot.com/feeds/game-news",         False),
+    ("Eurogamer",     "https://www.eurogamer.net/feed",                   False),
+    ("Gematsu",       "https://www.gematsu.com/feed",                     False),
+    ("PC Gamer",      "https://www.pcgamer.com/rss/",                     False),
+    ("Push Square",   "https://www.pushsquare.com/feeds/latest",          False),
+    ("Nintendo Life", "https://www.nintendolife.com/feeds/latest",        False),
+]
 FONTES_PT = {"OtakuPT"}  # fontes de Portugal: o texto é convertido para o português do Brasil (abrasileirar)
 MAX_POR_FEED = 5       # máximo de notícias novas por fonte a cada execução (o robô roda 1 vez por dia)
 MAX_POR_RODADA = 20    # máximo de notícias novas no total por execução

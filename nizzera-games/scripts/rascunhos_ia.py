@@ -5,7 +5,8 @@ Nada vai direto para o site: os rascunhos ficam no Upstash Redis (o mesmo banco 
 e aparecem no painel admin, aba "Rascunhos", onde você edita, publica, descarta ou gera de novo.
 
 Como funciona:
-  1. lê os mesmos feeds do scripts/atualizar_noticias.py;
+  1. lê os feeds do scripts/atualizar_noticias.py: os brasileiros (FEEDS) e os de fora, em inglês (FEEDS_EXTERIOR),
+     que o Gemini traduz;
   2. para cada notícia nova, procura a MESMA notícia nos outros feeds (título e palavras-chave)
      e junta até MAX_FONTES fontes; com uma fonte só, gera mesmo assim;
   3. pede ao Gemini uma matéria original que combine as fontes (o texto do pedido fica em
@@ -37,6 +38,7 @@ MAX_ERROS_SEGUIDOS = 3   # o Gemini falhou 3 vezes seguidas: para e deixa o rest
 PAUSA_SEG = 8            # pausa entre uma chamada e outra ao Gemini
 ESPERA_429_SEG = 45      # espera antes de tentar de novo quando o Gemini responde 429 (limite por minuto)
 MAX_POR_ASSUNTO = 3      # máximo de rascunhos do mesmo "assunto em alta" (GTA 6, Zelda...) por execução
+MAX_POR_SITE = 2         # máximo de rascunhos com o mesmo site como fonte principal (para nenhum site dominar)
 MAX_FONTES = 3           # fontes por matéria (a notícia principal + as mesmas notícias em outros feeds)
 IDADE_MAX_DIAS = 2       # só notícias publicadas nos últimos 2 dias (o robô roda 1 vez por dia)
 TEXTO_MAX = 5000         # caracteres de cada fonte enviados ao Gemini
@@ -48,6 +50,8 @@ RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = os.path.join(RAIZ, "SITE")
 PROMPT = os.path.join(SITE, "api", "_rascunho_ia.json")
 DRAFTS, FONTES, VISTOS = "nz:drafts", "nz:drafts:src", "nz:drafts:seen"
+TODOS_FEEDS = AN.FEEDS + AN.FEEDS_EXTERIOR  # brasileiros primeiro (têm preferência para completar as fontes)
+EXTERIOR = {f[0] for f in AN.FEEDS_EXTERIOR}
 API = "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent"
 PLAT_CAT = {"Steam": "Steam", "PC": "Steam", "PlayStation": "PlayStation", "Xbox": "Xbox", "Nintendo": "Nintendo"}
 
@@ -58,6 +62,9 @@ muito muita ja já ainda tambem também agora hoje vai vao vão sera será foi s
 the of and for with to in on is are new jogo jogos game games anuncia anunciado anunciada revela revelado revelada chega chegam
 ganha ganham confira veja saiba diz dizem segundo apos após data lancamento lançamento trailer video vídeo oficial oficialmente
 black friday oferta ofertas desconto descontos preco preço precos preços promocao promoção reduzido barato menos
+an its it from after how why what when who will has have had gets get got reveals revealed announces announced
+launches launch release released out now just more first here heres could would may might says said update
+review preview hands this that your you all over into about than finally coming comes like
 """.split())
 
 
@@ -122,7 +129,9 @@ def calcular_pesos(itens):
             df[w] = df.get(w, 0) + 1
     n = max(len(itens), 2)
     PESO.clear()
-    PESO.update({w: math.log(n / c) + 0.1 for w, c in df.items()})
+    # palavra que aparece em 4 títulos ou mais é o "assunto do dia" (Zelda, GTA 6): quase não conta para dizer
+    # que duas matérias são a MESMA notícia, senão qualquer coisa sobre o jogo vira uma notícia só
+    PESO.update({w: (math.log(n / c) + 0.1) * (1 if c < 4 else 0.25) for w, c in df.items()})
 
 
 def peso(ws):
@@ -137,7 +146,8 @@ def mesma_noticia(a, b):
     comum = ta & tb
     if len(comum) < 2:
         return False
-    return peso(comum) / min(peso(ta), peso(tb)) >= 0.5
+    # precisa cobrir boa parte do título menor E uma parte razoável dos dois juntos
+    return peso(comum) / min(peso(ta), peso(tb)) >= 0.5 and peso(comum) / peso(ta | tb) >= 0.25
 
 
 def texto_da_pagina(url):
@@ -222,7 +232,8 @@ def preencher(modelo, campos):
 
 
 def montar_pedido(P, fontes, contexto):
-    blocos = [preencher(P["fonte"], {"n": i, "nome": f["nome"], "titulo": f["titulo"], "pub": f.get("pub") or "", "url": f["url"], "texto": f["texto"]})
+    blocos = [preencher(P["fonte"], {"n": i, "nome": f["nome"], "titulo": f["titulo"], "pub": f.get("pub") or "", "url": f["url"], "texto": f["texto"],
+                                     "idioma": f.get("idioma") or "português"})
               for i, f in enumerate(fontes, 1)]
     if contexto:
         blocos.append(preencher(P["contexto"], {"contexto": contexto}))
@@ -367,7 +378,7 @@ def main():
     trend = [x for x in dados.get("trend", []) if isinstance(x, dict) and x.get("terms")]
 
     coletados = []
-    for nome, feed, so_games in AN.FEEDS:
+    for nome, feed, so_games in TODOS_FEEDS:
         try:
             itens = AN.ler_feed(nome, feed, so_games)
             log(f"[ok]   {nome}: {len(itens)} itens lidos")
@@ -387,7 +398,7 @@ def main():
     fila = sorted(recentes, key=lambda x: x["pub"], reverse=True)  # a ordenação abaixo mantém esta ordem nos empates
     fila.sort(key=lambda x: (x["alta"] is None, x["alta"] or 0, -len({o["nome"] for o in x["grupo"]})))
 
-    novos, ja_cobertas, erros, por_assunto, tentadas, seguidos = [], [], 0, {}, 0, 0
+    novos, ja_cobertas, erros, por_assunto, tentadas, seguidos, por_site = [], [], 0, {}, 0, 0, {}
     for it in fila:
         if len(novos) >= MAX_POR_EXECUCAO or tentadas >= MAX_TENTATIVAS:
             break
@@ -395,6 +406,8 @@ def main():
             log(f"\nO Gemini falhou {seguidos} vezes seguidas: o resto fica para a próxima execução.")
             break
         if it["alta"] is not None and por_assunto.get(it["alta"], 0) >= MAX_POR_ASSUNTO:
+            continue
+        if por_site.get(it["nome"], 0) >= MAX_POR_SITE:
             continue
         if it["k"] in usados or re.sub(r"\W+", "", it["titulo"].lower()) in tit_site:
             continue
@@ -404,7 +417,8 @@ def main():
             usados.add(it["k"])
             continue
         outras, nomes = [], {it["nome"]}
-        for o in sorted(it["grupo"], key=lambda o: AN.FEEDS.index(next(f for f in AN.FEEDS if f[0] == o["nome"]))):
+        ordem = [f[0] for f in TODOS_FEEDS]
+        for o in sorted(it["grupo"], key=lambda o: ordem.index(o["nome"])):
             if o["nome"] not in nomes and o["k"] not in usados and len(outras) < MAX_FONTES - 1:
                 outras.append(o)
                 nomes.add(o["nome"])
@@ -416,9 +430,13 @@ def main():
             for g in outras:
                 log(f"     + {g['nome']}: {g['titulo'][:80]}")
             novos.append(it)
+            if it["alta"] is not None:
+                por_assunto[it["alta"]] = por_assunto.get(it["alta"], 0) + 1
+            por_site[it["nome"]] = por_site.get(it["nome"], 0) + 1
             continue
 
-        fontes = [{"nome": g["nome"], "titulo": g["titulo"], "url": g["link"], "pub": g["pub"], "texto": texto_da_fonte(g)} for g in grupo]
+        fontes = [{"nome": g["nome"], "titulo": g["titulo"], "url": g["link"], "pub": g["pub"], "texto": texto_da_fonte(g),
+                   "idioma": "inglês" if g["nome"] in EXTERIOR else "português"} for g in grupo]
         contexto = contexto_do_site(fontes)
         img, credito = "", ""
         for g in grupo:
@@ -465,6 +483,7 @@ def main():
         novos.append(rascunho)
         if it["alta"] is not None:
             por_assunto[it["alta"]] = por_assunto.get(it["alta"], 0) + 1
+        por_site[it["nome"]] = por_site.get(it["nome"], 0) + 1
         log(f"   ✓ rascunho: {gerado['titulo']}  ({len(gerado['texto'].split())} palavras, {len(fontes)} fonte(s))")
 
     if ja_cobertas and not teste:
