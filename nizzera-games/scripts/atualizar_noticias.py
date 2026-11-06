@@ -24,6 +24,7 @@ FEEDS = [  # (nome mostrado como fonte/crédito, url do RSS, só_games?)
     ("Tecnoblog",   "https://tecnoblog.net/feed/",        True),
     ("OtakuPT",     "https://www.otakupt.com/feed/",      True),
 ]
+FONTES_PT = {"OtakuPT"}  # fontes de Portugal: o texto é convertido para o português do Brasil (abrasileirar)
 MAX_POR_FEED = 5       # máximo de notícias novas por fonte a cada execução (o robô roda 1 vez por dia)
 MAX_POR_RODADA = 20    # máximo de notícias novas no total por execução
 DIAS_NO_SITE = 15      # notícia com mais de 15 dias sai do site (e a página dela é apagada)
@@ -63,9 +64,64 @@ def limpar(txt):
     txt = re.sub(r"<script.*?</script>|<style.*?</style>", " ", txt or "", flags=re.S | re.I)
     txt = re.sub(r"<[^>]+>", " ", txt)
     txt = html.unescape(txt)
-    txt = re.sub(r"(O post|The post|A matéria|Post)\s.{0,200}?(apareceu primeiro|appeared first|foi publicad).*$", "", txt, flags=re.S | re.I)
+    txt = re.sub(RODAPE_FEED, "", txt, flags=re.S | re.I)
     txt = txt.replace("[…]", "").replace("[...]", "").replace("Read more", "").replace("Leia mais", "")
     return re.sub(r"\s+", " ", txt).strip()
+
+
+# "O post X apareceu primeiro em Y", "O conteúdo X aparece primeiro em Y" etc. (rodapé que os feeds colam no texto)
+RODAPE_FEED = r"(O post|The post|A matéria|O artigo|O conteúdo|Post)\s.{0,250}?(aparece(u)? primeiro|appeared first|foi publicad).*$"
+
+
+# ---- português de Portugal -> do Brasil (só nas FONTES_PT) ----
+PT_BR = {
+    "ecrã": "tela", "ecrãs": "telas", "telemóvel": "celular", "telemóveis": "celulares",
+    "consola": "console", "consolas": "consoles", "equipa": "equipe", "equipas": "equipes",
+    "utilizador": "usuário", "utilizadores": "usuários", "utilizadora": "usuária", "utilizadoras": "usuárias",
+    "partilhar": "compartilhar", "partilhou": "compartilhou", "partilha": "compartilha", "partilham": "compartilham",
+    "partilhado": "compartilhado", "partilhada": "compartilhada", "partilhados": "compartilhados", "partilhadas": "compartilhadas",
+    "pormenor": "detalhe", "pormenores": "detalhes", "videojogo": "videogame", "videojogos": "videogames",
+    "registar": "registrar", "registou": "registrou", "registado": "registrado", "registada": "registrada",
+    "facto": "fato", "factos": "fatos", "contacto": "contato", "contactos": "contatos", "actualização": "atualização",
+    "ficheiro": "arquivo", "ficheiros": "arquivos", "descarregar": "baixar", "descarregamento": "download",
+    "arranque": "início", "fecho": "fechamento", "cassete": "fita", "cassetes": "fitas", "guião": "roteiro",
+    "decorre": "acontece", "decorrem": "acontecem", "decorrerá": "acontecerá", "decorreu": "aconteceu",
+    "regressa": "volta", "regressam": "voltam", "regressou": "voltou", "regressaram": "voltaram", "regresso": "retorno",
+    "comboio": "trem", "autocarro": "ônibus", "relvado": "gramado", "golo": "gol", "golos": "gols",
+    "vais": "você vai", "podes": "você pode", "tens": "você tem", "queres": "você quer", "sabes": "você sabe",
+    "estás": "você está", "teu": "seu", "tua": "sua", "teus": "seus", "tuas": "suas",
+}
+PT_FRASES = [  # (procura, troca): expressões de mais de uma palavra
+    (r"\bbanda sonora\b", "trilha sonora"), (r"\besta (segunda|terça|quarta|quinta|sexta)-feira\b", r"nesta \1-feira"),
+    (r"\beste (sábado|domingo)\b", r"neste \1"), (r"\bfica a saber\b", "saiba"),
+    (r"\baprendizagem automática\b", "aprendizado de máquina"), (r"\bpara às\b", "para as"),
+]
+# palavras que mudam de gênero: "a consola" -> "o console", "o ecrã" -> "a tela" (artigo e adjetivo juntos)
+_GENERO = [("consola", "console", {"a": "o", "da": "do", "na": "no", "pela": "pelo", "uma": "um", "esta": "este", "essa": "esse",
+                                   "nova": "novo", "própria": "próprio", "sua": "seu", "uma nova": "um novo", "a nova": "o novo"}),
+           ("consolas", "consoles", {"as": "os", "das": "dos", "nas": "nos", "às": "aos", "pelas": "pelos", "estas": "estes",
+                                     "novas": "novos", "suas": "seus", "as novas": "os novos", "às novas": "aos novos"}),
+           ("ecrã", "tela", {"o": "a", "do": "da", "no": "na", "pelo": "pela", "um": "uma", "este": "esta", "seu": "sua"}),
+           ("ecrãs", "telas", {"os": "as", "dos": "das", "nos": "nas", "pelos": "pelas", "seus": "suas"})]
+for _pt, _br, _arts in _GENERO:
+    for _a in sorted(_arts, key=len, reverse=True):  # "uma nova" antes de "nova"
+        PT_FRASES.append((r"\b" + _a.replace(" ", r"\s+") + r"\s+" + _pt + r"\b", _arts[_a] + " " + _br))
+# "está a fazer" -> "está fazendo": estar/continuar/andar/ficar + a + infinitivo vira gerúndio
+PT_GERUNDIO = re.compile(r"\b(est(?:á|ão|ava|avam|ou|amos|eja|ejam)|continu(?:a|am|ava|avam|ou)|and(?:a|am|ava|avam)|fic(?:a|am|ou|aram))\s+a\s+([a-zà-ú]+?)(ar|er|ir|or|ôr)\b", re.I)
+
+
+def _mesma_caixa(orig, novo):
+    return novo[0].upper() + novo[1:] if orig[:1].isupper() else novo
+
+
+def abrasileirar(txt):
+    if not txt:
+        return txt
+    for pad, novo in PT_FRASES:  # expressões primeiro (inclui artigo + palavra que muda de gênero)
+        txt = re.sub(pad, lambda m, novo=novo: _mesma_caixa(m.group(0), m.expand(novo)), txt, flags=re.I)
+    txt = re.sub(r"\b[a-zà-úA-ZÀ-Ú]+\b", lambda m: _mesma_caixa(m.group(0), PT_BR[m.group(0).lower()]) if m.group(0).lower() in PT_BR else m.group(0), txt)
+    # por último o gerúndio, já com as palavras trocadas ("estão a partilhar" -> "estão compartilhando")
+    return PT_GERUNDIO.sub(lambda m: f"{m.group(1)} {m.group(2)}{ {'ar': 'ando', 'er': 'endo', 'ir': 'indo', 'or': 'ondo', 'ôr': 'ondo'}[m.group(3).lower()] }", txt)
 
 
 def cortar(txt, n):
@@ -76,6 +132,15 @@ def cortar(txt, n):
     if pos > n * 0.5:
         return corte[:pos + 1]
     return corte.rsplit(" ", 1)[0].rstrip(",;:") + "…"
+
+
+def fechar_frase(txt):
+    """O feed às vezes corta o texto no meio da frase: volta até a última frase completa (ou põe "…")."""
+    txt = (txt or "").strip()
+    if not txt or re.search(r"[.!?…\"”)]$", txt):
+        return txt
+    pos = max(txt.rfind(". "), txt.rfind("! "), txt.rfind("? "))
+    return txt[:pos + 1] if pos > len(txt) * 0.4 else txt.rstrip(",;:- ") + "…"
 
 
 def primeira_frase(txt, n=170):
@@ -126,15 +191,16 @@ def eh_game(titulo, texto):
     return any(p in base for p in PALAVRAS_GAMES)
 
 
-def data_do_item(item):
+def quando_do_item(item):
+    """Data e hora de publicação, no horário de Brasília."""
     bruto = item.findtext("pubDate") or item.findtext("{http://purl.org/dc/elements/1.1/}date") or ""
     try:
         d = parsedate_to_datetime(bruto)
         if d.tzinfo is None:
             d = d.replace(tzinfo=timezone.utc)
-        return d.astimezone(FUSO).date()
+        return d.astimezone(FUSO).replace(microsecond=0)
     except Exception:
-        return datetime.now(FUSO).date()
+        return datetime.now(FUSO).replace(microsecond=0)
 
 
 def ler_feed(nome, url, so_games):
@@ -146,10 +212,12 @@ def ler_feed(nome, url, so_games):
         if not titulo or not url_ok(link):
             continue
         texto = limpar(item.findtext("description") or item.findtext("content:encoded", namespaces=NS))
+        if nome in FONTES_PT:
+            titulo, texto = abrasileirar(titulo), abrasileirar(texto)
         if so_games and not eh_game(titulo, texto):
             continue
         achados.append({"nome": nome, "titulo": titulo, "link": link, "texto": texto,
-                        "data": data_do_item(item), "img": imagem_do_item(item)})
+                        "data": (q := quando_do_item(item)).date(), "pub": q.isoformat(), "img": imagem_do_item(item)})
     return achados
 
 
@@ -198,11 +266,11 @@ def montar(dados, coletados, hoje):
         if not img:  # o site só publica notícias com foto
             print(f"[pula] sem imagem: {it['titulo'][:70]}")
             continue
-        corpo = cortar(it["texto"], 450) or it["titulo"]
+        corpo = fechar_frase(cortar(it["texto"], 450)) or it["titulo"]
         novas.append({
             "id": prox_id, "img": img, "alt": it["titulo"] if img else "", "pos": "",
             "credit": it["nome"] if img else "", "cat": categoria(it["titulo"], it["texto"]),
-            "title": it["titulo"], "date": it["data"].isoformat(), "read": 1,
+            "title": it["titulo"], "date": it["data"].isoformat(), "pub": it["pub"], "read": 1,
             "sum": primeira_frase(it["texto"]) or it["titulo"], "body": corpo,
             "src": it["nome"], "url": it["link"], "featured": False})
         prox_id += 1
@@ -224,13 +292,40 @@ def montar(dados, coletados, hoje):
     return novas
 
 
+def revisar(dados):
+    """Aplica a limpeza do rodapé do feed e o português do Brasil às notícias que já estão no site.
+    Só mexe em notícias vindas das fontes (não toca em texto escrito no painel, como "Nossa opinião")."""
+    mudou = 0
+    for n in dados["news"]:
+        antes = json.dumps(n, ensure_ascii=False, sort_keys=True)
+        for k in ("sum", "body"):
+            if n.get(k):
+                n[k] = re.sub(r"\s+", " ", re.sub(RODAPE_FEED, "", n[k], flags=re.S | re.I)).strip() or n.get("title", "")
+        if n.get("src") and n.get("body"):
+            n["body"] = fechar_frase(n["body"])
+        if n.get("src") in FONTES_PT:
+            for k in ("title", "alt", "sum", "body"):
+                if n.get(k):
+                    n[k] = abrasileirar(n[k])
+        mudou += json.dumps(n, ensure_ascii=False, sort_keys=True) != antes
+    return mudou
+
+
 def main():
-    caminho = sys.argv[1] if len(sys.argv) > 1 else PADRAO
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    caminho = args[0] if args else PADRAO
     texto = open(caminho, encoding="utf-8").read()
     m = re.search(r'(<script id="nz-data" type="application/json">\s*)(.*?)(\s*</script>)', texto, re.S)
     if not m:
         sys.exit("Bloco nz-data não encontrado em " + caminho)
     dados = json.loads(m.group(2))
+
+    if "--revisar" in sys.argv:  # uso:  python scripts/atualizar_noticias.py --revisar
+        n = revisar(dados)
+        js = json.dumps(dados, ensure_ascii=False, indent=1).replace("<", "\\u003c")
+        open(caminho, "w", encoding="utf-8").write(texto[:m.start(2)] + js + texto[m.end(2):])
+        print(f"{n} notícia(s) revisada(s).")
+        return
 
     coletados = []
     for nome, url, so_games in FEEDS:

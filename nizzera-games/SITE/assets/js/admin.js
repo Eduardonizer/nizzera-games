@@ -272,7 +272,7 @@
     var q=st.q.toLowerCase(),h="";
     DATA.news.forEach(function(n){
       if(q&&(n.title+" "+n.cat).toLowerCase().indexOf(q)<0)return;
-      h+='<div class="a-rowi'+(n.id===st.sel?" on":"")+'"><div class="art a-th">'+pic(n)+'</div><button type="button" class="a-pick" data-pick="'+n.id+'"><b>'+esc(n.title||"(sem título)")+'</b><small>'+esc(n.cat)+" · "+esc(fmt(n.date))+(n.featured?" · ★ destaque":"")+'</small></button>'
+      h+='<div class="a-rowi'+(n.id===st.sel?" on":"")+'"><div class="art a-th">'+pic(n)+'</div><button type="button" class="a-pick" data-pick="'+n.id+'"><b>'+esc(n.title||"(sem título)")+'</b><small>'+esc(n.cat)+" · "+esc(fmt(n.date))+(n.featured?" · ★ destaque":"")+'</small>'+(String(n.take||"").trim()?'<span class="a-tk ok">✓ com opinião</span>':'<span class="a-tk">sem opinião</span>')+'</button>'
        +'<span class="a-mv"><button type="button" data-mv="-1" data-mid="'+n.id+'" aria-label="Subir" title="Subir">↑</button><button type="button" data-mv="1" data-mid="'+n.id+'" aria-label="Descer" title="Descer">↓</button></span></div>';
     });
     $("#a-items").innerHTML=h||'<p class="a-hint">Nenhuma notícia encontrada.</p>';
@@ -289,6 +289,9 @@
       +'<div class="a-row3"><div><label for="f-cat">Categoria</label><select class="a-in" id="f-cat">'+opts+'</select></div><div><label for="f-date">Data</label><input class="a-in" id="f-date" type="date" value="'+esc(d.date)+'"></div><div><label for="f-read">Leitura (min)</label><input class="a-in" id="f-read" type="number" min="1" max="60" placeholder="auto" value="'+esc(d.read||"")+'"></div></div>'
       +area("Resumo (aparece no card)","f-sum",d.sum,2)
       +area("Texto completo (uma linha em branco separa os parágrafos)","f-body",d.body,8)
+      +'<div class="a-take"><label for="f-take">Nossa opinião <small>(texto seu: 2 ou 3 frases com opinião ou contexto)</small></label>'
+      +'<textarea class="a-in" id="f-take" rows="3" maxlength="2000" placeholder="Ex.: O que isso muda para quem joga? Vale a pena? Como se compara com o anterior?">'+esc(d.take||"")+'</textarea>'
+      +'<p class="a-hint">O Google dá pouco valor a páginas que só repetem outro site. Este texto aparece em destaque na notícia e é o que torna a página sua.</p></div>'
       +'<div class="a-row2"><div>'+fld("Nome da fonte","f-src",d.src)+'</div><div>'+fld("Link da matéria original","f-url",d.url,"url")+'</div></div>'
       +'<h3>Capa</h3><div class="a-cover"><div class="art a-prev" id="a-prev"></div><div>'
       +'<label for="f-img" style="margin-top:0">Endereço (link) da imagem</label><input class="a-in" id="f-img" type="url" placeholder="'+(isData?"Imagem enviada do computador":"https://...")+'" value="'+esc(isData?"":d.img)+'">'
@@ -303,7 +306,7 @@
   function readForm(){
     var d=st.draft;if(!d||!$("#a-form"))return;
     d.title=$("#f-title").value.trim();d.cat=$("#f-cat").value;d.date=$("#f-date").value;d.read=parseInt($("#f-read").value,10)||0;
-    d.sum=$("#f-sum").value.trim();d.body=$("#f-body").value.trim();d.src=$("#f-src").value.trim();d.url=$("#f-url").value.trim();
+    d.sum=$("#f-sum").value.trim();d.body=$("#f-body").value.trim();d.take=$("#f-take").value.trim();d.src=$("#f-src").value.trim();d.url=$("#f-url").value.trim();
     d.alt=$("#f-alt").value.trim();d.credit=$("#f-credit").value.trim();d.pos=$("#f-pos").value;d.featured=$("#f-feat").checked;
   }
   function preview(){var d=st.draft,p=$("#a-prev");if(!p||!d)return;p.innerHTML=pic({id:d.id,img:d.img,alt:d.alt,title:d.title,pos:d.pos})}
@@ -623,7 +626,7 @@
     ["name","tagline","intro","footer","credit"].forEach(function(k){o.site[k]=String(s[k]==null?BASE.site[k]:s[k])});
     d.news.forEach(function(n,i){
       if(!n||!n.title)return;var id=+n.id||i+1;while(seen[id])id++;seen[id]=1;
-      o.news.push({id:id,slug:/^[a-z0-9-]{1,90}$/.test(n.slug||"")?n.slug:"",img:String(n.img||""),alt:String(n.alt||""),credit:String(n.credit||""),pos:/^(top|bottom)$/.test(n.pos)?n.pos:"",cat:String(n.cat||""),title:String(n.title),date:String(n.date||""),read:+n.read||0,sum:String(n.sum||""),body:String(n.body||""),src:String(n.src||""),url:String(n.url||""),featured:!!n.featured});
+      o.news.push({id:id,slug:/^[a-z0-9-]{1,90}$/.test(n.slug||"")?n.slug:"",img:String(n.img||""),alt:String(n.alt||""),credit:String(n.credit||""),pos:/^(top|bottom)$/.test(n.pos)?n.pos:"",cat:String(n.cat||""),title:String(n.title),date:String(n.date||""),pub:String(n.pub||""),take:String(n.take||""),read:+n.read||0,sum:String(n.sum||""),body:String(n.body||""),src:String(n.src||""),url:String(n.url||""),featured:!!n.featured});
     });
     var cs=(Array.isArray(d.cats)?d.cats:[]).map(String).filter(function(c){return c&&c!=="Todas"});
     o.news.forEach(function(n){if(n.cat&&cs.indexOf(n.cat)<0)cs.push(n.cat)});

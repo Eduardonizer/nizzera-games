@@ -244,3 +244,9 @@ a.a-btn{display:inline-flex;align-items:center;text-decoration:none}
   .a-save .a-btn{justify-content:center;padding:11px 12px;text-align:center}
   .a-save a.a-btn{grid-column:1/-1;order:5}
 }
+
+/* "Nossa opinião" no editor e selo na lista */
+.a-take{margin-top:6px;padding:4px 14px 10px;border-radius:12px;border:2px dashed var(--cobalt);background:rgba(36,51,240,.05)}
+.a-take label small{font-weight:400;color:var(--muted)}
+.a-tk{justify-self:start;font-size:.7rem;font-weight:800;border-radius:99px;padding:1px 8px;margin-top:3px;background:#ffe0e6;color:#b3243f}
+.a-tk.ok{background:#d3f5e8;color:#0b7a55}
