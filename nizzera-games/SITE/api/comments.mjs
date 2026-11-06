@@ -1,32 +1,16 @@
 // api/comments.mjs — comentários do site Nizzera Games
-//   GET    /api/comments            -> lista pública (100 mais recentes)
-//   GET    /api/comments?all=1      -> lista do admin (até 300) — exige login de admin
-//   POST   /api/comments            -> { name, msg } publica um comentário
-//   DELETE /api/comments?id=XXXX    -> remove um comentário — exige login de admin
+//   GET    /api/comments              -> comentários gerais da página /comentarios/ (100 mais recentes)
+//   GET    /api/comments?post=SLUG    -> comentários de uma notícia (/noticia/SLUG/)
+//   GET    /api/comments?all=1        -> lista do admin (gerais + das notícias) — exige login de admin
+//   POST   /api/comments              -> { name, msg, post?, title? } publica um comentário
+//   DELETE /api/comments?id=XXXX      -> remove um comentário — exige login de admin
 //
-// Guarda os dados no Upstash Redis (Vercel → Storage). Variáveis de ambiente aceitas:
-//   UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN   (ou KV_REST_API_URL + KV_REST_API_TOKEN)
-import { createHash, randomBytes } from "node:crypto";
+// Guarda os dados no Upstash Redis (Vercel → Storage). Veja api/_redis.mjs.
+import { randomBytes } from "node:crypto";
+import { redis, redisReady, tooMany, readBody, sameOrigin, POST_OK } from "./_redis.mjs";
 
 const KEY = "nz:comments";
-const MAX_STORED = 500;
-
-const redisUrl = () => process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
-const redisToken = () => process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
-
-async function redis(cmds) {
-  const r = await fetch(redisUrl().replace(/\/$/, "") + "/pipeline", {
-    method: "POST",
-    headers: { Authorization: "Bearer " + redisToken(), "Content-Type": "application/json" },
-    body: JSON.stringify(cmds),
-  });
-  if (!r.ok) throw new Error("redis HTTP " + r.status);
-  const out = await r.json();
-  return out.map((x) => {
-    if (x && x.error) throw new Error("redis: " + x.error);
-    return x ? x.result : null;
-  });
-}
+const MAX_STORED = 2000;
 
 // confere o login de admin usando a própria rota /api/me do site (a mesma que o painel usa)
 async function isAdmin(req) {
@@ -41,14 +25,6 @@ async function isAdmin(req) {
   }
 }
 
-async function tooMany(req, bucket, max, ttl) {
-  const fwd = String(req.headers["x-forwarded-for"] || (req.socket && req.socket.remoteAddress) || "?");
-  const ip = fwd.split(",")[0].trim();
-  const k = "nz:rl:" + bucket + ":" + createHash("sha256").update(ip).digest("hex").slice(0, 16);
-  const out = await redis([["SET", k, "0", "EX", ttl, "NX"], ["INCR", k]]);
-  return Number(out[1]) > max;
-}
-
 const clean = (s, max) =>
   String(s == null ? "" : s)
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
@@ -57,20 +33,6 @@ const clean = (s, max) =>
     .replace(/\n{3,}/g, "\n\n")
     .trim()
     .slice(0, max);
-
-function readBody(req) {
-  const b = req.body;
-  if (b && typeof b === "object") return b;
-  try { return JSON.parse(b || "{}"); } catch { return {}; }
-}
-
-// recusa pedidos que não vieram do próprio site (o navegador sempre manda Origin em POST/DELETE via fetch)
-function sameOrigin(req) {
-  const host = String(req.headers["x-forwarded-host"] || req.headers.host || "").split(",")[0].trim().toLowerCase();
-  const origin = req.headers.origin;
-  if (origin) { try { return new URL(origin).host.toLowerCase() === host; } catch { return false; } }
-  return req.headers["sec-fetch-site"] === "same-origin";
-}
 
 async function readAll() {
   const [flat] = await redis([["HGETALL", KEY]]);
@@ -81,7 +43,7 @@ async function readAll() {
   for (const [id, v] of pairs) {
     try {
       const c = JSON.parse(v);
-      if (c && c.msg) items.push({ id, name: c.name || "", msg: c.msg, ts: Number(c.ts) || 0 });
+      if (c && c.msg) items.push({ id, name: c.name || "", msg: c.msg, ts: Number(c.ts) || 0, post: c.post || "", title: c.title || "" });
     } catch { /* ignora registro quebrado */ }
   }
   items.sort((a, b) => b.ts - a.ts);
@@ -90,7 +52,7 @@ async function readAll() {
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
-  if (!redisUrl() || !redisToken()) {
+  if (!redisReady()) {
     return res.status(503).json({ ok: false, error: "Os comentários ainda não foram configurados no servidor." });
   }
   if ((req.method === "POST" || req.method === "DELETE") && !sameOrigin(req)) {
@@ -100,8 +62,13 @@ export default async function handler(req, res) {
     if (req.method === "GET") {
       const all = req.query && req.query.all === "1";
       if (all && !(await isAdmin(req))) return res.status(401).json({ ok: false, error: "Faça login como admin." });
+      const post = String((req.query && req.query.post) || "");
+      if (post && !POST_OK.test(post)) return res.status(400).json({ ok: false, error: "Notícia inválida." });
       const items = await readAll();
-      return res.status(200).json({ ok: true, items: items.slice(0, all ? 300 : 100) });
+      if (all) return res.status(200).json({ ok: true, items: items.slice(0, 500) });
+      // sem ?post= mostra só os comentários gerais; com ?post= só os daquela notícia
+      const pub = items.filter((c) => c.post === post).map(({ title, ...c }) => c);
+      return res.status(200).json({ ok: true, items: pub.slice(0, post ? 300 : 100) });
     }
 
     if (req.method === "POST") {
@@ -116,8 +83,13 @@ export default async function handler(req, res) {
       if (await tooMany(req, "cm", 3, 600)) {
         return res.status(429).json({ ok: false, error: "Muitos comentários em pouco tempo. Tente de novo em alguns minutos." });
       }
+      const post = String(b.post || "");
+      if (post && !POST_OK.test(post)) return res.status(400).json({ ok: false, error: "Notícia inválida." });
+      const title = post ? clean(b.title, 160).replace(/\s+/g, " ") : "";
       const id = Date.now().toString(36) + randomBytes(3).toString("hex");
-      await redis([["HSET", KEY, id, JSON.stringify({ name, msg, ts: Date.now() })]]);
+      const rec = { name, msg, ts: Date.now() };
+      if (post) { rec.post = post; rec.title = title; }
+      await redis([["HSET", KEY, id, JSON.stringify(rec)]]);
       const [len] = await redis([["HLEN", KEY]]);
       if (Number(len) > MAX_STORED) {
         const old = (await readAll()).slice(MAX_STORED).map((c) => c.id);

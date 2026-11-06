@@ -15,3 +15,25 @@ fillArt();
   };
   box.appendChild(b);
 })();
+/* botão de curtir: aparece só quando o servidor responde (cada visitante curte uma vez; clicar de novo desfaz) */
+(function(){
+  var b=document.getElementById("like");if(!b||!window.fetch)return;
+  var post=b.getAttribute("data-post"),n=document.getElementById("like-n"),t=b.querySelector(".like-t"),busy=false;
+  function show(j){
+    b.hidden=false;b.setAttribute("aria-pressed",j.liked?"true":"false");b.classList.toggle("on",!!j.liked);
+    t.textContent=j.liked?"Curtido":"Curtir";n.textContent=j.count>0?String(j.count):"";
+    b.setAttribute("aria-label",(j.liked?"Você curtiu esta notícia":"Curtir esta notícia")+(j.count>0?" ("+j.count+(j.count===1?" curtida)":" curtidas)"):""));
+  }
+  function req(method,body){
+    return fetch("/api/likes"+(method==="GET"?"?post="+encodeURIComponent(post):""),{method:method,credentials:"same-origin",cache:"no-store",
+      headers:{"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined}).then(function(r){return r.json()});
+  }
+  req("GET").then(function(j){if(j&&j.ok)show(j)},function(){});
+  b.addEventListener("click",function(){
+    if(busy)return;busy=true;
+    var want=b.getAttribute("aria-pressed")!=="true",cur=+(n.textContent||0);
+    show({liked:want,count:Math.max(0,cur+(want?1:-1))}); /* responde na hora; o servidor confirma em seguida */
+    if(want){b.classList.remove("pop");void b.offsetWidth;b.classList.add("pop")}
+    req("POST",{post:post,like:want}).then(function(j){busy=false;if(j&&j.ok)show(j);else show({liked:!want,count:cur})},function(){busy=false;show({liked:!want,count:cur})});
+  });
+})();

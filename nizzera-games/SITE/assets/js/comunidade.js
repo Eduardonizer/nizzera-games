@@ -7,10 +7,12 @@
       .then(function(r){return r.json().catch(function(){return {}}).then(function(j){j.status=r.status;return j})});
   }
 
-  /* ---------- comentários (página /comentarios/) ---------- */
+  /* ---------- comentários (página /comentarios/ e abaixo de cada notícia) ---------- */
   if($("fb-form"))(function(){
   var list=$("cmlist"),form=$("fb-form"),fmsg=$("fb-msg"),fname=$("fb-name"),fst=$("fb-status"),fsend=$("fb-send"),fcount=$("fb-count"),more=$("cm-more"),stat=$("cm-stat");
   var ITEMS=[],SHOWN=10,PER=10,fresh="";
+  /* na página de uma notícia o formulário traz data-post: os comentários ficam ligados a ela */
+  var POST=form.getAttribute("data-post")||"",PTITLE=form.getAttribute("data-title")||"";
   var COLORS=["#2433f0","#ff5c7a","#12b886","#9b5cff","#ff8a3d","#0e8fb8"];
   function say(el,t,cls){el.textContent=t;el.className="fb-status"+(cls?" "+cls:"")}
   function full(ts){var d=new Date(ts);return isNaN(d)?"":d.toLocaleString("pt-BR",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"})}
@@ -31,14 +33,14 @@
   function draw(){
     list.setAttribute("aria-busy","false");
     stat.textContent=ITEMS.length?(ITEMS.length===1?"1 comentário":ITEMS.length+" comentários"):"";
-    if(!ITEMS.length){list.innerHTML='<div class="cm-empty"><b>Ainda não há comentários.</b><span>Seja a primeira pessoa a escrever!</span></div>';more.hidden=true;return}
+    if(!ITEMS.length){list.innerHTML='<div class="cm-empty"><b>Ainda não há comentários.</b><span>'+(POST?"Seja a primeira pessoa a comentar esta notícia!":"Seja a primeira pessoa a escrever!")+'</span></div>';more.hidden=true;return}
     list.innerHTML=ITEMS.slice(0,SHOWN).map(item).join("");
     more.hidden=ITEMS.length<=SHOWN;
     more.textContent="Ver mais comentários ("+(ITEMS.length-SHOWN)+")";
   }
   function unavailable(){list.setAttribute("aria-busy","false");list.innerHTML='<div class="cm-empty"><b>Os comentários não estão disponíveis agora.</b><span>Tente de novo em alguns minutos.</span></div>'}
   function load(){
-    return jreq("GET","/api/comments").then(function(j){
+    return jreq("GET","/api/comments"+(POST?"?post="+encodeURIComponent(POST):"")).then(function(j){
       if(j.ok&&Array.isArray(j.items)){ITEMS=j.items;draw()}else unavailable();
     },unavailable);
   }
@@ -50,7 +52,7 @@
     var msg=fmsg.value.trim();
     if(msg.length<3){say(fst,"Escreva pelo menos algumas palavras.","err");fmsg.focus();return}
     fsend.disabled=true;say(fst,"Enviando…","");
-    jreq("POST","/api/comments",{name:fname.value.trim(),msg:msg,hp:$("fb-hp").value}).then(function(r){
+    jreq("POST","/api/comments",{name:fname.value.trim(),msg:msg,hp:$("fb-hp").value,post:POST||undefined,title:POST?PTITLE:undefined}).then(function(r){
       fsend.disabled=false;
       if(r.ok){
         fmsg.value="";fcount.textContent="0/500";say(fst,"Obrigado! Seu comentário foi publicado.","ok");fresh=r.id||"";

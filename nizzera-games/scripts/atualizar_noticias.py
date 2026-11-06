@@ -24,9 +24,11 @@ FEEDS = [  # (nome mostrado como fonte/crédito, url do RSS, só_games?)
     ("Tecnoblog",   "https://tecnoblog.net/feed/",        True),
     ("OtakuPT",     "https://www.otakupt.com/feed/",      True),
 ]
-MAX_POR_FEED = 4       # máximo de notícias novas por fonte a cada execução
-MAX_POR_RODADA = 12    # máximo de notícias novas no total por execução
-MAX_NO_SITE = 200      # quantas notícias ficam no site (as mais antigas saem); a paginação mostra 12 por vez
+MAX_POR_FEED = 5       # máximo de notícias novas por fonte a cada execução (o robô roda 1 vez por dia)
+MAX_POR_RODADA = 20    # máximo de notícias novas no total por execução
+DIAS_NO_SITE = 15      # notícia com mais de 15 dias sai do site (e a página dela é apagada)
+MIN_NO_SITE = 12       # segurança: se as fontes pararem, as 12 mais novas ficam mesmo passando dos 15 dias
+MAX_NO_SITE = 300      # teto de notícias no site; a paginação mostra 12 por vez
 DESTAQUE_DIAS = 3      # destaque é trocado se tiver mais que isso de idade
 MAX_IDADE_DIAS = 10    # notícia mais velha que isso não entra (alguns feeds trazem matérias de meses atrás)
 EXTRA_EM_ALTA = 2      # notícias a mais por fonte quando são de um "assunto em alta"
@@ -207,7 +209,9 @@ def montar(dados, coletados, hoje):
         vistas_url.add(k); vistos_tit.add(t)
         por_feed[it["nome"]] = por_feed.get(it["nome"], 0) + 1
 
-    todas = sorted(noticias + novas, key=lambda n: (n.get("date", ""), n.get("id", 0)), reverse=True)[:MAX_NO_SITE]
+    ordem = sorted(noticias + novas, key=lambda n: (n.get("date", ""), n.get("id", 0)), reverse=True)
+    validade = (hoje - timedelta(days=DIAS_NO_SITE)).isoformat()
+    todas = [n for i, n in enumerate(ordem) if i < MIN_NO_SITE or n.get("date", "") >= validade][:MAX_NO_SITE]
     # destaque: mantém o atual se ainda for recente; senão, a mais nova com foto
     recente = (hoje - timedelta(days=DESTAQUE_DIAS)).isoformat()
     atual = next((n for n in todas if n.get("featured")), None)
@@ -237,14 +241,17 @@ def main():
         except Exception as e:  # uma fonte fora do ar não derruba as outras
             print(f"[erro] {nome}: {e}")
 
+    antes = len(dados["news"])
+    original = json.dumps(dados, ensure_ascii=False, sort_keys=True)
     novas = montar(dados, coletados, datetime.now(FUSO).date())
-    if not novas:
-        print("Nenhuma notícia nova. Arquivo não alterado.")
+    saiu = antes + len(novas) - len(dados["news"])
+    if json.dumps(dados, ensure_ascii=False, sort_keys=True) == original:
+        print("Nenhuma notícia nova nem vencida. Arquivo não alterado.")
         return
     js = json.dumps(dados, ensure_ascii=False, indent=1).replace("<", "\\u003c")
     texto = texto[:m.start(2)] + js + texto[m.end(2):]
     open(caminho, "w", encoding="utf-8").write(texto)
-    print(f"{len(novas)} notícias novas adicionadas; {len(dados['news'])} no site.")
+    print(f"{len(novas)} notícias novas adicionadas; {saiu} saíram por ter mais de {DIAS_NO_SITE} dias; {len(dados['news'])} no site.")
     for n in novas:
         print(f" + [{n['cat']}] {n['title']}")
 

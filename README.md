@@ -33,12 +33,12 @@ https://nizzera-games.vercel.app. Criado por Eduardo Nizer.
 │   │   │   ├── js/app.js         página inicial: lista, paginação, destaque
 │   │   │   ├── js/ofertas.js     página de ofertas
 │   │   │   ├── js/artigo.js      páginas das notícias
-│   │   │   ├── js/comunidade.js  comentários e caixa "Fale com a gente" (todas as páginas)
+│   │   │   ├── js/comunidade.js  comentários (página geral e abaixo de cada notícia) e caixa "Fale com a gente"
 │   │   │   ├── js/admin.js       painel admin
 │   │   │   └── icons/
 │   │   ├── data/ofertas.json     ofertas da semana (gerado pelo robô)
 │   │   ├── googlecd4f...html     verificação do Google Search Console (não apague)
-│   │   └── api/                  funções da Vercel: login, sessão, publicar, comentários, contato
+│   │   └── api/                  funções da Vercel: login, sessão, publicar, comentários, curtidas, contato
 │   └── scripts/
 │       ├── atualizar_noticias.py lê os feeds RSS e grava as notícias no index.html
 │       ├── atualizar_ofertas.py  busca as promoções da Steam
@@ -50,7 +50,8 @@ https://nizzera-games.vercel.app. Criado por Eduardo Nizer.
 
 ## Como funciona
 
-1. A cada 4 horas o GitHub Actions busca notícias e ofertas, gera as páginas e faz commit.
+1. Uma vez por dia (07:23, horário de Brasília) o GitHub Actions busca notícias e ofertas, gera as páginas e faz commit.
+   Notícias com mais de 15 dias saem do site sozinhas (a página delas é apagada).
 2. Quando você publica pelo painel admin, o mesmo robô roda na hora e gera as páginas novas.
 3. A Vercel publica a pasta `nizzera-games/SITE` a cada commit.
 
@@ -107,7 +108,7 @@ Variáveis na Vercel (Settings → Environment Variables), depois faça um novo 
 | `GITHUB_TOKEN` | token fine-grained só deste repositório, com permissão *Contents: Read and write* |
 | `GITHUB_FILE` | `nizzera-games/SITE/index.html` |
 | `GITHUB_BRANCH` | opcional, padrão `main` |
-| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | comentários (Vercel → Storage → Upstash Redis). `KV_REST_API_URL`/`KV_REST_API_TOKEN` também servem |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | comentários e curtidas (Vercel → Storage → Upstash Redis). `KV_REST_API_URL`/`KV_REST_API_TOKEN` também servem |
 | `RESEND_API_KEY` | envio da caixa "Fale com a gente" (resend.com) |
 | `CONTACT_TO` / `CONTACT_FROM` | opcionais: quem recebe e quem envia o e-mail |
 
