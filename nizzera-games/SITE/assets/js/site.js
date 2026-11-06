@@ -42,7 +42,7 @@
     h+=link("/reviews/","star","Reviews",' data-page="/review"');
     h+=link("/ofertas/","tag","Ofertas da semana",' data-page="/ofertas/"');
     h+=link("/gratis/","gift","Jogos grátis",' data-page="/gratis/"');
-    h+=link("/comentarios/","chat","Comentários", data-page="/comentarios/"');
+    h+=link("/comentarios/","chat","Comentários",' data-page="/comentarios/"');
     h+=link("/sobre/","info","Sobre",' data-page="/sobre/"');
     h+='<div class="grp">Ferramentas</div>'+btn("contact","mail","Fale com a gente")+btn("search","search","Buscar")+btn("theme","theme","Tema claro/escuro")
      +'<div style="flex:1"></div><div class="foot"><button class="item collapse" type="button" data-act="collapse" title="Recolher ou expandir menu">'+svg("chev")+'<span class="lbl">Recolher menu</span></button></div>';
