@@ -9,6 +9,7 @@ Cria, dentro de SITE/:
   gratis/index.html                  página dos jogos grátis da semana (Epic e Steam)
   comentarios/index.html             página de comentários e feedback
   sobre/index.html                   página "Sobre" (quem faz o site e como falar com ele)
+  privacidade/index.html             política de privacidade (o que o site guarda e por quê)
   tierlist/index.html                Tier List interativa (temas em data/tierlists/, ver atualizar_tierlists.py)
   404.html                           página de "não encontrado"
   sitemap.xml                        lista de todas as páginas, para o Google
@@ -35,6 +36,7 @@ RELACIONADAS = 3                                # quantas "leia também" no fim 
 NO_FEED = 30                                    # quantas notícias entram no feed RSS
 STEAM_PERFIL = ""                               # endereço do seu perfil na Steam (vazio = página Sobre sem o botão)
 TREND_DIAS = 21                                 # igual a TREND_DIAS de assets/js/core.js
+BANNER = "/assets/og/nizzera-games.png"        # imagem dos cards de compartilhamento (1200x630; fonte em scripts/og_banner.html)
 FLAME = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 01-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-4-1-6 1-9.5z"/></svg>'
 # ----------------------------------------------
 
@@ -232,7 +234,17 @@ def descricao(*textos, maximo=155):
     return base[:maximo - 1].rsplit(" ", 1)[0].rstrip(",;:–- ") + "…"
 
 
-def meta_pagina(titulo, desc, url, nome, tipo="website", indexar=True, og_titulo=None):
+def og_imagem(foto=""):
+    """Imagem do card no WhatsApp, Discord, X...: a foto da matéria ou, sem foto, o banner do site (1200x630)."""
+    if foto:
+        return f'<meta property="og:image" content="{e(foto)}">\n<meta name="twitter:card" content="summary_large_image">'
+    return (f'<meta property="og:image" content="{SITE_URL}{BANNER}">\n<meta property="og:image:width" content="1200">\n'
+            f'<meta property="og:image:height" content="630">\n'
+            f'<meta property="og:image:alt" content="Nizzera Games: seu lugar, a parada gamer">\n'
+            f'<meta name="twitter:card" content="summary_large_image">')
+
+
+def meta_pagina(titulo, desc, url, nome, tipo="website", indexar=True, og_titulo=None, foto=""):
     return f"""<title>{e(titulo)}</title>
 <meta name="description" content="{e(desc)}">
 <link rel="canonical" href="{e(url)}">
@@ -242,7 +254,8 @@ def meta_pagina(titulo, desc, url, nome, tipo="website", indexar=True, og_titulo
 <meta property="og:locale" content="pt_BR">
 <meta property="og:title" content="{e(og_titulo or titulo)}">
 <meta property="og:description" content="{e(desc)}">
-<meta property="og:url" content="{e(url)}">"""
+<meta property="og:url" content="{e(url)}">
+{og_imagem(foto)}"""
 
 
 def trilha(atual):
@@ -388,6 +401,86 @@ def pagina_sobre(c, site):
     return layout(c, nome, cab, corpo)
 
 
+def pagina_privacidade(c, site):
+    nome = site.get("name") or "Nizzera Games"
+    email = "nizzeragames@gmail.com"
+    atualizada = "6 de novembro de 2026"
+    desc = ("O que o Nizzera Games guarda quando você comenta, curte, vota ou manda mensagem, por quanto tempo, "
+            "com quem divide e como pedir para apagar.")
+    cab = meta_pagina(f"Política de privacidade | {nome}", desc, SITE_URL + "/privacidade/", nome)
+    corpo = f"""<main class="wrap page sobre priv">
+  {trilha("Política de privacidade")}
+  <header class="sb-head">
+    <h1 class="ph">Política de privacidade</h1>
+    <p class="lead">Sem letra miúda: o que o {e(nome)} guarda, por quê e como você pede para apagar.</p>
+    <p class="meta">Atualizada em {atualizada}.</p>
+  </header>
+
+  <section class="sb-sec sb-card sb-talk" aria-labelledby="pv-resumo">
+    <div>
+      <h2 id="pv-resumo">Resumo</h2>
+      <ul>
+        <li>Para ler o site você não precisa de cadastro, e não usamos cookies de propaganda nem de rastreamento.</li>
+        <li>Guardamos só o que você mesmo manda (comentário, mensagem) e o mínimo para contar curtidas e votos sem repetição.</li>
+        <li>Não vendemos nem repassamos seus dados para ninguém.</li>
+        <li>Quer que algo seja apagado? Escreva para <a href="mailto:{email}">{email}</a>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sb-sec" aria-labelledby="pv-quem">
+    <h2 id="pv-quem">Quem cuida dos seus dados</h2>
+    <p>O {e(nome)} é mantido por {e(site.get("credit") or "Eduardo Nizer")}, de Curitiba (PR), que é o responsável pelos dados tratados no site, nos termos da Lei Geral de Proteção de Dados (LGPD, Lei nº 13.709/2018). Contato: <a href="mailto:{email}">{email}</a>.</p>
+  </section>
+
+  <section class="sb-sec" aria-labelledby="pv-o-que">
+    <h2 id="pv-o-que">O que o site guarda e por quê</h2>
+    <h3>Comentários</h3>
+    <p>Quando você comenta, guardamos o nome que você escolher (é opcional), o texto e a data e hora. O comentário fica <b>público</b> para todo mundo, na página de comentários ou embaixo da notícia ou review. Ele continua no site até ser removido pela moderação ou a seu pedido (o site guarda no máximo os 2.000 comentários mais recentes). Não pedimos e-mail nem login para comentar.</p>
+    <h3>Curtidas e votações</h3>
+    <p>Para cada pessoa curtir uma notícia ou votar uma vez só, o servidor guarda um <b>código curto calculado a partir do seu endereço IP</b> (o IP em si não é guardado). Esse código vale 60 dias nas curtidas e até 13 meses nas votações; depois disso, é apagado sozinho. Os números que aparecem no site (quantas curtidas, porcentagem dos votos) não identificam ninguém.</p>
+    <h3>Proteção contra spam</h3>
+    <p>O mesmo tipo de código é usado por 10 minutos para limitar quantos comentários, votos ou mensagens saem da mesma conexão em pouco tempo.</p>
+    <h3>Mensagens do “Fale com a gente”</h3>
+    <p>O nome, o e-mail (opcional, só se você quiser resposta) e o texto são enviados para o e-mail {email}. No painel do administrador fica um aviso com o nome e o começo da mensagem, entre as 500 notificações mais recentes. Usamos esses dados só para ler e responder você.</p>
+    <h3>Estatísticas de visita</h3>
+    <p>Usamos o Vercel Web Analytics para saber quantas pessoas visitam cada página. Ele conta as visitas de forma agregada, <b>sem cookies</b> e sem identificar você.</p>
+    <h3>Registros técnicos</h3>
+    <p>Como qualquer site, o servidor da hospedagem recebe o seu endereço IP e dados do navegador para entregar as páginas e se proteger de ataques. Esses registros são da hospedagem (Vercel) e não são usados para identificar visitantes.</p>
+  </section>
+
+  <section class="sb-sec" aria-labelledby="pv-local">
+    <h2 id="pv-local">O que fica só no seu navegador</h2>
+    <p>Algumas preferências ficam guardadas no seu próprio aparelho (no armazenamento local do navegador) e <b>não são enviadas</b> para o site: o tema claro ou escuro, o menu recolhido e as tier lists que você montou. Para apagar, limpe os dados do site nas configurações do navegador.</p>
+    <p>O único cookie do site é o do login do painel de administração, usado só pelo administrador.</p>
+  </section>
+
+  <section class="sb-sec" aria-labelledby="pv-terceiros">
+    <h2 id="pv-terceiros">Serviços que ajudam a fazer o site funcionar</h2>
+    <ul>
+      <li><b>Vercel</b>: hospedagem do site e estatísticas de visita.</li>
+      <li><b>Upstash</b>: banco de dados dos comentários, curtidas, votos e notificações.</li>
+      <li><b>Resend</b>: envio das mensagens do “Fale com a gente” para o nosso e-mail.</li>
+      <li><b>Google Fonts</b>: as fontes do site são baixadas dos servidores do Google pelo seu navegador.</li>
+      <li><b>Sites das fontes das notícias e Steam</b>: algumas imagens são carregadas direto dos sites de origem.</li>
+    </ul>
+    <p>Esses serviços podem ter servidores fora do Brasil. Eles recebem só o necessário para fazer a sua parte e têm as próprias políticas de privacidade. Os links para outros sites (como a matéria original de uma notícia) levam para páginas que não controlamos.</p>
+    <p>Hoje o site não exibe anúncios. Se um dia passar a exibir (por exemplo, com o Google AdSense), esta página será atualizada antes.</p>
+  </section>
+
+  <section class="sb-sec" aria-labelledby="pv-direitos">
+    <h2 id="pv-direitos">Seus direitos</h2>
+    <p>Pela LGPD, você pode pedir para saber quais dados seus temos, corrigir ou apagar esses dados, e tirar dúvidas sobre como eles são usados. É só escrever para <a href="mailto:{email}">{email}</a>. Como os comentários não têm login, para apagar um comentário seu diga o nome usado, onde ele está e mais ou menos quando foi feito. Respondemos o quanto antes, em até 15 dias.</p>
+  </section>
+
+  <section class="sb-sec" aria-labelledby="pv-mudancas">
+    <h2 id="pv-mudancas">Mudanças nesta política</h2>
+    <p>Se o site passar a guardar algo novo, esta página muda antes, e a data no topo é atualizada.</p>
+  </section>
+</main>"""
+    return layout(c, nome, cab, corpo)
+
+
 def temas_tierlist():
     """Lista de temas gerada por scripts/atualizar_tierlists.py (vazia se ainda não rodou)."""
     try:
@@ -508,10 +601,7 @@ def pagina_review(r, c, site, noticias):
         ld["datePublished"] = ld["dateModified"] = r["date"]
     if foto:
         ld["image"] = [foto]
-    og = (f'<meta property="og:image" content="{e(foto)}">\n<meta name="twitter:card" content="summary_large_image">' if foto
-          else f'<meta property="og:image" content="{SITE_URL}/assets/icons/icon-192.png">\n<meta name="twitter:card" content="summary">')
-    cab = meta_pagina(f"Review: {jogo} | {nome}", desc, url, nome, tipo="article") + f"""
-{og}
+    cab = meta_pagina(f"Review: {jogo} | {nome}", desc, url, nome, tipo="article", foto=foto) + f"""
 <script type="application/ld+json">{json_ld(ld)}</script>"""
 
     ficha = [("Plataformas", r.get("platforms")), ("Lançamento", data_br(r.get("release", "")) or r.get("release")),
@@ -648,13 +738,10 @@ def pagina(n, todas, site, c, trend):
     credito = []
     if n.get("credit"):
         credito.append("Imagem: " + e(n["credit"]))
-    meta_og_img = (f'<meta property="og:image" content="{e(foto)}">\n<meta name="twitter:card" content="summary_large_image">'
-                   if foto else f'<meta property="og:image" content="{SITE_URL}/assets/icons/icon-192.png">\n<meta name="twitter:card" content="summary">')
     bloco_fonte = (f'<p class="src">Leia a matéria completa em <a href="{e(link_fonte)}" target="_blank" rel="noopener">{e(fonte or link_fonte)}</a>.</p>'
                    if link_fonte else "")
 
-    cab = meta_pagina(titulo_seo(titulo, nome), desc, url, nome, tipo="article", og_titulo=titulo) + f"""
-{meta_og_img}
+    cab = meta_pagina(titulo_seo(titulo, nome), desc, url, nome, tipo="article", og_titulo=titulo, foto=foto) + f"""
 <meta property="article:published_time" content="{e(publicado)}">
 <meta property="article:modified_time" content="{e(publicado)}">
 <meta property="article:section" content="{e(n.get('cat'))}">
@@ -868,7 +955,8 @@ def sitemap(todas):
               f"  <url><loc>{SITE_URL}/gratis/</loc></url>",
               f"  <url><loc>{SITE_URL}/comentarios/</loc></url>",
               f"  <url><loc>{SITE_URL}/sobre/</loc></url>",
-              f"  <url><loc>{SITE_URL}/tierlist/</loc></url>"]
+              f"  <url><loc>{SITE_URL}/tierlist/</loc></url>",
+              f"  <url><loc>{SITE_URL}/privacidade/</loc></url>"]
     for n in todas:
         lm = f"<lastmod>{e(n['date'])}</lastmod>" if re.match(r"^\d{4}-\d{2}-\d{2}$", n.get("date", "")) else ""
         linhas.append(f"  <url><loc>{e(url_noticia(n))}</loc>{lm}</url>")
@@ -954,6 +1042,7 @@ def main():
     mudou += gravar(os.path.join(SITE, "comentarios", "index.html"), pagina_comentarios(c, site))
     mudou += gravar(os.path.join(SITE, "sobre", "index.html"), pagina_sobre(c, site))
     mudou += gravar(os.path.join(SITE, "tierlist", "index.html"), pagina_tierlist(c, site))
+    mudou += gravar(os.path.join(SITE, "privacidade", "index.html"), pagina_privacidade(c, site))
     mudou += gravar(os.path.join(SITE, "404.html"), pagina_404(c, site))
 
     # 3) apaga páginas de notícias que saíram do site (só as que este script criou)
