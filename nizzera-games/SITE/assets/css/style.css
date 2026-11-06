@@ -348,6 +348,27 @@ a.feat{display:block;text-decoration:none}
 .sechead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px}
 .sechead .more{font-weight:700;text-decoration:none;color:var(--fg);border-bottom:2px solid var(--sun)}
 .sechead .more:hover{color:var(--sun)}
+/* mais jogados na Steam (página inicial) */
+.stop{margin-top:44px}
+.stop .sec{margin-top:0}
+.stop-upd{margin:0}
+.stop-list{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:10px 18px}
+@media (min-width:1000px){.stop-list{grid-template-columns:1fr 1fr;grid-template-rows:repeat(5,auto);grid-auto-flow:column}}
+.stop-row{display:grid;grid-template-columns:2.1rem 92px minmax(0,1fr) auto 3.2rem;align-items:center;gap:12px;background:var(--card);border-radius:14px;padding:10px 12px;text-decoration:none;color:inherit;transition:transform .2s,box-shadow .2s}
+.stop-row:hover{transform:translateX(4px);box-shadow:5px 5px 0 var(--sun)}
+.stop-n{font:800 1.5rem "Bricolage Grotesque",sans-serif;text-align:center;color:var(--muted)}
+.stop-list li:first-child .stop-n{color:var(--fg)}
+.stop-row img,.stop-noimg{display:block;width:92px;aspect-ratio:460/215;object-fit:cover;border-radius:6px;background:var(--line)}
+.stop-name{display:grid;gap:5px;min-width:0}
+.stop-name b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.stop-bar{display:block;height:6px;border-radius:99px;background:var(--sun)}
+.stop-name small,.stop-num small{color:var(--muted);font-size:.78rem}
+.stop-num{display:grid;text-align:right;line-height:1.15}
+.stop-num b{font:800 1.1rem "Bricolage Grotesque",sans-serif;font-variant-numeric:tabular-nums}
+.stop-mv{font-size:.78rem;font-weight:800;text-align:center;border-radius:6px;padding:2px 4px}
+.stop-mv.up{color:#0b7a55;background:#d3f5e8}.stop-mv.down{color:#b3243f;background:#ffe0e6}
+.stop-mv.same{color:var(--muted)}.stop-mv.new{color:var(--ink);background:var(--sun)}
+@media (max-width:560px){.stop-row{grid-template-columns:1.6rem minmax(0,1fr) auto 2.8rem;gap:10px}.stop-row img,.stop-row .stop-noimg{display:none}.stop-n{font-size:1.2rem}}
 .rv-home{padding-bottom:24px}
 .rv-home .sec{margin-top:8px}
 .rv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px;margin-top:18px}

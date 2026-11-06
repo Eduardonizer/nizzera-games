@@ -22,7 +22,7 @@ Roda sozinho no GitHub Actions. Uso manual:  python scripts/gerar_paginas.py
 Só usa a biblioteca padrão.
 """
 import html, json, os, re, shutil, sys, unicodedata
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from atualizar_noticias import assunto  # mesma regra de "assunto em alta" do robô e do site
@@ -569,6 +569,56 @@ def oculto(texto, id_, esconder):
     return re.sub(rf'<[a-z]+\b[^>]*\bid="{id_}"[^>]*>', f, texto, count=1)
 
 
+def num_br(n):
+    return f"{int(n):,}".replace(",", ".")
+
+
+def mais_jogados():
+    """Top 10 da Steam (SITE/data/maisjogados.json, gravado por atualizar_maisjogados.py)."""
+    try:
+        with open(os.path.join(SITE, "data", "maisjogados.json"), encoding="utf-8") as f:
+            d = json.load(f)
+    except Exception:
+        return "", ""
+    jogos = [g for g in d.get("games") or [] if g.get("id") and g.get("name") and g.get("players")]
+    if not jogos:
+        return "", ""
+    maior = max(g["players"] for g in jogos)
+    com_historico = any(g.get("prev") for g in jogos)  # na 1ª rodada não há com o que comparar
+    m = re.match(r"^\d{4}-(\d{2})-(\d{2})$", d.get("peak_day") or "")
+    dia_pico = f"{int(m.group(2))}/{int(m.group(1))}" if m else ""
+    linhas = []
+    for i, g in enumerate(jogos, 1):
+        prev = g.get("prev")
+        if not com_historico:
+            mov = '<span class="stop-mv"></span>'
+        elif not prev:
+            mov = '<span class="stop-mv new" title="Novo no top 10">novo</span>'
+        elif prev > i:
+            mov = f'<span class="stop-mv up" title="Subiu {prev - i} desde a última atualização">▲{prev - i}</span>'
+        elif prev < i:
+            mov = f'<span class="stop-mv down" title="Caiu {i - prev} desde a última atualização">▼{i - prev}</span>'
+        else:
+            mov = '<span class="stop-mv same" title="Mesma posição">=</span>'
+        img = g.get("img", "")
+        img = (f'<img src="{e(img)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">'
+               if re.match(r"^https://\S+$", img) else '<span class="stop-noimg" aria-hidden="true"></span>')
+        pct = max(2, round(g["players"] / maior * 100))
+        linhas.append(
+            f'<li><a class="stop-row" href="https://store.steampowered.com/app/{int(g["id"])}/" target="_blank" rel="noopener noreferrer">'
+            f'<span class="stop-n">{i}</span>{img}'
+            f'<span class="stop-name"><b>{e(g["name"])}</b><i class="stop-bar" style="width:{pct}%"></i>'
+            + (f'<small>pico em {dia_pico}: {num_br(g["peak"])}</small>' if g.get("peak") and dia_pico else "") + '</span>'
+            f'<span class="stop-num"><b>{num_br(g["players"])}</b><small>jogando</small></span>{mov}</a></li>')
+    quando = ""
+    try:
+        t = datetime.strptime(d.get("updated", ""), "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc) - timedelta(hours=3)
+        quando = f"Jogadores ao mesmo tempo · atualizado em {t.day}/{t.month} às {t:%H:%M} (Brasília)"
+    except Exception:
+        quando = "Jogadores ao mesmo tempo"
+    return "".join(linhas), e(quando)
+
+
 def pagina_inicial(texto, dados, trend):
     site, noticias = dados.get("site", {}), dados.get("news", [])
     nome = site.get("name") or "Nizzera Games"
@@ -600,6 +650,12 @@ def pagina_inicial(texto, dados, trend):
         f'<a class="tchip" href="/?assunto={e(slugify(x["name"]))}#noticias">{FLAME}{e(x["name"])}</a>' for x in vivos)) if vivos else ""
     texto = trocar(texto, r'(<div class="trendbar" id="trendbar"[^>]*>).*?</div>', f'<div class="trendbar" id="trendbar">{barra}</div>')
     texto = oculto(texto, "trendbar", not vivos)
+
+    # mais jogados na Steam (top 10)
+    lista, quando = mais_jogados()
+    texto = miolo(texto, "stoplist", lista)
+    texto = miolo(texto, "stopupd", quando)
+    texto = oculto(texto, "maisjogados", not lista)
 
     # reviews (as 3 mais recentes)
     revs = sorted([r for r in dados.get("reviews", []) if r.get("game")], key=lambda r: r.get("date", ""), reverse=True)[:3]
