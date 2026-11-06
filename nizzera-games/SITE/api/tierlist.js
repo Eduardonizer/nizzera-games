@@ -55,7 +55,8 @@ function clean(t, current) {
     let id = prev && ID.test(prev.id || "") ? prev.id : slugify(name || "jogo-" + appid);
     while (used.has(id)) id += "-2";
     used.add(id);
-    const out = { id, name: name || (prev && prev.name) || `Jogo ${appid}` };
+    // sem nome: fica vazio e o robô (atualizar_tierlists.py) preenche com o nome da Steam
+    const out = { id, name: name || (prev && prev.name) || "" };
     if (appid) out.appid = appid;
     if (src) out.src = src;
     out.img = prev && IMG.test(prev.img || "") && (prev.appid || 0) === appid && (prev.src || "") === src ? prev.img : "";

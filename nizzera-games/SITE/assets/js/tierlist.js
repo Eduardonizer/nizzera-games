@@ -161,6 +161,7 @@
 
   /* ---------- arrastar (Pointer Events: mouse, caneta e toque) ---------- */
   function onDown(e){
+    skipClick=false; /* um novo toque/clique começou: o "clique fantasma" do arrasto anterior já passou */
     var it=e.target.closest(".tl-item");
     if(!it||drag||(e.pointerType==="mouse"&&e.button!==0))return;
     var r=it.getBoundingClientRect();
