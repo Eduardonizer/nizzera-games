@@ -258,7 +258,7 @@ function typeTitle(txt){
 
 function applySite(){
   var S=DATA.site;
-  document.title=S.name+" – notícias de games";
+  document.title=S.name+" – notícias, ofertas, jogos grátis e reviews";
   [].forEach.call(document.querySelectorAll(".sname"),function(e){e.textContent=S.name});
   var br=document.querySelector(".side .brand");if(br)br.title=S.name;
   document.getElementById("intro").textContent=S.intro;
