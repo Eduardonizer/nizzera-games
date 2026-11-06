@@ -60,6 +60,10 @@ function clean(d) {
       cat: str(n.cat, 40, "Uma categoria"),
       title,
       date,
+      // data e hora de publicação gravadas pelo robô (ISO, com fuso)
+      pub: /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?([+-]\d{2}:\d{2}|Z)$/.test(String(n.pub || "")) ? String(n.pub) : "",
+      // "Nossa opinião": texto próprio do site, escrito no painel
+      take: str(n.take, 2000, "O texto de opinião"),
       read: Math.max(0, Math.min(120, parseInt(n.read, 10) || 0)),
       sum: str(n.sum, 1000, "Um resumo"),
       body: str(n.body, 30000, "Um texto"),

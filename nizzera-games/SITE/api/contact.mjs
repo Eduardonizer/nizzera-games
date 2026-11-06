@@ -7,6 +7,7 @@
 //   CONTACT_FROM     (opcional)     remetente; padrão "Nizzera Games <onboarding@resend.dev>"
 //   (o limite de mensagens por pessoa usa o mesmo Upstash Redis dos comentários, se estiver configurado)
 import { createHash } from "node:crypto";
+import { logEvent } from "./_redis.mjs";
 
 const redisUrl = () => process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
 const redisToken = () => process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
@@ -154,6 +155,8 @@ export default async function handler(req, res) {
       console.error("contact: resend", out.status, out.detail);
       return res.status(502).json({ ok: false, error: "Não consegui enviar o e-mail agora." });
     }
+    // aviso no painel admin (só nome e começo do texto; o e-mail completo fica na caixa de entrada)
+    if (redisUrl() && redisToken()) await logEvent({ t: "msg", name, msg: msg.slice(0, 280), mail: !!email });
     return res.status(200).json({ ok: true });
   } catch (e) {
     console.error("contact:", e && e.message);

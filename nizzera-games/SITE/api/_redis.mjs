@@ -49,3 +49,46 @@ export function sameOrigin(req) {
 
 // endereço de uma notícia (/noticia/<slug>/): só letras minúsculas, números e hífen
 export const POST_OK = /^[a-z0-9][a-z0-9-]{0,119}$/;
+
+// confere o login de admin usando a própria rota /api/me do site (a mesma que o painel usa)
+export async function isAdmin(req) {
+  try {
+    const host = req.headers["x-forwarded-host"] || req.headers.host;
+    if (!host || !req.headers.cookie) return false;
+    const r = await fetch("https://" + host + "/api/me", { headers: { cookie: req.headers.cookie } });
+    const j = await r.json().catch(() => ({}));
+    return !!(r.ok && j && j.ok);
+  } catch {
+    return false;
+  }
+}
+
+// comentários guardados (hash "nz:comments"), do mais novo para o mais antigo
+export const COMMENTS = "nz:comments";
+export async function readComments() {
+  const [flat] = await redis([["HGETALL", COMMENTS]]);
+  let pairs = [];
+  if (Array.isArray(flat)) for (let i = 0; i + 1 < flat.length; i += 2) pairs.push([flat[i], flat[i + 1]]);
+  else if (flat && typeof flat === "object") pairs = Object.entries(flat);
+  const items = [];
+  for (const [id, v] of pairs) {
+    try {
+      const c = JSON.parse(v);
+      if (c && c.msg) items.push({ id, name: c.name || "", msg: c.msg, ts: Number(c.ts) || 0, post: c.post || "", title: c.title || "" });
+    } catch { /* ignora registro quebrado */ }
+  }
+  items.sort((a, b) => b.ts - a.ts);
+  return items;
+}
+
+// notificações do painel admin: lista "nz:events" com os 500 eventos mais recentes
+// (curtidas novas, votos, mensagens do "Fale com a gente"). Os comentários vêm direto de nz:comments.
+// Nunca derruba a ação principal: se o Redis falhar aqui, só registra no log.
+export const EVENTS = "nz:events";
+export async function logEvent(ev) {
+  try {
+    await redis([["LPUSH", EVENTS, JSON.stringify({ ...ev, ts: Date.now() })], ["LTRIM", EVENTS, 0, 499]]);
+  } catch (e) {
+    console.error("events:", e && e.message);
+  }
+}

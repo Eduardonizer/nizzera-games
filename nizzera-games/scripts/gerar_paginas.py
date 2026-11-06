@@ -185,7 +185,51 @@ def layout(c, nome, cabeca, corpo, scripts=""):
 """
 
 
-def meta_pagina(titulo, desc, url, nome, tipo="website", indexar=True):
+# palavras que não devem ficar soltas no fim de um título cortado
+_SOLTAS = {"a", "o", "as", "os", "e", "é", "de", "da", "do", "das", "dos", "em", "na", "no", "nas", "nos", "que", "para", "com",
+           "por", "um", "uma", "ao", "aos", "à", "às", "se", "sem", "sobre", "mais", "seu", "sua", "pelo", "pela", "ou", "mas",
+           "até", "entre", "após", "como", "quando", "onde", "já", "não", "muito", "seus", "suas", "este", "esta", "num", "numa"}
+
+
+def titulo_seo(titulo, nome, maximo=60):
+    """Título da aba e do Google: o Google mostra ~60 caracteres. Põe o nome do site se couber;
+    se o título for longo, corta numa palavra (sem deixar "de", "que"... no fim) e sem reticências."""
+    titulo = re.sub(r"\s+", " ", str(titulo or "")).strip()
+    if len(titulo) + len(nome) + 3 <= maximo + 5:
+        return f"{titulo} | {nome}"
+    if len(titulo) <= maximo + 5:
+        return titulo
+    palavras = titulo[:maximo + 1].split(" ")[:-1] or [titulo[:maximo]]
+    while len(palavras) > 3 and (palavras[-1].lower().strip(",:;–-") in _SOLTAS or palavras[-1] in ("–", "-", "|")):
+        palavras.pop()
+    return " ".join(palavras).rstrip(",:;–- ")
+
+
+def descricao(*textos, maximo=155):
+    """Descrição do Google (~155 caracteres): junta frases inteiras; só corta com "…" se a primeira frase já for maior."""
+    txt = re.sub(r"\s+", " ", " ".join(str(t or "") for t in textos if t)).strip()
+    # fim de frase = pontuação + espaço + maiúscula/número ("4.1.2" e "Sr." no meio não contam)
+    frases = [f for f in re.split(r"(?<=[.!?…])\s+(?=[A-ZÀ-Ú0-9\"“'])", txt) if re.search(r"[.!?…]$", f)]
+    out = ""
+    for f in frases:
+        f = f.strip()
+        if out and f in out:  # o corpo costuma repetir o resumo
+            continue
+        if len(out) + len(f) + 1 > maximo:
+            break
+        out = (out + " " + f).strip()
+    if out and not out.endswith("…"):
+        return out
+    base = (frases[0] if frases else txt).strip().rstrip("…").strip()
+    if len(base) <= maximo:
+        return base
+    virgula = base[:maximo].rfind(", ")  # frase longa: fecha na última vírgula, se sobrar bastante texto
+    if virgula > maximo * 0.55:
+        return base[:virgula] + "."
+    return base[:maximo - 1].rsplit(" ", 1)[0].rstrip(",;:–- ") + "…"
+
+
+def meta_pagina(titulo, desc, url, nome, tipo="website", indexar=True, og_titulo=None):
     return f"""<title>{e(titulo)}</title>
 <meta name="description" content="{e(desc)}">
 <link rel="canonical" href="{e(url)}">
@@ -193,7 +237,7 @@ def meta_pagina(titulo, desc, url, nome, tipo="website", indexar=True):
 <meta property="og:type" content="{tipo}">
 <meta property="og:site_name" content="{e(nome)}">
 <meta property="og:locale" content="pt_BR">
-<meta property="og:title" content="{e(titulo)}">
+<meta property="og:title" content="{e(og_titulo or titulo)}">
 <meta property="og:description" content="{e(desc)}">
 <meta property="og:url" content="{e(url)}">"""
 
@@ -438,25 +482,31 @@ def pagina(n, todas, site, c, trend):
     url = url_noticia(n)
     titulo = n.get("title", "")
     resumo = n.get("sum") or titulo
-    desc = resumo if len(resumo) <= 160 else resumo[:157].rsplit(" ", 1)[0] + "…"
+    opiniao = str(n.get("take") or "").strip()
+    desc = descricao(resumo, n.get("body"))
     foto = http(n.get("img", ""))
     data = n.get("date", "")
+    # data com hora e fuso (o robô grava "pub"; notícias antigas ou do painel ficam às 9h de Brasília)
+    publicado = n.get("pub") if re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}", str(n.get("pub") or "")) else (f"{data}T09:00:00-03:00" if data else "")
     fonte, link_fonte = n.get("src", ""), http(n.get("url", ""))
 
     ld_artigo = {
         "@context": "https://schema.org", "@type": "NewsArticle",
         "mainEntityOfPage": {"@type": "WebPage", "@id": url},
-        "headline": titulo[:110], "description": desc, "inLanguage": "pt-BR",
-        "articleSection": n.get("cat", ""),
+        "url": url, "headline": titulo[:110], "description": desc, "inLanguage": "pt-BR",
+        "articleSection": n.get("cat", ""), "isAccessibleForFree": True,
         "author": {"@type": "Organization", "name": nome, "url": SITE_URL + "/"},
         "publisher": {"@type": "Organization", "name": nome, "url": SITE_URL + "/",
                       "logo": {"@type": "ImageObject", "url": SITE_URL + "/assets/icons/icon-192.png",
                                "width": 192, "height": 192}},
     }
-    if data:
-        ld_artigo["datePublished"] = ld_artigo["dateModified"] = data
+    if publicado:
+        ld_artigo["datePublished"] = ld_artigo["dateModified"] = publicado
     if foto:
         ld_artigo["image"] = [foto]
+        ld_artigo["thumbnailUrl"] = foto
+    if opiniao:  # o texto próprio do site, que o Google valoriza
+        ld_artigo["abstract"] = opiniao
     if link_fonte:
         ld_artigo["isBasedOn"] = link_fonte
     ld_trilha = {
@@ -481,9 +531,10 @@ def pagina(n, todas, site, c, trend):
     bloco_fonte = (f'<p class="src">Leia a matéria completa em <a href="{e(link_fonte)}" target="_blank" rel="noopener">{e(fonte or link_fonte)}</a>.</p>'
                    if link_fonte else "")
 
-    cab = meta_pagina(f"{titulo} | {nome}", desc, url, nome, tipo="article") + f"""
+    cab = meta_pagina(titulo_seo(titulo, nome), desc, url, nome, tipo="article", og_titulo=titulo) + f"""
 {meta_og_img}
-<meta property="article:published_time" content="{e(data)}">
+<meta property="article:published_time" content="{e(publicado)}">
+<meta property="article:modified_time" content="{e(publicado)}">
 <meta property="article:section" content="{e(n.get('cat'))}">
 <script type="application/ld+json">{json_ld(ld_artigo)}</script>
 <script type="application/ld+json">{json_ld(ld_trilha)}</script>"""
@@ -498,6 +549,7 @@ def pagina(n, todas, site, c, trend):
     <p class="meta"><time datetime="{e(data)}">{e(data_br(data))}</time> · {int(n.get('read') or 1)} min de leitura{(' · Fonte: ' + e(fonte)) if fonte else ''}</p>
     <figure>{arte(n, prioridade=True)}{('<figcaption>' + ' · '.join(credito) + '</figcaption>') if credito else ''}</figure>
     <div class="body">{paragrafos(n.get('body') or resumo)}</div>
+    {('<aside class="take" aria-label="Nossa opinião"><h2>Nossa opinião</h2>' + paragrafos(opiniao) + '</aside>') if opiniao else ''}
     {bloco_fonte}
     <p class="share"><span>Link desta notícia:</span> <a href="{e(url)}">{e(url)}</a></p>
     <p class="likes"><button class="like" id="like" type="button" aria-pressed="false" data-post="{e(n['slug'])}" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span class="like-t">Curtir</span><b id="like-n"></b></button></p>
