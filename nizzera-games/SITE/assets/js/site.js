@@ -20,6 +20,7 @@
     chev:'<path d="M15 6l-6 6 6 6"/>',
     chat:'<path d="M4 5h16a1 1 0 011 1v10a1 1 0 01-1 1H10l-5 4v-4H4a1 1 0 01-1-1V6a1 1 0 011-1z"/><path d="M8 10h8M8 13h5"/>',
     menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
+    info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/>',
     mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'
   };
   var CATICON={"Todas":"news","Lançamentos":"rocket","PlayStation":"pad","Xbox":"pad","Nintendo":"pad","Serviços":"cloud","Steam":"monitor","Game Pass":"ticket","Esports":"trophy","Eventos":"cal"};
@@ -41,7 +42,8 @@
     h+=link("/reviews/","star","Reviews",' data-page="/review"');
     h+=link("/ofertas/","tag","Ofertas da semana",' data-page="/ofertas/"');
     h+=link("/gratis/","gift","Jogos grátis",' data-page="/gratis/"');
-    h+=link("/comentarios/","chat","Comentários",' data-page="/comentarios/"');
+    h+=link("/comentarios/","chat","Comentários", data-page="/comentarios/"');
+    h+=link("/sobre/","info","Sobre",' data-page="/sobre/"');
     h+='<div class="grp">Ferramentas</div>'+btn("contact","mail","Fale com a gente")+btn("search","search","Buscar")+btn("theme","theme","Tema claro/escuro")
      +'<div style="flex:1"></div><div class="foot"><button class="item collapse" type="button" data-act="collapse" title="Recolher ou expandir menu">'+svg("chev")+'<span class="lbl">Recolher menu</span></button></div>';
     list.innerHTML=h;

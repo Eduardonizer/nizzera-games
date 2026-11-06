@@ -8,6 +8,7 @@ Cria, dentro de SITE/:
   ofertas/index.html                 página das ofertas da semana
   gratis/index.html                  página dos jogos grátis da semana (Epic e Steam)
   comentarios/index.html             página de comentários e feedback
+  sobre/index.html                   página "Sobre" (quem faz o site e como falar com ele)
   404.html                           página de "não encontrado"
   sitemap.xml                        lista de todas as páginas, para o Google
   feed.xml                           feed RSS das notícias mais recentes
@@ -31,6 +32,7 @@ from atualizar_noticias import assunto  # mesma regra de "assunto em alta" do ro
 SITE_URL = "https://nizzera-games.vercel.app"   # sem barra no final; troque se tiver domínio próprio
 RELACIONADAS = 3                                # quantas "leia também" no fim de cada notícia
 NO_FEED = 30                                    # quantas notícias entram no feed RSS
+STEAM_PERFIL = ""                               # endereço do seu perfil na Steam (vazio = página Sobre sem o botão)
 TREND_DIAS = 21                                 # igual a TREND_DIAS de assets/js/core.js
 FLAME = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 01-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-4-1-6 1-9.5z"/></svg>'
 # ----------------------------------------------
@@ -321,6 +323,66 @@ def pagina_comentarios(c, site):
       <nav class="cm-pager" id="cm-pager" aria-label="Páginas dos comentários" hidden></nav>
     </section>
   </div>
+</main>"""
+    return layout(c, nome, cab, corpo)
+
+def pagina_sobre(c, site):
+    nome = site.get("name") or "Nizzera Games"
+    autor = site.get("credit") or "Eduardo Nizer"
+    email = "nizzeragames@gmail.com"
+    desc = ("Notícias que importam, promoções que valem a pena, jogos grátis da semana e análises sinceras, "
+            "num só lugar. Conheça o Nizzera Games.")
+    url = SITE_URL + "/sobre/"
+    ld = {"@context": "https://schema.org", "@type": "AboutPage", "url": url, "name": f"Sobre o {nome}",
+          "description": desc, "inLanguage": "pt-BR",
+          "about": {"@type": "Organization", "name": nome, "url": SITE_URL + "/", "email": email,
+                    "founder": {"@type": "Person", "name": autor, "homeLocation": "Curitiba, PR"}}}
+    cab = meta_pagina(f"Sobre o {nome}", desc, url, nome) + \
+        f'\n<script type="application/ld+json">{json_ld(ld)}</script>'
+    steam = http(STEAM_PERFIL)
+    botao_steam = (f'<a class="sb-btn alt" href="{e(steam)}" target="_blank" rel="noopener">Ver meu perfil na Steam</a>'
+                   if steam else "")
+    corpo = f"""<main class="wrap page sobre">
+  {trilha("Sobre")}
+  <header class="sb-head">
+    <h1 class="ph">Sobre o {e(nome)}</h1>
+    <p class="lead">Aqui é a sua parada gamer.</p>
+  </header>
+
+  <section class="sb-sec" aria-label="O que é o {e(nome)}">
+    <p>O {e(nome)} nasceu com uma ideia simples: juntar num só lugar tudo o que um gamer de hoje precisa pra ficar por dentro. As notícias que importam, as promoções que valem a pena, os jogos grátis da semana e análises sinceras de quem joga de verdade.</p>
+    <ul class="sb-tiles">
+      <li><a href="/#noticias"><b>Notícias</b><span>O que importa, sem enrolação</span></a></li>
+      <li><a href="/ofertas/"><b>Promoções</b><span>Descontos que valem a pena</span></a></li>
+      <li><a href="/gratis/"><b>Jogos grátis</b><span>O que dá pra pegar de graça</span></a></li>
+      <li><a href="/reviews/"><b>Análises</b><span>Sinceras, de quem joga</span></a></li>
+    </ul>
+    <p>Nada de enrolação nem de texto gigante pra dizer pouca coisa. A ideia é você chegar, se atualizar e voltar pro jogo.</p>
+  </section>
+
+  <section class="sb-sec sb-card" aria-labelledby="sb-quem">
+    <div class="sb-av" aria-hidden="true">EN</div>
+    <div>
+      <h2 id="sb-quem">Quem tá por trás</h2>
+      <p>Prazer, eu sou o {e(autor)}, de Curitiba. Sou apaixonado por games e tecnologia desde sempre, daqueles que passam mais tempo lendo sobre jogo do que deveriam (e jogando mais ainda).</p>
+      <p>Criei o {e(nome)} pra ser o site que eu mesmo gostaria de visitar todo dia. Ele foi feito do zero por mim, e cada parte dele vai crescendo junto com a comunidade.</p>
+      <p>Também escrevo análises na Steam. Se quiser conferir o que ando jogando, é só dar uma passada no meu perfil.</p>
+      {botao_steam}
+    </div>
+  </section>
+
+  <section class="sb-sec sb-card sb-talk" aria-labelledby="sb-fala">
+    <div>
+      <h2 id="sb-fala">Fala comigo</h2>
+      <p>Tem sugestão, achou algum erro ou quer só trocar uma ideia sobre games? Manda um <a href="/comentarios/">comentário aqui no site</a> ou um e-mail pra <a href="mailto:{email}">{email}</a>. Eu leio tudo.</p>
+      <div class="sb-acts">
+        <a class="sb-btn" href="/comentarios/">Deixar um comentário</a>
+        <a class="sb-btn alt" href="mailto:{email}">Mandar um e-mail</a>
+      </div>
+    </div>
+  </section>
+
+  <p class="sb-end">Bem-vindo ao seu novo save point. <span aria-hidden="true">🎮</span></p>
 </main>"""
     return layout(c, nome, cab, corpo)
 
@@ -744,7 +806,8 @@ def sitemap(todas):
               f"  <url><loc>{SITE_URL}/reviews/</loc></url>",
               f"  <url><loc>{SITE_URL}/ofertas/</loc></url>",
               f"  <url><loc>{SITE_URL}/gratis/</loc></url>",
-              f"  <url><loc>{SITE_URL}/comentarios/</loc></url>"]
+              f"  <url><loc>{SITE_URL}/comentarios/</loc></url>",
+              f"  <url><loc>{SITE_URL}/sobre/</loc></url>"]
     for n in todas:
         lm = f"<lastmod>{e(n['date'])}</lastmod>" if re.match(r"^\d{4}-\d{2}-\d{2}$", n.get("date", "")) else ""
         linhas.append(f"  <url><loc>{e(url_noticia(n))}</loc>{lm}</url>")
@@ -828,6 +891,7 @@ def main():
     mudou += gravar(os.path.join(SITE, "ofertas", "index.html"), pagina_ofertas(c, site))
     mudou += gravar(os.path.join(SITE, "gratis", "index.html"), pagina_gratis(c, site))
     mudou += gravar(os.path.join(SITE, "comentarios", "index.html"), pagina_comentarios(c, site))
+    mudou += gravar(os.path.join(SITE, "sobre", "index.html"), pagina_sobre(c, site))
     mudou += gravar(os.path.join(SITE, "404.html"), pagina_404(c, site))
 
     # 3) apaga páginas de notícias que saíram do site (só as que este script criou)
