@@ -9,6 +9,7 @@ Cria, dentro de SITE/:
   gratis/index.html                  página dos jogos grátis da semana (Epic e Steam)
   comentarios/index.html             página de comentários e feedback
   sobre/index.html                   página "Sobre" (quem faz o site e como falar com ele)
+  tierlist/index.html                Tier List interativa (temas em data/tierlists/, ver atualizar_tierlists.py)
   404.html                           página de "não encontrado"
   sitemap.xml                        lista de todas as páginas, para o Google
   feed.xml                           feed RSS das notícias mais recentes
@@ -385,6 +386,65 @@ def pagina_sobre(c, site):
   <p class="sb-end">Bem-vindo ao seu novo save point. <span aria-hidden="true">🎮</span></p>
 </main>"""
     return layout(c, nome, cab, corpo)
+
+
+def temas_tierlist():
+    """Lista de temas gerada por scripts/atualizar_tierlists.py (vazia se ainda não rodou)."""
+    try:
+        with open(os.path.join(SITE, "data", "tierlists", "index.json"), encoding="utf-8") as f:
+            temas = json.load(f).get("themes") or []
+    except Exception:
+        return []
+    return [t for t in temas if isinstance(t, dict) and SLUG_OK.match(str(t.get("slug") or ""))]
+
+
+def card_tema(t):
+    """Card de um tema no seletor (o assets/js/tierlist.js desenha igual, a partir do mesmo index.json)."""
+    capas = "".join(f'<img src="{e(c)}" alt="" loading="lazy" decoding="async">'
+                    for c in (t.get("covers") or [])[:4] if str(c).startswith("/assets/tierlist/"))
+    n = int(t.get("count") or 0)
+    return (f'<a class="tl-theme" href="/tierlist/?tema={e(t["slug"])}" data-theme-slug="{e(t["slug"])}">'
+            f'<span class="tl-cov" aria-hidden="true">{capas}</span><span class="tl-ttx"><b>{e(t.get("title"))}</b>'
+            f'<span>{e(t.get("description"))}</span><small>{n} jogo{"s" if n != 1 else ""}</small></span></a>')
+
+
+def pagina_tierlist(c, site):
+    nome = site.get("name") or "Nizzera Games"
+    desc = ("Monte sua tier list de jogos: arraste as capas para as faixas S, A, B, C e D, "
+            "no PC ou no celular, e compartilhe a imagem com os amigos.")
+    cab = meta_pagina(f"Tier List de jogos: monte e compartilhe | {nome}", desc, SITE_URL + "/tierlist/", nome,
+                      og_titulo=f"Monte sua Tier List de jogos | {nome}")
+    temas = "".join(card_tema(t) for t in temas_tierlist()) or '<p class="soon">Carregando temas…</p>'
+    corpo = f"""<main class="wrap page tl" id="tierlist">
+  {trilha("Tier List")}
+  <h1 class="ph">Tier List</h1>
+  <p class="lead">Escolha um tema, arraste os jogos para as faixas e compartilhe a sua com os amigos.</p>
+
+  <section class="tl-pick" id="tl-pick" aria-labelledby="tl-pick-t">
+    <h2 class="sec" id="tl-pick-t">Escolha um tema</h2>
+    <div class="tl-themes" id="tl-themes">{temas}</div>
+  </section>
+
+  <section class="tl-board" id="tl-board" aria-labelledby="tl-title" hidden>
+    <div class="tl-bar">
+      <h2 class="sec" id="tl-title" tabindex="-1"></h2>
+      <div class="tl-acts">
+        <button class="tl-btn ghost" type="button" id="tl-change">Trocar tema</button>
+        <button class="tl-btn ghost" type="button" id="tl-reset">Recomeçar</button>
+        <button class="tl-btn" type="button" id="tl-share">Baixar / Compartilhar imagem</button>
+      </div>
+    </div>
+    <p class="tl-hint" id="tl-hint">Arraste as capas para as faixas. No celular, segure a capa um instante e arraste, ou toque na capa e depois na faixa.</p>
+    <div class="tl-rows" id="tl-rows"></div>
+    <div class="tl-poolbox">
+      <h3>Jogos para colocar</h3>
+      <div class="tl-drop tl-pool" id="tl-pool" data-tier="pool" role="list" aria-label="Jogos ainda não colocados"></div>
+    </div>
+    <p class="tl-status" id="tl-status" role="status" aria-live="polite"></p>
+  </section>
+  <noscript><p class="empty">A Tier List precisa de JavaScript para funcionar.</p></noscript>
+</main>"""
+    return layout(c, nome, cab, corpo, '<script src="/assets/js/tierlist.js"></script>\n')
 
 
 def rv_slug(r):
@@ -807,7 +867,8 @@ def sitemap(todas):
               f"  <url><loc>{SITE_URL}/ofertas/</loc></url>",
               f"  <url><loc>{SITE_URL}/gratis/</loc></url>",
               f"  <url><loc>{SITE_URL}/comentarios/</loc></url>",
-              f"  <url><loc>{SITE_URL}/sobre/</loc></url>"]
+              f"  <url><loc>{SITE_URL}/sobre/</loc></url>",
+              f"  <url><loc>{SITE_URL}/tierlist/</loc></url>"]
     for n in todas:
         lm = f"<lastmod>{e(n['date'])}</lastmod>" if re.match(r"^\d{4}-\d{2}-\d{2}$", n.get("date", "")) else ""
         linhas.append(f"  <url><loc>{e(url_noticia(n))}</loc>{lm}</url>")
@@ -892,6 +953,7 @@ def main():
     mudou += gravar(os.path.join(SITE, "gratis", "index.html"), pagina_gratis(c, site))
     mudou += gravar(os.path.join(SITE, "comentarios", "index.html"), pagina_comentarios(c, site))
     mudou += gravar(os.path.join(SITE, "sobre", "index.html"), pagina_sobre(c, site))
+    mudou += gravar(os.path.join(SITE, "tierlist", "index.html"), pagina_tierlist(c, site))
     mudou += gravar(os.path.join(SITE, "404.html"), pagina_404(c, site))
 
     # 3) apaga páginas de notícias que saíram do site (só as que este script criou)
