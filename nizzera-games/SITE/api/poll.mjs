@@ -5,7 +5,7 @@
 // Só devolve porcentagens (nunca o número de votos). Cada visitante (hash do IP, sem guardar o IP)
 // vota uma vez por votação. Guardado no Upstash Redis: hash "nz:poll:<id>" (campo = opção).
 // Para criar outra votação: acrescente em POLLS abaixo e monte o quadro no index.html (data-poll).
-import { redis, redisReady, visitor, tooMany, readBody, sameOrigin } from "./_redis.mjs";
+import { redis, redisReady, visitor, tooMany, readBody, sameOrigin, logEvent } from "./_redis.mjs";
 
 const POLLS = {
   "goty-2026": ["zelda", "gta6"],
@@ -49,7 +49,7 @@ export default async function handler(req, res) {
         return res.status(429).json({ ok: false, error: "Muitas tentativas. Tente de novo em alguns minutos." });
       }
       const [set] = await redis([["SET", mark, option, "EX", MARK_TTL, "NX"]]);
-      if (set === "OK") await redis([["HINCRBY", "nz:poll:" + id, option, 1]]);
+      if (set === "OK") { await redis([["HINCRBY", "nz:poll:" + id, option, 1]]); await logEvent({ t: "vote", poll: id, opt: option }); }
       return res.status(200).json(await state(id, mark));
     }
 

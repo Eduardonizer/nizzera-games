@@ -8,24 +8,10 @@
 // Guarda os dados no Upstash Redis (Vercel → Storage). Veja api/_redis.mjs.
 // Palavras ofensivas: veja api/_filtro.mjs (recusa no envio e esconde da lista pública).
 import { randomBytes } from "node:crypto";
-import { redis, redisReady, tooMany, readBody, sameOrigin, POST_OK } from "./_redis.mjs";
+import { redis, redisReady, tooMany, readBody, sameOrigin, POST_OK, isAdmin, readComments as readAll, COMMENTS as KEY } from "./_redis.mjs";
 import { ofensivo } from "./_filtro.mjs";
 
-const KEY = "nz:comments";
 const MAX_STORED = 2000;
-
-// confere o login de admin usando a própria rota /api/me do site (a mesma que o painel usa)
-async function isAdmin(req) {
-  try {
-    const host = req.headers["x-forwarded-host"] || req.headers.host;
-    if (!host || !req.headers.cookie) return false;
-    const r = await fetch("https://" + host + "/api/me", { headers: { cookie: req.headers.cookie } });
-    const j = await r.json().catch(() => ({}));
-    return !!(r.ok && j && j.ok);
-  } catch {
-    return false;
-  }
-}
 
 const clean = (s, max) =>
   String(s == null ? "" : s)
@@ -35,22 +21,6 @@ const clean = (s, max) =>
     .replace(/\n{3,}/g, "\n\n")
     .trim()
     .slice(0, max);
-
-async function readAll() {
-  const [flat] = await redis([["HGETALL", KEY]]);
-  let pairs = [];
-  if (Array.isArray(flat)) for (let i = 0; i + 1 < flat.length; i += 2) pairs.push([flat[i], flat[i + 1]]);
-  else if (flat && typeof flat === "object") pairs = Object.entries(flat);
-  const items = [];
-  for (const [id, v] of pairs) {
-    try {
-      const c = JSON.parse(v);
-      if (c && c.msg) items.push({ id, name: c.name || "", msg: c.msg, ts: Number(c.ts) || 0, post: c.post || "", title: c.title || "" });
-    } catch { /* ignora registro quebrado */ }
-  }
-  items.sort((a, b) => b.ts - a.ts);
-  return items;
-}
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");

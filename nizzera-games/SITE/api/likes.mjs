@@ -5,7 +5,7 @@
 //
 // Cada visitante (pelo hash do IP, sem guardar o IP) curte uma vez por notícia; a marca dura 60 dias.
 // Contagem: hash "nz:likes" (campo = slug da notícia). Guardado no Upstash Redis, veja api/_redis.mjs.
-import { redis, redisReady, visitor, tooMany, readBody, sameOrigin, POST_OK } from "./_redis.mjs";
+import { redis, redisReady, visitor, tooMany, readBody, sameOrigin, POST_OK, logEvent } from "./_redis.mjs";
 
 const KEY = "nz:likes";
 const MARK_TTL = 60 * 24 * 3600;
@@ -45,7 +45,7 @@ export default async function handler(req, res) {
         liked = false;
       } else {
         const [set] = await redis([["SET", mark, "1", "EX", MARK_TTL, "NX"]]);
-        if (set === "OK") await redis([["HINCRBY", KEY, post, 1]]);
+        if (set === "OK") { await redis([["HINCRBY", KEY, post, 1]]); await logEvent({ t: "like", post }); }
         liked = true;
       }
       const [count] = await redis([["HGET", KEY, post]]);

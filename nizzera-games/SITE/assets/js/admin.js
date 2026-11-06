@@ -2,7 +2,24 @@
 (function(){
   var adm=document.getElementById("admin");
   var UKEY="nz-unpub",KKEY="nz-known",PKEY="nz-pub",FILE="index.html";
-  var st={tab:"news",sel:null,draft:null,isNew:false,dirty:false,q:"",cats:[]},tt,authOk=false,needTotp=false,SRC="";
+  var st={tab:"home",sel:null,draft:null,isNew:false,dirty:false,q:"",cats:[]},tt,authOk=false,needTotp=false,SRC="";
+  var IC={
+    home:'<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>',
+    news:'<path d="M5 4h11a2 2 0 012 2v14H7a2 2 0 01-2-2zM18 8h2v10a2 2 0 01-2 2M8 8h7M8 12h7M8 16h4"/>',
+    star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+    chat:'<path d="M4 5h16a1 1 0 011 1v10a1 1 0 01-1 1H10l-5 4v-4H4a1 1 0 01-1-1V6a1 1 0 011-1z"/><path d="M8 10h8M8 13h5"/>',
+    gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
+    upload:'<path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/>',
+    bell:'<path d="M6 16V11a6 6 0 0112 0v5l2 2H4zM10 20a2 2 0 004 0"/>',
+    heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+    vote:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/>',
+    mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+    ext:'<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5"/>',
+    out:'<path d="M15 4h4a1 1 0 011 1v14a1 1 0 01-1 1h-4M10 8l-4 4 4 4M6 12h10"/>',
+    back:'<path d="M15 6l-6 6 6 6"/>',
+    trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'
+  };
+  function svg(n){return '<svg viewBox="0 0 24 24" aria-hidden="true">'+IC[n]+'</svg>'}
   function refreshAll(){} /* nesta página não há site para redesenhar */
   function lsGet(k){try{return localStorage.getItem(k)}catch(_){return null}}
   function lsSet(k,v){try{localStorage.setItem(k,v);return true}catch(_){return false}}
@@ -83,17 +100,166 @@
   }
 
   /* ---- estrutura ---- */
+  /* abas: [id, ícone, nome, nome curto (barra do celular)] */
+  var TABS=[["home","home","Início"],["news","news","Notícias"],["rv","star","Reviews"],["cm","chat","Comentários","Coment."],["site","gear","Site e categorias","Site"],["back","upload","Publicar e backup","Publicar"]];
   function shell(){
-    adm.innerHTML='<div class="a-top"><strong class="a-title">Área admin</strong><span class="a-chip" id="a-status"></span><span class="a-sp"></span><a class="a-btn" href="/" target="_blank" rel="noopener">Ver site ↗</a><button class="a-btn" type="button" id="a-out">Sair</button></div>'
-      +'<div class="a-tabs" role="tablist"><button class="a-tab" role="tab" type="button" data-tab="news">Notícias</button><button class="a-tab" role="tab" type="button" data-tab="rv">Reviews</button><button class="a-tab" role="tab" type="button" data-tab="cm">Comentários</button><button class="a-tab" role="tab" type="button" data-tab="site">Site e categorias</button><button class="a-tab" role="tab" type="button" data-tab="back">Publicar e backup</button></div><div class="a-body" id="a-body"></div>';
-    status();
+    adm.innerHTML='<header class="a-top"><span class="a-logo" aria-hidden="true"></span><strong class="a-title">Painel</strong><span class="a-chip" id="a-status"></span><span class="a-sp"></span>'
+      +'<button class="a-ico" type="button" id="a-bell" aria-label="Notificações" title="Notificações">'+svg("bell")+'<b class="a-badge" data-badge hidden></b></button>'
+      +'<a class="a-ico" href="/" target="_blank" rel="noopener" title="Ver site">'+svg("ext")+'<span class="a-ilbl">Ver site</span></a>'
+      +'<button class="a-ico" type="button" id="a-out" title="Sair">'+svg("out")+'<span class="a-ilbl">Sair</span></button></header>'
+      +'<nav class="a-tabs" role="tablist" aria-label="Seções do painel">'+TABS.map(function(t){
+        return '<button class="a-tab" role="tab" type="button" data-tab="'+t[0]+'"><span class="a-ti">'+svg(t[1])+(t[0]==="home"?'<b class="a-badge" data-badge hidden></b>':'')+'</span><span class="a-tl">'+t[2]+'</span><span class="a-ts">'+(t[3]||t[2])+'</span></button>';
+      }).join("")+'</nav><div class="a-body" id="a-body"></div>';
+    status();badge();ntStart();
   }
   function tab(n){
     if(n!==st.tab){if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;st.dirty=false;st.draft=null;st.sel=null;st.isNew=false;st.rvDraft=null;st.rvSel=null;st.rvNew=false}
     st.tab=n;
     [].forEach.call(adm.querySelectorAll(".a-tab"),function(b){b.setAttribute("aria-selected",b.dataset.tab===n)});
-    ({news:newsView,rv:rvView,cm:cmView,site:siteView,back:backView})[n]();
+    var body=$("#a-body");if(body)body.scrollTop=0;
+    ({home:homeView,news:newsView,rv:rvView,cm:cmView,site:siteView,back:backView})[n]();
     if(n==="back")svcView();
+  }
+
+  /* ---- notificações (curtidas, comentários, votos e mensagens) ----
+     O servidor guarda até onde você já leu: abrir o Início marca tudo como lido em todos os aparelhos. */
+  var NT={items:[],seen:0,unread:0,stats:null,err:"",loaded:false,filter:"all",hl:Infinity,hlPending:true,timer:null,busy:false};
+  var POLLNAMES={"goty-2026":{t:"GOTY 2026",o:{zelda:"Zelda: Ocarina of Time",gta6:"GTA 6"}}};
+  function badge(){
+    var n=NT.unread,txt=n>99?"99+":String(n);
+    [].forEach.call(adm.querySelectorAll("[data-badge]"),function(b){b.textContent=txt;b.hidden=!n});
+    var bell=$("#a-bell");if(bell)bell.setAttribute("aria-label",n?n+" notificação(ões) nova(s)":"Notificações");
+    document.title=(n?"("+txt+") ":"")+"Painel · Nizzera Games";
+  }
+  function ntStart(){
+    clearInterval(NT.timer);
+    NT.timer=setInterval(function(){if(authOk&&!document.hidden)ntLoad()},60000);
+    ntLoad();
+  }
+  document.addEventListener("visibilitychange",function(){if(!document.hidden&&authOk&&NT.loaded)ntLoad()});
+  function ntLoad(){
+    if(NT.busy)return;NT.busy=true;
+    api("GET","/api/notifications").then(function(r){
+      NT.busy=false;
+      if(r.status===401){authOk=false;clearInterval(NT.timer);toast("Sua sessão expirou. Entre de novo.",true);paint();return}
+      NT.loaded=true;
+      if(!r.ok){NT.err=r.error||"Não consegui carregar as notificações.";if(st.tab==="home")homeFill();return}
+      NT.err="";NT.items=r.items||[];NT.seen=+r.seen||0;NT.unread=+r.unread||0;NT.stats=r.stats||null;
+      if(st.tab==="home"){
+        if(NT.hlPending){NT.hl=NT.seen;NT.hlPending=false}
+        homeFill();
+        if(NT.unread>0)ntSeen();
+      }
+      badge();
+    },function(){NT.busy=false;NT.loaded=true;NT.err="Não consegui falar com o servidor.";if(st.tab==="home")homeFill()});
+  }
+  function ntSeen(){
+    api("POST","/api/notifications",{action:"seen"}).then(function(r){if(r.ok){NT.seen=+r.seen||Date.now();NT.unread=0;badge()}},function(){});
+  }
+  /* de onde veio: a notícia, a review ou a página de comentários */
+  function place(post){
+    post=String(post||"");
+    if(!post)return {kind:"Página",label:"Comentários e feedback",url:"/comentarios/"};
+    if(/^review-/.test(post)){
+      var s=post.slice(7),r=rvList().filter(function(x){return reviewSlug(x)===s})[0];
+      return {kind:"Review",label:r?r.game:pretty(s),url:"/review/"+s+"/",img:r?{id:r.id,img:r.img,title:r.game}:null};
+    }
+    var n=DATA.news.filter(function(x){return newsSlug(x)===post})[0];
+    return {kind:"Notícia",label:n?n.title:pretty(post),url:"/noticia/"+post+"/",img:n||null};
+  }
+  function pretty(s){s=String(s).replace(/^\d+-/,"").replace(/-/g," ");return s.charAt(0).toUpperCase()+s.slice(1)}
+  function ago(ts){
+    var s=Math.round((Date.now()-ts)/1000);
+    if(s<60)return "agora";if(s<3600)return "há "+Math.floor(s/60)+" min";if(s<86400)return "há "+Math.floor(s/3600)+" h";
+    var d=new Date(ts);return d.toLocaleDateString("pt-BR",{day:"numeric",month:"short"})+", "+d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+  }
+  function dayLabel(ts){
+    var d=new Date(ts),t=new Date();t.setHours(0,0,0,0);var x=new Date(d);x.setHours(0,0,0,0);
+    var diff=Math.round((t-x)/86400000);
+    return diff===0?"Hoje":diff===1?"Ontem":d.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"});
+  }
+  function initials(n){var p=String(n||"").trim().split(/\s+/);return ((p[0]||"?")[0]+(p.length>1?p[p.length-1][0]:"")).toUpperCase()}
+  var AVC=["#2433f0","#ff5c7a","#0f9f6e","#7a3cff","#e07a00","#0e7fa8"];
+  function avColor(n){var h=0;String(n||"?").split("").forEach(function(c){h=(h*31+c.charCodeAt(0))>>>0});return AVC[h%AVC.length]}
+  function placeLink(p,hash){return '<a class="n-where" href="'+esc(p.url+(hash||""))+'" target="_blank" rel="noopener"><span class="n-kind">'+esc(p.kind)+'</span><span class="n-lbl">'+esc(p.label)+'</span>'+svg("ext")+'</a>'}
+  function ntRow(x){
+    var isNew=x.ts>NT.hl,icon,cls,head="",body="",p,act="";
+    if(x.t==="comment"){
+      p=place(x.post);icon="chat";cls="cm";
+      head='<b>'+esc(x.name||"Anônimo")+'</b> comentou'+(x.blocked?' <span class="a-flag" title="Tem palavra da lista de api/_filtro.mjs: não aparece no site">Oculto pelo filtro</span>':'');
+      body='<p class="n-msg">'+esc(x.msg)+'</p>'+placeLink(p,"#comentarios");
+      act='<button type="button" class="a-mini dan" data-cmdel="'+esc(x.id)+'" title="Remover comentário">'+svg("trash")+'<span>Remover</span></button>';
+    }else if(x.t==="like"){
+      p=place(x.post);icon="heart";cls="lk";
+      head='Alguém <b>curtiu</b> '+(p.kind==="Review"?"a review":"a notícia");
+      body=placeLink(p);
+    }else if(x.t==="vote"){
+      var P=POLLNAMES[x.poll]||{t:x.poll,o:{}};icon="vote";cls="vt";
+      head='Novo <b>voto</b> na votação '+esc(P.t);
+      body='<p class="n-sub">Escolheu <b>'+esc(P.o[x.opt]||x.opt)+'</b></p>';
+    }else if(x.t==="msg"){
+      icon="mail";cls="ms";
+      head='<b>'+esc(x.name||"Visitante")+'</b> mandou mensagem pelo “Fale com a gente”';
+      body='<p class="n-msg">'+esc(x.msg)+'</p><p class="n-sub">'+(x.mail?"A resposta vai pelo e-mail: a mensagem completa está na caixa de entrada.":"Não deixou e-mail para resposta.")+'</p>';
+    }else return "";
+    return '<li class="n-it n-'+cls+(isNew?" new":"")+'"><span class="n-ic">'+svg(icon)+'</span><div class="n-tx"><div class="n-head"><span>'+head+'</span><time datetime="'+new Date(x.ts).toISOString()+'" title="'+esc(cmDate(x.ts))+'">'+esc(ago(x.ts))+'</time></div>'+body+(act?'<div class="n-act">'+act+'</div>':'')+'</div>'+(isNew?'<span class="n-dot" aria-label="Novo"></span>':'')+'</li>';
+  }
+  function feedHtml(list){
+    var h="",day="";
+    list.forEach(function(x){var d=dayLabel(x.ts);if(d!==day){if(day)h+='</ul>';h+='<h3 class="n-day">'+esc(d)+'</h3><ul class="n-list">';day=d}h+=ntRow(x)});
+    return h?h+'</ul>':"";
+  }
+
+  /* ---- aba Início: resumo e notificações ---- */
+  var FILTERS=[["all","Tudo"],["comment","Comentários"],["like","Curtidas"],["vote","Votos"],["msg","Mensagens"]];
+  function homeView(){
+    NT.hlPending=true;
+    $("#a-body").innerHTML='<div class="a-home"><div class="a-hello"><h1>'+hello()+'</h1><p class="a-hint">O que aconteceu no site: curtidas, comentários, votos e mensagens, com o lugar de onde vieram.</p></div>'
+      +'<div class="a-stats" id="h-stats"></div>'
+      +'<div class="a-homegrid"><section class="a-card a-feed" aria-labelledby="h-ft"><div class="a-fhead"><h2 id="h-ft">Notificações</h2><button class="a-mini" type="button" id="h-reload" title="Atualizar">Atualizar</button></div>'
+      +'<div class="a-filters" role="group" aria-label="Filtrar notificações">'+FILTERS.map(function(f){return '<button type="button" class="a-fchip" data-nf="'+f[0]+'" aria-pressed="'+(NT.filter===f[0])+'">'+f[1]+'<b></b></button>'}).join("")+'</div>'
+      +'<div id="h-feed"><div class="a-skel"></div><div class="a-skel"></div><div class="a-skel"></div></div></section>'
+      +'<aside class="a-side"><section class="a-card" aria-labelledby="h-tt"><h2 id="h-tt">Mais curtidas</h2><div id="h-top"><p class="a-hint">Carregando…</p></div></section>'
+      +'<section class="a-card" aria-labelledby="h-pt"><h2 id="h-pt">Votação GOTY 2026</h2><div id="h-poll"><p class="a-hint">Carregando…</p></div></section></aside></div></div>';
+    if(NT.loaded)homeFill();
+    ntLoad();
+  }
+  function hello(){var h=new Date().getHours();return h<12?"Bom dia!":h<18?"Boa tarde!":"Boa noite!"}
+  function homeFill(){
+    var feed=$("#h-feed");if(!feed)return;
+    if(NT.err&&!NT.items.length){feed.innerHTML='<p class="a-err">'+esc(NT.err)+'</p>';return}
+    var S=NT.stats||{},votes=0,pl=(S.polls||{})["goty-2026"]||{};for(var k in pl)votes+=pl[k];
+    var since=Date.now()-86400000,today=NT.items.filter(function(x){return x.ts>since}).length;
+    function tile(cls,icon,n,label,sub,go){return '<button type="button" class="a-stat s-'+cls+'"'+(go?' data-nf="'+go+'"':'')+'><span class="a-sic">'+svg(icon)+'</span><b>'+n.toLocaleString("pt-BR")+'</b><span>'+label+'</span>'+(sub?'<small>'+sub+'</small>':'')+'</button>'}
+    $("#h-stats").innerHTML=tile("nw","bell",NT.unread||NT.items.filter(function(x){return x.ts>NT.hl}).length,"novas","desde a última visita","all")
+      +tile("lk","heart",S.likes||0,"curtidas","no total","like")+tile("cm","chat",S.comments||0,"comentários","no total","comment")+tile("vt","vote",votes,"votos","GOTY 2026","vote");
+    /* contagem por tipo nos filtros */
+    var cnt={all:NT.items.length};NT.items.forEach(function(x){cnt[x.t]=(cnt[x.t]||0)+1});
+    [].forEach.call(adm.querySelectorAll(".a-fchip"),function(b){b.setAttribute("aria-pressed",b.dataset.nf===NT.filter);b.querySelector("b").textContent=cnt[b.dataset.nf]||0});
+    var list=NT.items.filter(function(x){return NT.filter==="all"||x.t===NT.filter}).slice(0,120);
+    feed.innerHTML=feedHtml(list)||'<div class="a-empty">'+svg("bell")+'<b>Nada por aqui ainda.</b><span>'+(NT.filter==="all"?"Quando alguém curtir, comentar, votar ou mandar mensagem, aparece aqui.":"Nenhuma notificação deste tipo.")+'</span></div>';
+    if(today)feed.insertAdjacentHTML("afterbegin",'<p class="a-hint n-today">'+today+' nas últimas 24 horas</p>');
+    /* mais curtidas */
+    var top=(S.top||[]),mx=top.length?top[0].n:1;
+    $("#h-top").innerHTML=top.length?'<ol class="a-top5">'+top.map(function(t){var p=place(t.post);
+      return '<li><a href="'+esc(p.url)+'" target="_blank" rel="noopener">'+(p.img?'<span class="art">'+pic(p.img)+'</span>':'<span class="art"></span>')+'<span class="t5-tx"><b>'+esc(p.label)+'</b><i style="width:'+Math.max(6,Math.round(t.n/mx*100))+'%"></i></span><span class="t5-n">'+svg("heart")+t.n+'</span></a></li>'}).join("")+'</ol>':'<p class="a-hint">Nenhuma curtida ainda.</p>';
+    /* votação */
+    var P=POLLNAMES["goty-2026"],opts=Object.keys(P.o);
+    $("#h-poll").innerHTML=votes?opts.map(function(o){var n=pl[o]||0,pc=Math.round(n/votes*100);
+      return '<div class="a-pollr"><div><b>'+esc(P.o[o])+'</b><span>'+pc+'% · '+n+' voto'+(n===1?"":"s")+'</span></div><i><u style="width:'+pc+'%"></u></i></div>'}).join("")+'<p class="a-hint">Os números exatos só aparecem aqui; o site mostra só as porcentagens.</p>':'<p class="a-hint">Nenhum voto ainda.</p>';
+    fillArt($("#h-top"));
+  }
+
+  /* no celular, lista e editor ocupam a tela um de cada vez */
+  function editing(on){var w=$(".a-news");if(w)w.classList.toggle("editing",on)}
+  function toTop(){var b=$("#a-body");if(b)b.scrollTop=0}
+  function backBtn(k){return '<button type="button" class="a-backl" data-backlist="'+k+'">'+svg("back")+'Voltar à lista</button>'}
+  function backList(k){
+    if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;
+    st.dirty=false;
+    if(k==="news"){st.draft=null;st.sel=null;st.isNew=false;items();editor()}
+    else{st.rvDraft=null;st.rvSel=null;st.rvNew=false;rvItems();rvEditor()}
+    toTop();
   }
 
   /* ---- aba Notícias ---- */
@@ -113,11 +279,12 @@
   }
   function editor(){
     var box=$("#a-edit"),d=st.draft;
+    editing(!!d);
     if(!d){box.innerHTML='<div class="a-card a-ph"><h2>Editar notícia</h2><p>Escolha uma notícia na lista ao lado ou crie uma nova.</p></div>';return}
     var opts=DATA.cats.map(function(c){return '<option'+(c===d.cat?" selected":"")+'>'+esc(c)+'</option>'}).join("");
     var isData=/^data:/.test(d.img||"");
     var pos=[["","Centro"],["top","Topo"],["bottom","Base"]].map(function(p){return '<option value="'+p[0]+'"'+((d.pos||"")===p[0]?" selected":"")+'>'+p[1]+'</option>'}).join("");
-    box.innerHTML='<form id="a-form" class="a-card" novalidate><h2>'+(st.isNew?"Nova notícia":"Editar notícia")+'</h2>'
+    box.innerHTML='<form id="a-form" class="a-card" novalidate>'+backBtn("news")+'<h2>'+(st.isNew?"Nova notícia":"Editar notícia")+'</h2>'
       +fld("Título","f-title",d.title)
       +'<div class="a-row3"><div><label for="f-cat">Categoria</label><select class="a-in" id="f-cat">'+opts+'</select></div><div><label for="f-date">Data</label><input class="a-in" id="f-date" type="date" value="'+esc(d.date)+'"></div><div><label for="f-read">Leitura (min)</label><input class="a-in" id="f-read" type="number" min="1" max="60" placeholder="auto" value="'+esc(d.read||"")+'"></div></div>'
       +area("Resumo (aparece no card)","f-sum",d.sum,2)
@@ -130,7 +297,7 @@
       +fld("Texto alternativo (para leitores de tela)","f-alt",d.alt)+fld("Crédito da imagem (opcional)","f-credit",d.credit)+'</div></div>'
       +'<label class="a-chk"><input type="checkbox" id="f-feat"'+(d.featured?" checked":"")+'> Mostrar como destaque no topo do site</label>'
       +'<div class="a-err" id="f-err" role="alert"></div>'
-      +'<div class="a-act"><button class="a-btn pri" type="submit">Salvar</button><button type="button" class="a-btn" id="a-disc">Descartar alterações</button>'+(st.isNew?"":'<button type="button" class="a-btn dan" id="a-del">Excluir</button>')+'</div></form>';
+      +'<div class="a-act a-save"><button class="a-btn pri" type="submit">Salvar</button><button type="button" class="a-btn" id="a-disc">Descartar</button>'+(st.isNew?"":'<button type="button" class="a-btn dan" id="a-del">Excluir</button>')+'</div></form>';
     preview();
   }
   function readForm(){
@@ -143,14 +310,13 @@
   function pick(id){
     if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;
     st.dirty=false;st.isNew=false;st.sel=id;st.draft=clone(find(id));items();editor();
-    if(innerWidth<900)$("#a-edit").scrollIntoView({behavior:"smooth",block:"start"});
+    toTop();
   }
   function addNew(){
     if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;
     st.dirty=false;st.isNew=true;st.sel=null;
     st.draft={id:nextId(),img:"",alt:"",pos:"",credit:"",cat:DATA.cats[0]||"",title:"",date:today(),read:0,sum:"",body:"",src:"",url:"",featured:false};
-    items();editor();var t=$("#f-title");if(t)t.focus();
-    if(innerWidth<900)$("#a-edit").scrollIntoView({behavior:"smooth",block:"start"});
+    items();editor();toTop();var t=$("#f-title");if(t)t.focus({preventScroll:true});
   }
   function saveNews(){
     var d=st.draft;if(!d)return;readForm();var err=$("#f-err");err.textContent="";
@@ -212,9 +378,10 @@
   }
   function rvEditor(){
     var box=$("#rv-edit"),r=st.rvDraft;
+    editing(!!r);
     if(!r){box.innerHTML='<div class="a-card a-ph"><h2>Editar review</h2><p>Escolha uma review na lista ao lado ou crie uma nova. Use notas e opiniões de fontes reais e liste as fontes no fim.</p></div>';return}
     var mx=[100,10,5].map(function(v){return '<option value="'+v+'"'+((+r.scoreMax||100)===v?" selected":"")+'>de 0 a '+v+'</option>'}).join("");
-    box.innerHTML='<form id="rv-form" class="a-card" novalidate><h2>'+(st.rvNew?"Nova review":"Editar review")+'</h2>'
+    box.innerHTML='<form id="rv-form" class="a-card" novalidate>'+backBtn("rv")+'<h2>'+(st.rvNew?"Nova review":"Editar review")+'</h2>'
       +fld("Nome do jogo","r-game",r.game)+fld("Título da review","r-title",r.title)
       +area("Veredito (1 ou 2 frases; aparece no card)","r-verdict",r.verdict,2)
       +'<h3>Nota</h3><div class="a-row3"><div>'+fld("Nota","r-score",r.score,"number")+'</div><div><label for="r-max">Escala</label><select class="a-in" id="r-max">'+mx+'</select></div><div>'+fld("Nota própria (opcional)","r-mine",r.myScore)+'</div></div>'
@@ -230,7 +397,7 @@
       +area("O que o público está achando","r-pub",r.public,5)
       +area("Fontes: uma por linha, no formato  Nome | link","r-src",pairs(r.sources,["name","url"]),5)
       +fld("Data de publicação","r-date",r.date,"date")
-      +'<div class="a-err" id="r-err" role="alert"></div><div class="a-act"><button class="a-btn pri" type="submit">Salvar review</button><button type="button" class="a-btn" id="rv-disc">Descartar alterações</button>'
+      +'<div class="a-err" id="r-err" role="alert"></div><div class="a-act a-save"><button class="a-btn pri" type="submit">Salvar review</button><button type="button" class="a-btn" id="rv-disc">Descartar</button>'
       +(st.rvNew?"":'<a class="a-btn" href="'+esc(reviewUrl(r))+'" target="_blank" rel="noopener">Ver página ↗</a><button type="button" class="a-btn dan" id="rv-del">Excluir</button>')+'</div></form>';
   }
   function rvRead(){
@@ -260,14 +427,14 @@
   function rvPick(id){
     if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;
     st.dirty=false;st.rvNew=false;st.rvSel=id;st.rvDraft=clone(rvFind(id));rvItems();rvEditor();
-    if(innerWidth<900)$("#rv-edit").scrollIntoView({behavior:"smooth",block:"start"});
+    toTop();
   }
   function rvNew(){
     if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;
     st.dirty=false;st.rvNew=true;st.rvSel=null;
     var id=rvList().reduce(function(m,r){return Math.max(m,+r.id||0)},0)+1;
     st.rvDraft={id:id,slug:"",game:"",title:"",verdict:"",img:"",alt:"",credit:"",platforms:"",release:"",dev:"",genre:"",score:0,scoreMax:100,scoreLabel:"Metacritic (média da crítica)",myScore:"",critics:[],synopsis:"",changes:[],pros:[],cons:[],public:"",sources:[],date:today()};
-    rvItems();rvEditor();var f=$("#r-game");if(f)f.focus();
+    rvItems();rvEditor();toTop();var f=$("#r-game");if(f)f.focus({preventScroll:true});
   }
 
   /* ---- aba Comentários ---- */
@@ -284,16 +451,17 @@
       if(r.status===401){authOk=false;toast("Sua sessão expirou. Entre de novo.",true);paint();return}
       if(!r.ok||!Array.isArray(r.items)){box.innerHTML='<p class="a-err">'+esc(r.error||"Não consegui carregar os comentários.")+'</p>';return}
       var n=$("#cm-count");if(n)n.textContent=r.items.length+" comentário(s)";
-      box.innerHTML=r.items.length?r.items.map(function(c){
-        return '<div class="a-cm"><div class="a-cm-top"><b>'+esc(c.name||"Anônimo")+'</b><small>'+esc(cmDate(c.ts))+'</small>'+(c.blocked?'<span class="a-flag" title="Tem palavra da lista de api/_filtro.mjs: não aparece no site">Oculto pelo filtro</span>':'')+'<span class="a-sp"></span><button type="button" class="a-btn dan" data-cmdel="'+esc(c.id)+'">Remover</button></div>'+(c.post&&/^review-/.test(c.post)?'<small class="a-hint">Na review: <a href="/review/'+esc(c.post.slice(7))+'/#comentarios" target="_blank" rel="noopener">'+esc(c.title||c.post)+'</a></small>':c.post?'<small class="a-hint">Na notícia: <a href="/noticia/'+esc(c.post)+'/#comentarios" target="_blank" rel="noopener">'+esc(c.title||c.post)+'</a></small>':'<small class="a-hint">Na página Comentários</small>')+'<p>'+esc(c.msg)+'</p></div>';
-      }).join(""):'<p class="a-hint">Nenhum comentário ainda.</p>';
+      box.innerHTML=r.items.length?'<ul class="n-list">'+r.items.map(function(c){
+        var p=place(c.post);if(c.title&&p.label===pretty(String(c.post).replace(/^review-/,"")))p.label=c.title;
+        return '<li class="n-it n-cm"><span class="cm-av" style="background:'+avColor(c.name)+'">'+esc(initials(c.name||"Anônimo"))+'</span><div class="n-tx"><div class="n-head"><span><b>'+esc(c.name||"Anônimo")+'</b>'+(c.blocked?' <span class="a-flag" title="Tem palavra da lista de api/_filtro.mjs: não aparece no site">Oculto pelo filtro</span>':'')+'</span><time title="'+esc(cmDate(c.ts))+'">'+esc(ago(c.ts))+'</time></div><p class="n-msg">'+esc(c.msg)+'</p>'+placeLink(p,c.post?"#comentarios":"")+'<div class="n-act"><button type="button" class="a-mini dan" data-cmdel="'+esc(c.id)+'">'+svg("trash")+'<span>Remover</span></button></div></div></li>';
+      }).join("")+'</ul>':'<div class="a-empty">'+svg("chat")+'<b>Nenhum comentário ainda.</b></div>';
     },function(){box=$("#cm-list");if(box)box.innerHTML='<p class="a-err">Não consegui falar com o servidor.</p>'});
   }
   function cmDel(cid,btn){
     if(!confirm("Remover este comentário? Não dá para desfazer."))return;
     btn.disabled=true;
     api("DELETE","/api/comments?id="+encodeURIComponent(cid)).then(function(r){
-      if(r.ok){toast("Comentário removido.");cmLoad()}
+      if(r.ok){toast("Comentário removido.");NT.items=NT.items.filter(function(x){return !(x.t==="comment"&&x.id===cid)});if(NT.stats)NT.stats.comments=Math.max(0,(NT.stats.comments||1)-1);if(st.tab==="home")homeFill();else cmLoad()}
       else if(r.status===401){authOk=false;toast("Sua sessão expirou. Entre de novo.",true);paint()}
       else{btn.disabled=false;toast(r.error||"Não consegui remover.",true)}
     },function(){btn.disabled=false;toast("Não consegui falar com o servidor.",true)});
@@ -475,6 +643,10 @@
   adm.addEventListener("click",function(e){
     var t=e.target.closest("button");if(!t)return;var id=t.id,ds=t.dataset;
     if(ds.tab){tab(ds.tab);return}
+    if(id==="a-bell"){if(st.tab!=="home")tab("home");else{NT.filter="all";homeFill();var f=$(".a-feed");if(f)f.scrollIntoView({behavior:"smooth",block:"start"})}return}
+    if(ds.nf){NT.filter=ds.nf;homeFill();if(t.classList.contains("a-stat")){var fd=$(".a-feed");if(fd)fd.scrollIntoView({behavior:"smooth",block:"start"})}return}
+    if(id==="h-reload"){t.disabled=true;ntLoad();setTimeout(function(){t.disabled=false},1200);return}
+    if(ds.backlist){backList(ds.backlist);return}
     if(ds.pick){pick(+ds.pick);return}
     if(ds.rvpick){rvPick(+ds.rvpick);return}
     if(id==="rv-new"){rvNew();return}
