@@ -30,7 +30,10 @@ import atualizar_noticias as AN  # noqa: E402  (feeds, leitura do RSS, categoria
 
 # ---------------- CONFIGURAÇÃO (edite aqui) ----------------
 MODELO = "gemini-3.5-flash-lite"  # modelo Flash-Lite mais novo (lista: aistudio.google.com/docs/models)
+MODELO_RESERVA = "gemini-3.1-flash-lite"  # usado quando o principal responde "muita demanda" (503); "" desliga
 MAX_POR_EXECUCAO = 10    # máximo de rascunhos novos por execução (o plano grátis tem limite diário de pedidos)
+MAX_TENTATIVAS = 16      # máximo de notícias tentadas por execução (contando as que deram erro)
+MAX_ERROS_SEGUIDOS = 3   # o Gemini falhou 3 vezes seguidas: para e deixa o resto para a próxima execução
 PAUSA_SEG = 8            # pausa entre uma chamada e outra ao Gemini
 ESPERA_429_SEG = 45      # espera antes de tentar de novo quando o Gemini responde 429 (limite por minuto)
 MAX_POR_ASSUNTO = 3      # máximo de rascunhos do mesmo "assunto em alta" (GTA 6, Zelda...) por execução
@@ -209,6 +212,10 @@ class LimiteDiario(Exception):
     pass
 
 
+class Sobrecarga(Exception):  # 503 "high demand" mesmo depois de tentar de novo
+    pass
+
+
 def preencher(modelo, campos):
     """Troca {campo} pelo valor numa passada só (um "{url}" dentro de um título não é trocado)."""
     return re.sub(r"\{(\w+)\}", lambda m: str(campos.get(m.group(1), m.group(0))), modelo)
@@ -233,9 +240,20 @@ def espera_sugerida(corpo):
 
 
 def chamar_gemini(pedido, chave):
-    """Devolve o JSON gerado. 429 ou erro do servidor: espera e tenta UMA vez mais."""
+    """Devolve (JSON gerado, modelo usado). Se o principal estiver sobrecarregado, tenta o reserva."""
+    try:
+        return chamar_modelo(pedido, chave, MODELO), MODELO
+    except Sobrecarga:
+        if not MODELO_RESERVA:
+            raise
+        log(f"   {MODELO} sobrecarregado; tentando {MODELO_RESERVA}…")
+        return chamar_modelo(pedido, chave, MODELO_RESERVA), MODELO_RESERVA
+
+
+def chamar_modelo(pedido, chave, modelo):
+    """429 ou erro do servidor: espera e tenta UMA vez mais."""
     for tentativa in (1, 2):
-        req = urllib.request.Request(API.format(MODELO), data=json.dumps(pedido).encode("utf-8"),
+        req = urllib.request.Request(API.format(modelo), data=json.dumps(pedido).encode("utf-8"),
                                      headers={"Content-Type": "application/json", "x-goog-api-key": chave})
         try:
             with urllib.request.urlopen(req, timeout=90) as r:
@@ -250,7 +268,10 @@ def chamar_gemini(pedido, chave):
                 log(f"   Gemini respondeu {e.code}; esperando {s}s para tentar de novo…")
                 time.sleep(s)
                 continue
-            raise RuntimeError(f"Gemini HTTP {e.code}: {corpo[:300]}")
+            msg = (re.search(r'"message"\s*:\s*"([^"]+)', corpo) or [None, corpo[:200]])[1]
+            if e.code == 503:
+                raise Sobrecarga(f"Gemini HTTP 503: {msg}")
+            raise RuntimeError(f"Gemini HTTP {e.code}: {msg}")
     cand = (resp.get("candidates") or [{}])[0]
     partes = (cand.get("content") or {}).get("parts") or []
     txt = "".join(p.get("text", "") for p in partes if not p.get("thought"))
@@ -366,9 +387,12 @@ def main():
     fila = sorted(recentes, key=lambda x: x["pub"], reverse=True)  # a ordenação abaixo mantém esta ordem nos empates
     fila.sort(key=lambda x: (x["alta"] is None, x["alta"] or 0, -len({o["nome"] for o in x["grupo"]})))
 
-    novos, ja_cobertas, erros, por_assunto = [], [], 0, {}
+    novos, ja_cobertas, erros, por_assunto, tentadas, seguidos = [], [], 0, {}, 0, 0
     for it in fila:
-        if len(novos) >= MAX_POR_EXECUCAO:
+        if len(novos) >= MAX_POR_EXECUCAO or tentadas >= MAX_TENTATIVAS:
+            break
+        if seguidos >= MAX_ERROS_SEGUIDOS:
+            log(f"\nO Gemini falhou {seguidos} vezes seguidas: o resto fica para a próxima execução.")
             break
         if it["alta"] is not None and por_assunto.get(it["alta"], 0) >= MAX_POR_ASSUNTO:
             continue
@@ -402,10 +426,12 @@ def main():
             if img:
                 credito = "divulgação / " + g["nome"]
                 break
+        tentadas += 1
         try:
             if novos or erros:
                 time.sleep(PAUSA_SEG)
-            gerado = validar(chamar_gemini(montar_pedido(P, fontes, contexto), chave))
+            resposta, modelo = chamar_gemini(montar_pedido(P, fontes, contexto), chave)
+            gerado = validar(resposta)
         except LimiteDiario as e:
             log(f"   [pausa] {e}. O resto fica para a próxima execução.")
             for g in grupo:
@@ -413,18 +439,21 @@ def main():
             break
         except Exception as e:
             erros += 1
+            seguidos += 1
             log(f"   [erro] {e}. Fica para a próxima execução.")
+            for g in grupo:  # não marca como usada: volta na próxima execução
+                usados.discard(g["k"])
             continue
+        seguidos = 0
 
         did = "r" + hashlib.sha1(it["k"].encode()).hexdigest()[:11]
-        cat = AN.categoria(gerado["titulo"] + " " + it["titulo"], gerado["texto"])
-        if cat == "Lançamentos" and gerado["plataforma"] in PLAT_CAT:
-            cat = PLAT_CAT[gerado["plataforma"]]
+        # a plataforma dita pelo Gemini vale mais que as palavras-chave ("Majora's Mask" contém "major", de Esports)
+        cat = PLAT_CAT.get(gerado["plataforma"]) or AN.categoria(gerado["titulo"] + " " + it["titulo"], gerado["texto"])
         quando = agora().isoformat()
         rascunho = {"id": did, "criado": quando, "atualizado": quando, "status": "rascunho", **gerado,
                     "cat": cat, "img": img, "credito": credito, "alta": trend[it["alta"]]["name"] if it["alta"] is not None else "",
                     "fontes": [{"nome": f["nome"], "titulo": f["titulo"], "url": f["url"], "pub": f["pub"]} for f in fontes],
-                    "modelo": MODELO}
+                    "modelo": modelo}
         ts = int(time.time() * 1000)
         try:
             redis([["HSET", DRAFTS, did, json.dumps(rascunho, ensure_ascii=False)],

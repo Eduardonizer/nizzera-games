@@ -14,6 +14,7 @@ import { redis, redisReady, readBody, sameOrigin, isAdmin } from "./_redis.mjs";
 
 const DRAFTS = "nz:drafts", SRC = "nz:drafts:src";
 const MODEL = "gemini-3.5-flash-lite"; // o mesmo de MODELO em scripts/rascunhos_ia.py (GEMINI_MODEL na Vercel troca)
+const RESERVE = "gemini-3.1-flash-lite"; // usado quando o principal responde "muita demanda" (503)
 const ID = /^r[0-9a-f]{11}$/;
 const HTTP = /^https?:\/\/[^\s"'<>]+$/i;
 const PLAT = ["PC", "Steam", "PlayStation", "Xbox", "Nintendo", "Mobile", "Geral"];
@@ -87,14 +88,16 @@ async function regenerate(d) {
     contents: [{ role: "user", parts: [{ text: blocks.join("\n\n") }] }],
     generationConfig: { responseMimeType: "application/json", responseSchema: P.schema },
   };
-  const model = process.env.GEMINI_MODEL || MODEL;
-  let r;
-  for (let attempt = 0; attempt < 2; attempt++) {
+  // principal; se der erro do servidor (503 = muita demanda), espera um pouco e tenta o modelo reserva
+  const models = [process.env.GEMINI_MODEL || MODEL, RESERVE];
+  let r, model;
+  for (let attempt = 0; attempt < models.length; attempt++) {
+    model = models[attempt];
     r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent", {
       method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key }, body: JSON.stringify(body),
-      signal: AbortSignal.timeout(50000),
+      signal: AbortSignal.timeout(25000),
     });
-    if (r.status >= 500 && attempt === 0) { await new Promise((ok) => setTimeout(ok, 3000)); continue; }
+    if (r.status >= 500 && attempt === 0) { await new Promise((ok) => setTimeout(ok, 2000)); continue; }
     break;
   }
   if (r.status === 429) throw new Bad("O limite do plano grátis do Gemini foi atingido. Tente de novo daqui a 1 minuto (ou amanhã, se for o limite do dia).");
@@ -102,7 +105,7 @@ async function regenerate(d) {
     const j = await r.json().catch(() => ({}));
     throw new Bad("O Gemini recusou o pedido (código " + r.status + "): " + String((j.error && j.error.message) || "confira a GEMINI_API_KEY").slice(0, 200));
   }
-  if (!r.ok) throw new Bad("O Gemini está fora do ar agora (código " + r.status + "). Tente de novo mais tarde.");
+  if (!r.ok) throw new Bad(r.status === 503 ? "O Gemini está com muita demanda agora. Tente de novo daqui a alguns minutos." : "O Gemini está fora do ar agora (código " + r.status + "). Tente de novo mais tarde.");
   const j = await r.json();
   const parts = (((j.candidates || [])[0] || {}).content || {}).parts || [];
   const out = parts.filter((p) => !p.thought).map((p) => p.text || "").join("");
