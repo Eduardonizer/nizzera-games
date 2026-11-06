@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-05T19:08:24Z",
+ "updated": "2026-11-06T07:04:27Z",
  "steam": [
   {
    "id": 391220,
@@ -10,6 +10,22 @@
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/391220/29279804029df9b7540caef5c086c9f0393e2e2d/header_alt_assets_0.jpg?t=1792675385"
   },
   {
+   "id": 12210,
+   "name": "Grand Theft Auto IV: The Complete Edition",
+   "discount": 70,
+   "orig": "R$ 79,00",
+   "price": "R$ 23,70",
+   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/12210/header.jpg?t=1721061564"
+  },
+  {
+   "id": 817628,
+   "name": "Grand Theft Auto: The Trilogy – The Definitive Edition",
+   "discount": 67,
+   "orig": "R$ 299,90",
+   "price": "R$ 98,96",
+   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/subs/817628/header_ratio.jpg?t=1752520763"
+  },
+  {
    "id": 275850,
    "name": "No Man's Sky",
    "discount": 60,
@@ -18,12 +34,20 @@
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/275850/9f1ca9e3b7d1dccb7b5af404a6739ddc1118ef32/header_alt_assets_26.jpg?t=1793196605"
   },
   {
-   "id": 3159330,
-   "name": "Assassin’s Creed Shadows",
-   "discount": 60,
-   "orig": "R$ 349,99",
-   "price": "R$ 139,99",
-   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3159330/header.jpg?t=1792778493"
+   "id": 2448570,
+   "name": "Road Rash™: Edição de 30º Aniversário",
+   "discount": 50,
+   "orig": "R$ 49,00",
+   "price": "R$ 24,50",
+   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2448570/a12ed683c51938590f28400c89cd8c8204e1e8db/header.jpg?t=1793919166"
+  },
+  {
+   "id": 1790600,
+   "name": "DRAGON BALL: Sparking! ZERO",
+   "discount": 40,
+   "orig": "R$ 206,50",
+   "price": "R$ 123,90",
+   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1790600/header.jpg?t=1785726916"
   },
   {
    "id": 3768760,
@@ -34,36 +58,12 @@
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3768760/c5b553fd05ba41aefa6daeddac95849a10c93022/header_alt_assets_4.jpg?t=1791886607"
   },
   {
-   "id": 4715160,
-   "name": "Finals Week: Descolado",
-   "discount": 38,
-   "orig": "R$ 27,49",
-   "price": "R$ 17,04",
-   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4715160/3d05c4f85866620b0b47754e30414cb4414b42dc/header.jpg?t=1793289966"
-  },
-  {
    "id": 3241660,
    "name": "R.E.P.O.",
    "discount": 35,
    "orig": "R$ 29,99",
    "price": "R$ 19,49",
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3241660/62177765c05399116f0453fe1177b00ceed698c4/header_alt_assets_3.jpg?t=1793278962"
-  },
-  {
-   "id": 3669870,
-   "name": "CONTROL Resonant",
-   "discount": 20,
-   "orig": "R$ 229,99",
-   "price": "R$ 183,99",
-   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3669870/1e0c76e4253d347bb1304c3f213570251d924edf/header.jpg?t=1793357289"
-  },
-  {
-   "id": 1677110,
-   "name": "Lightyear Frontier",
-   "discount": 20,
-   "orig": "R$ 89,99",
-   "price": "R$ 71,99",
-   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1677110/f4aec944f634f189990fe69e6d353b5609787955/header_alt_assets_7.jpg?t=1793891345"
   },
   {
    "id": 1799840,
@@ -79,7 +79,7 @@
    "discount": 10,
    "orig": "R$ 44,99",
    "price": "R$ 40,49",
-   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4348910/b241a3bc1cb144e70a4840157e127212738ea5b3/header_alt_assets_3.jpg?t=1793890375"
+   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4348910/b241a3bc1cb144e70a4840157e127212738ea5b3/header_alt_assets_3.jpg?t=1793942460"
   }
  ]
 }
