@@ -35,6 +35,11 @@ jobs:
         continue-on-error: true      # se as lojas falharem, as notícias ainda são salvas
         run: python nizzera-games/scripts/atualizar_ofertas.py
 
+      - name: Rodar o script de jogos grátis
+        if: github.event_name != 'push'
+        continue-on-error: true      # se a Epic ou a Steam falharem, as notícias ainda são salvas
+        run: python nizzera-games/scripts/atualizar_gratis.py
+
       - name: Rodar o script de notícias
         if: github.event_name != 'push'
         run: python nizzera-games/scripts/atualizar_noticias.py

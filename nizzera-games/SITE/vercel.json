@@ -10,6 +10,10 @@
       "destination": "/ofertas/index.html"
     },
     {
+      "source": "/gratis",
+      "destination": "/gratis/index.html"
+    },
+    {
       "source": "/comentarios",
       "destination": "/comentarios/index.html"
     },

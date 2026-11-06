@@ -12,6 +12,7 @@
     trophy:'<path d="M8 4h8v5a4 4 0 01-8 0zM8 6H4v1a3 3 0 003 3M16 6h4v1a3 3 0 01-3 3M12 13v4M8 20h8M10 17h4"/>',
     cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
     tag:'<path d="M4 4h8l8 8-8 8-8-8z"/><circle cx="8.5" cy="8.5" r="1"/>',
+    gift:'<rect x="4" y="9" width="16" height="11" rx="1"/><path d="M3 9h18M12 9v11M12 9C10 5 7 5 7 7s3 2 5 2c2 0 5 0 5-2s-3-2-5 2"/>',
     search:'<circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/>',
     theme:'<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 010 16z" fill="currentColor"/>',
     monitor:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
@@ -38,6 +39,7 @@
     if(!hasNews||CATS.indexOf("Eventos")>-1)h+=link("/?categoria=eventos#noticias","cal","Eventos",' data-cat="Eventos"',hasNews?count("Eventos"):null);
     h+=link("/reviews/","star","Reviews",' data-page="/review"');
     h+=link("/ofertas/","tag","Ofertas da semana",' data-page="/ofertas/"');
+    h+=link("/gratis/","gift","Jogos grátis",' data-page="/gratis/"');
     h+=link("/comentarios/","chat","Comentários",' data-page="/comentarios/"');
     h+='<div class="grp">Ferramentas</div>'+btn("contact","mail","Fale com a gente")+btn("search","search","Buscar")+btn("theme","theme","Tema claro/escuro")
      +'<div style="flex:1"></div><div class="foot"><button class="item collapse" type="button" data-act="collapse" title="Recolher ou expandir menu">'+svg("chev")+'<span class="lbl">Recolher menu</span></button></div>';

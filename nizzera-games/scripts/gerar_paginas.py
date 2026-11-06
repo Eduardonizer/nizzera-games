@@ -6,6 +6,7 @@ Cria, dentro de SITE/:
   reviews/index.html                 lista de reviews de jogos
   review/<id>-<jogo>/index.html      uma página por review
   ofertas/index.html                 página das ofertas da semana
+  gratis/index.html                  página dos jogos grátis da semana (Epic e Steam)
   comentarios/index.html             página de comentários e feedback
   404.html                           página de "não encontrado"
   sitemap.xml                        lista de todas as páginas, para o Google
@@ -216,6 +217,21 @@ def pagina_ofertas(c, site):
   <p class="meta" id="dmeta"></p>
 </main>"""
     return layout(c, nome, cab, corpo, '<script src="/assets/js/ofertas.js"></script>\n')
+
+
+def pagina_gratis(c, site):
+    nome = site.get("name") or "Nizzera Games"
+    cab = meta_pagina(f"Jogos grátis da semana na Epic e na Steam | {nome}",
+                      "Os jogos grátis da semana na Epic Games Store e os fins de semana grátis da Steam, atualizados automaticamente.",
+                      SITE_URL + "/gratis/", nome)
+    corpo = f"""<main class="wrap page">
+  {trilha("Jogos grátis")}
+  <h1 class="ph">Jogos grátis da semana</h1>
+  <p class="lead">Os jogos grátis da Epic Games Store e os fins de semana grátis da Steam, num lugar só. Atualizado automaticamente.</p>
+  <div id="gratis" aria-live="polite"><div class="deals"><p class="soon">Carregando jogos grátis…</p></div></div>
+  <p class="meta" id="gmeta"></p>
+</main>"""
+    return layout(c, nome, cab, corpo, '<script src="/assets/js/gratis.js"></script>\n')
 
 
 def pagina_comentarios(c, site):
@@ -612,6 +628,7 @@ def sitemap(todas):
               f"  <url><loc>{SITE_URL}/</loc><lastmod>{mais_nova}</lastmod></url>",
               f"  <url><loc>{SITE_URL}/reviews/</loc></url>",
               f"  <url><loc>{SITE_URL}/ofertas/</loc></url>",
+              f"  <url><loc>{SITE_URL}/gratis/</loc></url>",
               f"  <url><loc>{SITE_URL}/comentarios/</loc></url>"]
     for n in todas:
         lm = f"<lastmod>{e(n['date'])}</lastmod>" if re.match(r"^\d{4}-\d{2}-\d{2}$", n.get("date", "")) else ""
@@ -694,6 +711,7 @@ def main():
             if nome_pasta not in rv_vivos and os.path.isfile(arq) and MARCA in open(arq, encoding="utf-8").read(400):
                 shutil.rmtree(os.path.join(PASTA_RV, nome_pasta))
     mudou += gravar(os.path.join(SITE, "ofertas", "index.html"), pagina_ofertas(c, site))
+    mudou += gravar(os.path.join(SITE, "gratis", "index.html"), pagina_gratis(c, site))
     mudou += gravar(os.path.join(SITE, "comentarios", "index.html"), pagina_comentarios(c, site))
     mudou += gravar(os.path.join(SITE, "404.html"), pagina_404(c, site))
 

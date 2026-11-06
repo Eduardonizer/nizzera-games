@@ -20,6 +20,7 @@ https://nizzera-games.vercel.app. Criado por Eduardo Nizer.
 │   │   ├── reviews/              │ lista de reviews de jogos
 │   │   ├── review/<id>-<jogo>/   │ uma página por review
 │   │   ├── ofertas/              │ página das ofertas da semana
+│   │   ├── gratis/               │ página dos jogos grátis da semana (Epic e Steam)
 │   │   ├── comentarios/          │ página de comentários e feedback
 │   │   ├── 404.html              ┘ página de "não encontrado"
 │   │   ├── admin/index.html      painel admin (endereço /admin, sem link no site)
@@ -32,16 +33,19 @@ https://nizzera-games.vercel.app. Criado por Eduardo Nizer.
 │   │   │   ├── js/site.js        menu lateral e tema (todas as páginas)
 │   │   │   ├── js/app.js         página inicial: lista, paginação, destaque
 │   │   │   ├── js/ofertas.js     página de ofertas
+│   │   │   ├── js/gratis.js      página de jogos grátis
 │   │   │   ├── js/artigo.js      páginas das notícias
 │   │   │   ├── js/comunidade.js  comentários (página geral e abaixo de cada notícia) e caixa "Fale com a gente"
 │   │   │   ├── js/admin.js       painel admin
 │   │   │   └── icons/
 │   │   ├── data/ofertas.json     ofertas da semana (gerado pelo robô)
+│   │   ├── data/gratis.json      jogos grátis da Epic e da Steam (gerado pelo robô)
 │   │   ├── googlecd4f...html     verificação do Google Search Console (não apague)
 │   │   └── api/                  funções da Vercel: login, sessão, publicar, comentários, curtidas, votação, contato
 │   └── scripts/
 │       ├── atualizar_noticias.py lê os feeds RSS e grava as notícias no index.html
 │       ├── atualizar_ofertas.py  busca as promoções da Steam
+│       ├── atualizar_gratis.py   busca os jogos grátis da Epic e os fins de semana grátis da Steam
 │       ├── gerar_paginas.py      gera noticia/, sitemap.xml e feed.xml
 │       └── gerar_segredos.py     gera SESSION_SECRET e a chave do 2FA
 ├── .gitignore
@@ -148,6 +152,7 @@ deploy: todas as sessões abertas caem na hora.
 ```
 python nizzera-games/scripts/atualizar_noticias.py
 python nizzera-games/scripts/atualizar_ofertas.py
+python nizzera-games/scripts/atualizar_gratis.py
 python nizzera-games/scripts/gerar_paginas.py
 cd nizzera-games/SITE && python -m http.server
 ```
