@@ -20,7 +20,7 @@
     chat:'<path d="M4 5h16a1 1 0 011 1v10a1 1 0 01-1 1H10l-5 4v-4H4a1 1 0 01-1-1V6a1 1 0 011-1z"/><path d="M8 10h8M8 13h5"/>',
     mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'
   };
-  var CATICON={"Todas":"news","Lançamentos":"rocket","Nintendo":"pad","Serviços":"cloud","Steam":"monitor","Game Pass":"ticket","Esports":"trophy","Eventos":"cal"};
+  var CATICON={"Todas":"news","Lançamentos":"rocket","PlayStation":"pad","Xbox":"pad","Nintendo":"pad","Serviços":"cloud","Steam":"monitor","Game Pass":"ticket","Esports":"trophy","Eventos":"cal"};
   var PATH=location.pathname, HOME=(PATH==="/"||PATH==="/index.html");
   var hasNews=HOME&&typeof NEWS!=="undefined";
   function svg(n){return '<svg viewBox="0 0 24 24" aria-hidden="true">'+IC[n]+'</svg>'}

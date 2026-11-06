@@ -3,7 +3,7 @@
 <channel>
   <title>Nizzera Games</title>
   <link>https://nizzera-games.vercel.app/</link>
-  <description>Lançamentos, Nintendo, Xbox e esports, em textos curtos e sem enrolação. Mova o mouse sobre o fundo e acenda os pixels.</description>
+  <description>Notícias de games de todas as plataformas, com destaque para a Steam, em textos curtos e sem enrolação. Mova o mouse sobre o fundo e acenda os pixels.</description>
   <language>pt-BR</language>
   <atom:link href="https://nizzera-games.vercel.app/feed.xml" rel="self" type="application/rss+xml"/>
   <item><title>FGC sofre invasão e notifica investidores sobre dados vazados</title><link>https://nizzera-games.vercel.app/noticia/49-fgc-sofre-invasao-e-notifica-investidores-sobre-dados/</link><guid isPermaLink="true">https://nizzera-games.vercel.app/noticia/49-fgc-sofre-invasao-e-notifica-investidores-sobre-dados/</guid><pubDate>Thu, 05 Nov 2026 12:00:00 -0300</pubDate><category>Lançamentos</category><description>Fundo Garantidor de Créditos sofreu um vazamento que expôs nomes, CPFs e dados de pagamento de garantias.</description></item>

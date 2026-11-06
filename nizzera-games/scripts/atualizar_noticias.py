@@ -16,11 +16,13 @@ PADRAO = os.path.join(RAIZ, "SITE", "index.html")
 
 # ---------------- CONFIGURAÇÃO (edite aqui) ----------------
 FEEDS = [  # (nome mostrado como fonte/crédito, url do RSS, só_games?)
-    ("Xbox Power",  "https://www.xboxpower.com.br/feed/", False),
-    ("OtakuPT",     "https://www.otakupt.com/feed/",      True),
-    ("NintendoBoy", "https://nintendoboy.com/feed",       False),
+    # Fontes de todas as plataformas; a ordem conta: as primeiras têm prioridade na rodada.
+    ("Adrenaline",  "https://www.adrenaline.com.br/feed/", True),   # forte em PC/Steam
+    ("IGN Brasil",  "https://br.ign.com/feed.xml",          True),
+    ("GameBlast",   "https://www.gameblast.com.br/feeds/posts/default?alt=rss", True),
     ("Canaltech",   "https://canaltech.com.br/rss/games/", True),
     ("Tecnoblog",   "https://tecnoblog.net/feed/",        True),
+    ("OtakuPT",     "https://www.otakupt.com/feed/",      True),
 ]
 MAX_POR_FEED = 4       # máximo de notícias novas por fonte a cada execução
 MAX_POR_RODADA = 12    # máximo de notícias novas no total por execução
@@ -32,13 +34,15 @@ EXTRA_EM_ALTA = 2      # notícias a mais por fonte quando são de um "assunto e
 # e são editados no painel admin (Site e categorias). O robô dá preferência a eles.
 FUSO = timezone(timedelta(hours=-3))  # Brasília
 
-CATEGORIAS = [  # primeira que casar vence; senão "Lançamentos"
-    ("Game Pass", ["game pass", "gamepass"]),
-    ("Nintendo",  ["nintendo", "switch", "zelda", "pikmin", "mario", "pokémon", "pokemon", "kirby", "metroid"]),
-    ("Steam",     ["steam", "valve", "deadlock", "steam deck"]),
-    ("Esports",   ["esports", "e-sports", "worlds", "campeonato", "major", "valorant", "league of legends", "counter-strike", "cs2", "free fire"]),
-    ("Eventos",   ["evento", "festival", "gamescom", "tgs", "the game awards", "summer game fest", "halloween", "bgs"]),
-    ("Serviços",  ["playstation plus", "ps plus", "xbox cloud", "geforce now", "assinatura", "cloud gaming"]),
+CATEGORIAS = [  # primeira que casar vence; senão "Lançamentos". Steam vem primeiro: é o foco do site
+    ("Steam",       ["steam", "valve", "deadlock", "half-life", "counter-strike 2", "epic games store", "para pc", "no pc", "jogos de pc"]),
+    ("Game Pass",   ["game pass", "gamepass"]),
+    ("Serviços",    ["playstation plus", "ps plus", "xbox cloud", "geforce now", "assinatura", "cloud gaming"]),
+    ("Esports",     ["esports", "e-sports", "worlds", "campeonato", "major", "valorant", "league of legends", "counter-strike", "cs2", "free fire"]),
+    ("PlayStation", ["playstation", "ps5", "ps4", "sony"]),
+    ("Xbox",        ["xbox"]),
+    ("Nintendo",    ["nintendo", "switch", "zelda", "pikmin", "mario", "pokémon", "pokemon", "kirby", "metroid"]),
+    ("Eventos",     ["evento", "festival", "gamescom", "tgs", "the game awards", "summer game fest", "halloween", "bgs"]),
 ]
 PALAVRAS_GAMES = ["game", "jogo", "xbox", "playstation", "ps5", "ps4", "nintendo", "switch", "steam",
                   "esports", "console", "gta", "fortnite", "zelda", "minecraft", "valve", "epic games"]
