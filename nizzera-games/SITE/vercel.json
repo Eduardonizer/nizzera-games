@@ -18,6 +18,10 @@
       "destination": "/comentarios/index.html"
     },
     {
+      "source": "/sobre",
+      "destination": "/sobre/index.html"
+    },
+    {
       "source": "/noticia/:slug",
       "destination": "/noticia/:slug/index.html"
     },
