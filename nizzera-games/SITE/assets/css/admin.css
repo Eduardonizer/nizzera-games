@@ -80,3 +80,9 @@ a.a-btn{display:inline-flex;align-items:center;text-decoration:none}
 .a-svc li.no b{color:#d6294b}
 :root[data-theme="dark"] .a-svc li.ok b{color:#5ee6b8}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .a-svc li.ok b{color:#5ee6b8}}
+.tfa{margin-top:14px}
+.tfa li{margin:10px 0}
+.tfa-key{display:grid;gap:4px;background:var(--bg);border:1px dashed var(--line);border-radius:12px;padding:10px 14px;margin-top:8px}
+.tfa-key code,#tfa-v{font:700 1.05rem/1.4 ui-monospace,Consolas,monospace;letter-spacing:.06em;word-break:break-all}
+.tfa-in{width:9em;font:700 1.2rem ui-monospace,Consolas,monospace;letter-spacing:.2em;text-align:center}
+.tfa-ok{margin-top:14px;border-left:4px solid #0f9f6e;padding:4px 0 4px 14px}

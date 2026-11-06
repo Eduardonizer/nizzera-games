@@ -122,9 +122,10 @@ Variáveis na Vercel (Settings → Environment Variables), depois faça um novo 
 
 Com domínio próprio no futuro: verifique o domínio no Resend e use `CONTACT_FROM` (ex.: `Nizzera Games <contato@seudominio.com.br>`).
 
-**2FA:** rode `python nizzera-games/scripts/gerar_segredos.py`, cadastre a chave mostrada no
-Google Authenticator (ou Authy, Microsoft Authenticator) e coloque o mesmo valor em
-`ADMIN_TOTP_SECRET` na Vercel. A partir daí, o login pede senha + código.
+**2FA (código do Google Authenticator):** no painel `/admin` → **Publicar e backup** →
+**Verificação em 2 etapas → Configurar agora**. O assistente gera a chave no navegador, você cadastra no
+app, ele confere um código e só então mostra o valor de `ADMIN_TOTP_SECRET` para colar na Vercel (depois, Redeploy).
+Perdeu o celular? Apague `ADMIN_TOTP_SECRET` na Vercel e faça Redeploy: o login volta a pedir só a senha.
 
 **Desconfiou de algo?** Troque `ADMIN_PASSWORD` ou `SESSION_SECRET` na Vercel e faça um novo
 deploy: todas as sessões abertas caem na hora.

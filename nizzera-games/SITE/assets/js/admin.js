@@ -364,6 +364,7 @@
     $("#a-body").innerHTML='<div class="a-wrap">'
       +'<div class="a-card"><h2>Situação do servidor</h2><p class="a-hint">O que já está configurado na Vercel (Settings → Environment Variables). Depois de criar ou mudar uma variável, faça um novo deploy para ela valer.</p><ul class="a-svc" id="a-svc"><li>Verificando…</li></ul>'
       +'<div class="a-act"><button class="a-btn" type="button" id="a-mailtest">Enviar e-mail de teste</button></div><div class="a-err" id="a-mailerr" role="alert"></div></div>'
+      +'<div class="a-card" id="a-2fa"><h2>Verificação em 2 etapas</h2><p class="a-hint">Verificando…</p></div>'
       +'<div class="a-card"><h2>Publicar no site</h2><p class="a-hint">Suas alterações já aparecem aqui no painel e no site aberto neste navegador. Para valerem para todo mundo, clique em publicar: os dados são gravados no GitHub e a Vercel atualiza o site em 1 a 2 minutos. As páginas individuais das notícias e o sitemap são gerados logo em seguida.</p><div class="a-act"><button class="a-btn pri" type="button" id="a-pub">Publicar no site agora</button><button class="a-btn" type="button" id="a-dl">Baixar index.html (cópia)</button></div></div>'
       +'<div class="a-card"><h2>Backup das notícias</h2><p class="a-hint">Um arquivo .json com todas as notícias, categorias e textos. Serve para guardar uma cópia ou levar para outro navegador.</p><div class="a-act"><button class="a-btn" type="button" id="a-json">Baixar notícias (.json)</button><button class="a-btn" type="button" id="a-imp">Importar notícias (.json)</button></div><input type="file" id="a-impf" accept=".json,application/json" hidden></div>'
       +'<div class="a-card"><h2>Voltar ao original</h2><p class="a-hint">Apaga as alterações ainda não publicadas deste navegador e volta ao conteúdo que está no site publicado.</p><div class="a-act"><button class="a-btn dan" type="button" id="a-reset">Descartar alterações deste navegador</button></div></div></div>';
@@ -376,8 +377,66 @@
       box.innerHTML=row(s.email,"E-mail (Fale com a gente)","Configurado. As mensagens vão para "+esc(s.emailTo)+".","Falta RESEND_API_KEY. Veja o passo a passo no README.")
         +row(s.comments,"Comentários","Configurado (Upstash Redis).","Falta o banco Upstash Redis.")
         +row(s.publish,"Publicar pelo painel","Configurado (GitHub).","Faltam GITHUB_REPO e GITHUB_TOKEN.")
-        +row(s.totp,"Verificação em 2 etapas","Ativada.","Desativada (opcional): ADMIN_TOTP_SECRET.");
+        +row(s.totp,"Verificação em 2 etapas","Ativada.","Desativada (opcional). Use o assistente abaixo.");
+      tfaCard(s.totp);
     },function(){var box=$("#a-svc");if(box)box.innerHTML='<li>Não consegui falar com o servidor.</li>'});
+  }
+  /* ---- assistente da verificação em 2 etapas (Google Authenticator, Authy, Microsoft Authenticator) ----
+     A chave nasce aqui no navegador e não é enviada a lugar nenhum: você mesmo cola na Vercel.
+     Antes disso, o painel confere um código do app, para não ativar com uma chave errada. */
+  var tfa=null; /* {key: bytes, b32: texto} */
+  function b32enc(bytes){
+    var A="ABCDEFGHIJKLMNOPQRSTUVWXYZ234567",bits=0,val=0,out="";
+    for(var i=0;i<bytes.length;i++){val=(val<<8)|bytes[i];bits+=8;while(bits>=5){out+=A[(val>>>(bits-5))&31];bits-=5}val&=(1<<bits)-1}
+    if(bits>0)out+=A[(val<<(5-bits))&31];
+    return out;
+  }
+  function totpAt(keyBytes,step){
+    var msg=new ArrayBuffer(8),dv=new DataView(msg);dv.setUint32(0,Math.floor(step/4294967296));dv.setUint32(4,step>>>0);
+    return crypto.subtle.importKey("raw",keyBytes,{name:"HMAC",hash:"SHA-1"},false,["sign"]).then(function(k){return crypto.subtle.sign("HMAC",k,msg)}).then(function(sig){
+      var h=new Uint8Array(sig),o=h[h.length-1]&15,n=((h[o]&127)<<24)|(h[o+1]<<16)|(h[o+2]<<8)|h[o+3];
+      return ("00000"+(n%1000000)).slice(-6);
+    });
+  }
+  function tfaCheck(keyBytes,code){
+    var now=Math.floor(Date.now()/30000);
+    return Promise.all([totpAt(keyBytes,now-1),totpAt(keyBytes,now),totpAt(keyBytes,now+1)]).then(function(l){return l.indexOf(code)>-1});
+  }
+  function tfaCard(on){
+    var box=$("#a-2fa");if(!box)return;
+    if(on){box.innerHTML='<h2>Verificação em 2 etapas</h2><p class="a-hint"><b>Ativada.</b> O login pede a senha e o código de 6 dígitos do app autenticador.</p>'
+      +'<p class="a-hint">Trocou de celular ou perdeu o app? Na Vercel, apague a variável <code>ADMIN_TOTP_SECRET</code> e faça um novo deploy: o login volta a pedir só a senha. Depois, ative de novo por aqui.</p>';return}
+    box.innerHTML='<h2>Verificação em 2 etapas</h2><p class="a-hint">Hoje o login pede só a senha. Com a verificação em 2 etapas, ele também pede um código de 6 dígitos que muda a cada 30 segundos no seu celular: mesmo quem descobrir a senha não consegue entrar.</p>'
+      +'<div class="a-act"><button class="a-btn pri" type="button" id="tfa-start">Configurar agora</button></div><div id="tfa-flow"></div>';
+  }
+  function tfaStart(){
+    var bytes=new Uint8Array(20);crypto.getRandomValues(bytes);tfa={key:bytes,b32:b32enc(bytes)};
+    var grouped=tfa.b32.replace(/(.{4})/g,"$1 ").trim();
+    var uri="otpauth://totp/"+encodeURIComponent("Nizzera Games:admin")+"?secret="+tfa.b32+"&issuer="+encodeURIComponent("Nizzera Games")+"&digits=6&period=30&algorithm=SHA1";
+    $("#tfa-flow").innerHTML='<ol class="a-steps tfa">'
+      +'<li><b>Instale o app</b> Google Authenticator (ou Authy / Microsoft Authenticator) no celular.</li>'
+      +'<li><b>No app, toque em “+” → “Inserir chave de configuração”</b> e preencha:<div class="tfa-key"><span>Conta: <b>Nizzera Games</b></span><span>Chave: <code id="tfa-k">'+esc(grouped)+'</code></span><span>Tipo: <b>Baseada no horário</b></span></div>'
+      +'<div class="a-act"><button class="a-btn" type="button" id="tfa-copy">Copiar chave</button><a class="a-btn" href="'+esc(uri)+'">Abrir no app autenticador (no celular)</a></div></li>'
+      +'<li><b>Digite o código de 6 dígitos</b> que apareceu no app:<div class="a-act"><input class="a-in tfa-in" id="tfa-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" aria-label="Código do app"><button class="a-btn pri" type="button" id="tfa-verify">Conferir código</button></div><div class="a-err" id="tfa-err" role="alert"></div></li>'
+      +'</ol><div id="tfa-done"></div>';
+    var c=$("#tfa-code");if(c)c.focus();
+  }
+  function tfaVerify(){
+    var code=($("#tfa-code").value||"").replace(/\D/g,""),err=$("#tfa-err");err.textContent="";
+    if(!tfa){return}if(code.length!==6){err.textContent="Digite os 6 dígitos que aparecem no app.";return}
+    tfaCheck(tfa.key,code).then(function(ok){
+      if(!ok){err.textContent="Esse código não confere. Veja se digitou a chave certa no app e se o horário do celular está automático, e tente o código seguinte.";return}
+      $("#tfa-done").innerHTML='<div class="tfa-ok"><p><b>✓ Código certo!</b> O app está configurado. Falta ligar no servidor:</p><ol class="a-steps">'
+        +'<li>Na Vercel: <b>Settings → Environment Variables → Add</b>.</li>'
+        +'<li><b>Key:</b> <code>ADMIN_TOTP_SECRET</code> &nbsp; <b>Value:</b> <code id="tfa-v">'+esc(tfa.b32)+'</code> <button class="a-btn" type="button" id="tfa-copy2">Copiar valor</button></li>'
+        +'<li>Marque <b>Production</b>, salve e faça <b>Redeploy</b> (Deployments → ⋯ → Redeploy).</li>'
+        +'<li>Saia do painel e entre de novo: agora ele pede a senha e o código do app.</li></ol>'
+        +'<p class="a-hint">Esta chave não fica salva em lugar nenhum além do seu app e da Vercel. Se fechar esta página antes de colar na Vercel, é só começar de novo (e apagar a conta antiga no app).</p></div>';
+    });
+  }
+  function copyTxt(txt,btn){
+    var done=function(){var o=btn.textContent;btn.textContent="Copiado!";setTimeout(function(){btn.textContent=o},1800)};
+    if(navigator.clipboard)navigator.clipboard.writeText(txt).then(done,function(){prompt("Copie:",txt)});else prompt("Copie:",txt);
   }
   function mailTest(b){
     var err=$("#a-mailerr");err.textContent="";b.disabled=true;b.textContent="Enviando…";
@@ -436,6 +495,10 @@
     if(id==="a-savecats"){saveCats();return}
     if(id==="a-savetrend"){saveTrend();return}
     if(id==="a-mailtest"){mailTest(t);return}
+    if(id==="tfa-start"){tfaStart();return}
+    if(id==="tfa-verify"){tfaVerify();return}
+    if(id==="tfa-copy"&&tfa){copyTxt(tfa.b32,t);return}
+    if(id==="tfa-copy2"&&tfa){copyTxt(tfa.b32,t);return}
     if(id==="a-pub"){
       if(!confirm("Publicar as alterações no site agora?"))return;
       t.disabled=true;t.textContent="Publicando…";
