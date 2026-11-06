@@ -66,7 +66,9 @@ CATEGORIAS = [  # primeira que casar vence; senão "Lançamentos". Steam vem pri
 ]
 PALAVRAS_GAMES = ["game", "jogo", "xbox", "playstation", "ps5", "ps4", "nintendo", "switch", "steam",
                   "esports", "console", "gta", "fortnite", "zelda", "minecraft", "valve", "epic games"]
-UA = {"User-Agent": "Mozilla/5.0 (compatible; NizzeraGamesBot/1.0)"}
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from config import USER_AGENT  # noqa: E402  (scripts/config.py: domínio e identificação do robô)
+UA = {"User-Agent": USER_AGENT}
 NS = {"media": "http://search.yahoo.com/mrss/", "content": "http://purl.org/rss/1.0/modules/content/"}
 # -----------------------------------------------------------
 

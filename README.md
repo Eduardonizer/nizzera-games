@@ -123,9 +123,10 @@ momento (ex.: `GTA 6: gta 6, gta vi, grand theft auto vi`), em ordem de importâ
   `https://www.nizzeragames.com.br/sitemap.xml`.
 - Domínio: **https://www.nizzeragames.com.br** (o sem www redireciona para ele, pela Vercel).
   O endereço antigo `nizzera-games.vercel.app` redireciona com 301 para o domínio (`redirects` no `SITE/vercel.json`).
-- Se mudar de domínio de novo, troque `SITE_URL` em `scripts/gerar_paginas.py`, `SITE_URL` em
-  `SITE/assets/js/tierlist.js`, o endereço no `<head>` do `index.html`, no `robots.txt`, no
-  `scripts/og_banner.html` (e gere a imagem de novo) e o redirecionamento do `vercel.json`; depois rode o gerador.
+- Se mudar de domínio de novo: troque `SITE_URL` em `nizzera-games/scripts/config.py` (e ponha o endereço
+  anterior em `DOMINIOS_ANTIGOS`) e rode `python nizzera-games/scripts/gerar_paginas.py`: ele acerta todas as
+  páginas, o sitemap, o feed, o `robots.txt`, o `index.html`, o `404.html` e o `tierlist.js`. Falta só, à mão,
+  o redirecionamento do `SITE/vercel.json` e o banner (`scripts/og_banner.html`, gere a imagem de novo).
 
 ## Painel admin
 

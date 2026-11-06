@@ -31,7 +31,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from atualizar_noticias import assunto  # mesma regra de "assunto em alta" do robô e do site
 
 # ---------------- CONFIGURAÇÃO ----------------
-SITE_URL = "https://www.nizzeragames.com.br"   # sem barra no final (domínio próprio desde 2026-11)
+from config import SITE_URL, DOMINIOS_ANTIGOS  # noqa: E402  (o domínio fica só em scripts/config.py)
 RELACIONADAS = 3                                # quantas "leia também" no fim de cada notícia
 NO_FEED = 30                                    # quantas notícias entram no feed RSS
 STEAM_PERFIL = ""                               # endereço do seu perfil na Steam (vazio = página Sobre sem o botão)
@@ -1008,7 +1008,34 @@ def gravar(caminho, texto):
     return True
 
 
+# arquivos escritos à mão que também têm o endereço do site (o resto é gerado a partir de SITE_URL)
+FIXOS = ["index.html", "404.html", os.path.join("admin", "index.html"), "robots.txt", os.path.join("assets", "js", "tierlist.js")]
+
+
+def acertar_dominio():
+    """Troca qualquer endereço antigo (DOMINIOS_ANTIGOS) por SITE_URL nos arquivos fixos.
+    Assim, mudar de domínio é só trocar scripts/config.py e rodar este gerador."""
+    host = re.sub(r"^https?://", "", SITE_URL)
+    mudou = 0
+    for nome in FIXOS:
+        caminho = os.path.join(SITE, nome)
+        if not os.path.exists(caminho):
+            continue
+        txt = open(caminho, encoding="utf-8").read()
+        novo = txt
+        for antigo in DOMINIOS_ANTIGOS:
+            novo = novo.replace(antigo, SITE_URL).replace(re.sub(r"^https?://", "", antigo), host)
+        if nome.endswith("tierlist.js"):  # endereço que aparece no rodapé da imagem exportada (sem "www.")
+            novo = re.sub(r'var SITE_URL="[^"]*";', 'var SITE_URL="' + re.sub(r"^www\.", "", host) + '";', novo)
+        if novo != txt:
+            open(caminho, "w", encoding="utf-8").write(novo)
+            mudou += 1
+    return mudou
+
+
 def main():
+    if acertar_dominio():
+        print("Endereço do site atualizado nos arquivos fixos para " + SITE_URL)
     texto = open(INDEX, encoding="utf-8").read()
     m = BLOCO.search(texto)
     if not m:
