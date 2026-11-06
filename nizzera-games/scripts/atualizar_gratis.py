@@ -8,12 +8,13 @@
 Cada loja é buscada separadamente: se uma falhar, ela mantém o que já tinha e a outra segue.
 Só usa a biblioteca padrão. Uso manual:  python scripts/atualizar_gratis.py
 """
-import html, json, os, re, urllib.request
+import html, json, os, re, sys, urllib.request
 from datetime import datetime, timezone
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SAIDA = os.path.join(RAIZ, "SITE", "data", "gratis.json")
-UA = "Mozilla/5.0 (nizzera-games)"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from config import USER_AGENT as UA  # noqa: E402  (scripts/config.py)
 EPIC_URL = ("https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions"
             "?locale=pt-BR&country=BR&allowCountries=BR")
 STEAM_DESTAQUES = "https://store.steampowered.com/api/featuredcategories?cc=br&l=brazilian"

@@ -37,7 +37,8 @@ SITE = os.path.join(RAIZ, "SITE")
 PASTA = os.path.join(SITE, "data", "tierlists")
 CAPAS = os.path.join(SITE, "assets", "tierlist")
 INDICE = os.path.join(PASTA, "index.json")
-UA = "Mozilla/5.0 (nizzera-games)"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from config import USER_AGENT as UA  # noqa: E402  (scripts/config.py)
 APPDETAILS = "https://store.steampowered.com/api/appdetails?appids={}&filters=basic&l=brazilian"
 # endereço antigo da capa: funciona para quase todos os jogos se a API da Steam falhar
 CAPA_PADRAO = "https://cdn.akamai.steamstatic.com/steam/apps/{}/header.jpg"

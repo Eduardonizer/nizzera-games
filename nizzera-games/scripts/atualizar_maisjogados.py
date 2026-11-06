@@ -9,12 +9,13 @@ jogos ficam de fora (a Steam marca alguns como jogo; esses vão na lista NAO_JOG
 Se a busca falhar, o script avisa e mantém a lista anterior: nunca apaga o que já funcionava.
 Só usa a biblioteca padrão. Uso manual:  python scripts/atualizar_maisjogados.py
 """
-import json, os, re, urllib.request
+import json, os, re, sys, urllib.request
 from datetime import datetime, timezone
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SAIDA = os.path.join(RAIZ, "SITE", "data", "maisjogados.json")
-UA = "Mozilla/5.0 (nizzera-games)"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from config import USER_AGENT as UA  # noqa: E402  (scripts/config.py)
 LISTA = "https://api.steampowered.com/ISteamChartsService/GetMostPlayedGames/v1/"
 AGORA = "https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid={}"
 APP = "https://store.steampowered.com/api/appdetails?appids={}&cc=br&l=brazilian&filters=basic"

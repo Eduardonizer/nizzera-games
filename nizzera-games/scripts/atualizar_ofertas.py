@@ -3,13 +3,14 @@
 
 Se a busca falhar, o script avisa e mantém as ofertas anteriores: nunca apaga o que já funcionava.
 """
-import json, os, re, urllib.request
+import json, os, re, sys, urllib.request
 from datetime import datetime, timezone
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SAIDA = os.path.join(RAIZ, "SITE", "data", "ofertas.json")
 URL = "https://store.steampowered.com/api/featuredcategories?cc=br&l=brazilian"
-UA = "Mozilla/5.0 (nizzera-games)"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from config import USER_AGENT as UA  # noqa: E402  (scripts/config.py)
 LIMITE = 12
 
 
