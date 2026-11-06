@@ -145,11 +145,12 @@ def casca(texto, site):
         return texto[i:texto.index(fim, i) + len(fim)]
     menu = pedaco('<button class="mbtn"', "</aside>").replace('href="#topo" data-go="topo"', 'href="/"')
     rodape = pedaco("<footer>", "</footer>")
-    rodape = rodape.replace('<span id="ftxt"></span>', f'<span id="ftxt">{e(site.get("footer"))}</span>')
+    rodape = re.sub(r'<span id="ftxt">.*?</span>', lambda _: f'<span id="ftxt">{e(site.get("footer"))}</span>', rodape, flags=re.S)
     if site.get("credit"):
-        rodape = rodape.replace('<strong id="fcredit"></strong>', f'<strong id="fcredit">{e(site["credit"])}</strong>')
+        rodape = re.sub(r'<strong id="fcredit">.*?</strong>', lambda _: f'<strong id="fcredit">{e(site["credit"])}</strong>', rodape, flags=re.S)
+        rodape = rodape.replace('<p class="by" hidden>', '<p class="by">')
     else:
-        rodape = re.sub(r'<p class="by">.*?</p>', "", rodape, flags=re.S)
+        rodape = re.sub(r'<p class="by"[^>]*>.*?</p>', "", rodape, flags=re.S)
     chat = pedaco('<button class="chat-fab"', '<section class="chat"') [:-len('<section class="chat"')]
     chat += pedaco('<section class="chat"', "</section>")
     return {"menu": menu, "rodape": rodape, "chat": chat}
@@ -508,6 +509,101 @@ def comentarios_noticia(n, titulo):
   </section>"""
 
 
+# ---------------- página inicial já preenchida no HTML ----------------
+# O Google, as prévias de link (WhatsApp etc.) e quem está sem JavaScript leem o index.html cru.
+# Aqui as mesmas partes que o assets/js/app.js monta são escritas direto no HTML; quando o
+# JavaScript roda, ele substitui tudo pela versão interativa (filtros, busca, paginação).
+POR_PAGINA = 12  # igual a PER de assets/js/app.js
+
+
+def idade_dias(n):
+    try:
+        return max(0, (date.today() - date.fromisoformat(n.get("date", ""))).days)
+    except ValueError:
+        return 999
+
+
+def mais_relevantes(noticias, trend, maximo):
+    """Igual a topNews() de app.js: destaque, depois assuntos em alta recentes, depois as mais novas."""
+    def nota(n):
+        i, idade = assunto(n.get("title", ""), n.get("sum", ""), trend), idade_dias(n)
+        return 1000 - i * 100 - idade if i is not None and idade <= TREND_DIAS else -idade
+    l = sorted(noticias, key=lambda n: n.get("date", ""), reverse=True)
+    l.sort(key=lambda n: (1 if n.get("featured") else 0, nota(n)), reverse=True)
+    return l[:maximo]
+
+
+def trocar(texto, padrao, novo, obrigatorio=True):
+    """Troca um trecho do index.html; avisa (e não troca) se o trecho sumiu."""
+    out, n = re.subn(padrao, lambda _: novo, texto, count=1, flags=re.S)
+    if not n and obrigatorio:
+        print(f"[aviso] index.html: não achei {padrao[:60]!r}; essa parte fica para o JavaScript")
+    return out
+
+
+def miolo(texto, nome, conteudo):
+    return trocar(texto, rf"<!--ssr:{nome}-->.*?<!--/ssr:{nome}-->", f"<!--ssr:{nome}-->{conteudo}<!--/ssr:{nome}-->")
+
+
+def oculto(texto, id_, esconder):
+    """Liga/desliga o atributo hidden na tag de abertura com esse id."""
+    def f(m):
+        tag = re.sub(r"\s+hidden(?=[\s>])", "", m.group(0))
+        return tag[:-1] + " hidden>" if esconder else tag
+    return re.sub(rf'<[a-z]+\b[^>]*\bid="{id_}"[^>]*>', f, texto, count=1)
+
+
+def pagina_inicial(texto, dados, trend):
+    site, noticias = dados.get("site", {}), dados.get("news", [])
+    nome = site.get("name") or "Nizzera Games"
+    tag = site.get("tagline") or ""
+    # título digitado, texto do topo e rodapé
+    texto = trocar(texto, r'<h1 id="typed"[^>]*>.*?</h1>', f'<h1 id="typed" class="typed" aria-label="{e(tag)}">{e(tag)}</h1>')
+    texto = trocar(texto, r'<p id="intro">.*?</p>', f'<p id="intro">{e(site.get("intro"))}</p>')
+    texto = trocar(texto, r'<span id="ftxt">.*?</span>', f'<span id="ftxt">{e(site.get("footer"))}</span>')
+    texto = trocar(texto, r'<strong id="fcredit">.*?</strong>', f'<strong id="fcredit">{e(site.get("credit"))}</strong>')
+    texto = trocar(texto, r'<p class="by"[^>]*>', '<p class="by">' if site.get("credit") else '<p class="by" hidden>')
+    texto = re.sub(r'<span class="(lbl )?sname">.*?</span>', lambda m: f'<span class="{m.group(1) or ""}sname">{e(nome)}</span>', texto)
+
+    # destaque do topo (o 1º do carrossel de destaques)
+    top = mais_relevantes(noticias, trend, 10)
+    if top:
+        f = top[0]
+        slide = (f'<div class="slide">{arte(f, prioridade=True)}<div class="tx"><span class="tags"><span class="tag">{e(f.get("cat"))}</span>{selo(f, trend)}</span>'
+                 f'<h2>{e(f.get("title"))}</h2><span class="meta">{e(data_br(f.get("date", "")))} · {int(f.get("read") or 1)} min de leitura</span></div></div>')
+        texto = trocar(texto, r'<a class="feat" id="feat"[^>]*>.*?</a>',
+                       f'<a class="feat" id="feat" href="/noticia/{e(f["slug"])}/" aria-label="Destaque: {e(f.get("title"))}">{slide}</a>')
+
+    # "Em alta": os mesmos cards do carrossel, parados (o JavaScript põe a animação)
+    texto = miolo(texto, "carr", ('<div class="track" style="animation:none">' + "".join(card(n, trend) for n in top) + "</div>") if top else "")
+    texto = oculto(texto, "carrossel", not top)
+
+    # assuntos do momento
+    vivos = [x for x in trend if any(em_alta(n, trend) == x["name"] for n in noticias)]
+    barra = ('<span class="tlabel">Assuntos do momento</span>' + "".join(
+        f'<a class="tchip" href="/?assunto={e(slugify(x["name"]))}#noticias">{FLAME}{e(x["name"])}</a>' for x in vivos)) if vivos else ""
+    texto = trocar(texto, r'(<div class="trendbar" id="trendbar"[^>]*>).*?</div>', f'<div class="trendbar" id="trendbar">{barra}</div>')
+    texto = oculto(texto, "trendbar", not vivos)
+
+    # reviews (as 3 mais recentes)
+    revs = sorted([r for r in dados.get("reviews", []) if r.get("game")], key=lambda r: r.get("date", ""), reverse=True)[:3]
+    texto = miolo(texto, "rvgrid", "".join(rv_card(r) for r in revs))
+    texto = oculto(texto, "reviews", not revs)
+
+    # lista de notícias: a 1ª página em cards, e as demais como links simples (o JavaScript troca pela paginação)
+    texto = miolo(texto, "cards", "".join(card(n, trend) for n in noticias[:POR_PAGINA]))
+    resto = noticias[POR_PAGINA:]
+    mais = ('<h3 class="ssr-h">Mais notícias</h3><ul class="ssr-more">' + "".join(
+        f'<li><a href="/noticia/{e(n["slug"])}/">{e(n.get("title"))}</a> <span class="meta">{e(data_br(n.get("date", "")))}</span></li>' for n in resto) + "</ul>") if resto else ""
+    texto = trocar(texto, r'<nav class="pager" id="pager"[^>]*>.*?</nav>',
+                   f'<nav class="pager" id="pager" aria-label="Paginação das notícias"{"" if resto else " hidden"}>{mais}</nav>')
+    total = len(noticias)
+    texto = trocar(texto, r'<p class="pinfo meta" id="pinfo"[^>]*>.*?</p>',
+                   f'<p class="pinfo meta" id="pinfo" aria-live="polite">{total} notícia{"s" if total != 1 else ""}</p>' if total else
+                   '<p class="pinfo meta" id="pinfo" aria-live="polite"></p>')
+    return texto
+
+
 def sitemap(todas):
     hoje = datetime.now(timezone.utc).date().isoformat()
     mais_nova = max([n.get("date", "") for n in todas] + [""]) or hoje
@@ -576,13 +672,14 @@ def main():
         vistos.add(s)
     if novos_slugs:
         js = json.dumps(dados, ensure_ascii=False, indent=1).replace("<", "\\u003c")
-        gravar(INDEX, texto[:m.start(2)] + js + texto[m.end(2):])
+        texto = texto[:m.start(2)] + js + texto[m.end(2):]
+    trend = [x for x in dados.get("trend", []) if isinstance(x, dict) and x.get("terms")]
+    index_mudou = gravar(INDEX, pagina_inicial(texto, dados, trend))
 
     # 2) páginas das notícias (mais recentes primeiro, para as "leia também")
     todas = sorted(noticias, key=lambda n: (n.get("date", ""), n.get("id", 0)), reverse=True)
     c = casca(texto, site)
-    trend = [x for x in dados.get("trend", []) if isinstance(x, dict) and x.get("terms")]
-    mudou = sum(gravar(os.path.join(PASTA, n["slug"], "index.html"), pagina(n, todas, site, c, trend)) for n in todas)
+    mudou = int(index_mudou) + sum(gravar(os.path.join(PASTA, n["slug"], "index.html"), pagina(n, todas, site, c, trend)) for n in todas)
     # reviews
     global REVIEWS
     REVIEWS = sorted([r for r in dados.get("reviews", []) if r.get("game")], key=lambda r: r.get("date", ""), reverse=True)

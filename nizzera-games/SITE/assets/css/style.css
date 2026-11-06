@@ -228,6 +228,10 @@ dialog .mlink{margin:18px 0 0}
 /* ===== paginação ===== */
 .pager{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;margin:-28px 0 0}
 .pager[hidden]{display:none}
+/* "Mais notícias": lista simples gerada no HTML para o Google e para quem está sem JavaScript (o app.js troca pela paginação) */
+.ssr-h{width:100%;font-size:1.1rem;margin:0 0 4px}
+.ssr-more{width:100%;margin:0;padding-left:20px;display:grid;gap:6px;line-height:1.4}
+.ssr-more .meta{font-size:.8rem}
 .pg{min-width:44px;height:44px;padding:0 14px;display:inline-grid;place-items:center;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--fg);font:700 .95rem "DM Sans",sans-serif;text-decoration:none;transition:border-color .2s,transform .2s,box-shadow .2s}
 a.pg:hover{border-color:var(--cobalt);transform:translateY(-2px);box-shadow:3px 3px 0 var(--sun)}
 .pg[aria-current="page"]{background:var(--cobalt);border-color:var(--cobalt);color:#fff;box-shadow:3px 3px 0 var(--sun)}
