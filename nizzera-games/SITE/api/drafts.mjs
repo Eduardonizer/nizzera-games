@@ -4,6 +4,10 @@
 //        "opiniao" é o SEU texto (bloco "Na opinião do Nizzera"); "minha_opiniao" é só a sugestão da IA
 //   POST /api/drafts { action: "status", id, status }  -> "descartado", "rascunho" (desfazer) ou "publicado" (+ newsId, slug)
 //   POST /api/drafts { action: "regen", id }           -> pede ao Gemini uma nova versão a partir das mesmas fontes
+//   POST /api/drafts { action: "images", id }          -> outras imagens do mesmo assunto, para trocar a capa:
+//        fotos das matérias de origem e capa/capturas oficiais da Steam dos jogos citados
+//   POST /api/drafts { action: "images", item: { titulo, tags, img, fontes: [{ nome, url }] } }
+//        -> o mesmo para uma notícia já publicada (editor da aba Notícias)
 //
 // Os rascunhos são criados 1 vez por dia pelo robô (scripts/rascunhos_ia.py) e ficam no Upstash Redis:
 //   nz:drafts      hash  id -> rascunho (JSON)
@@ -79,7 +83,7 @@ async function regenerate(d) {
   const P = prompt();
   // troca {campo} pelo valor numa passada só (com função: um "$" no texto da fonte não vira padrão de substituição)
   const fill = (tpl, m) => tpl.replace(/\{(\w+)\}/g, (all, k) => (k in m ? String(m[k] == null ? "" : m[k]) : all));
-  const blocks = src.fontes.map((f, i) => fill(P.fonte, { n: i + 1, nome: f.nome, titulo: f.titulo, pub: f.pub, url: f.url, texto: f.texto }));
+  const blocks = src.fontes.map((f, i) => fill(P.fonte, { n: i + 1, nome: f.nome, titulo: f.titulo, pub: f.pub, url: f.url, texto: f.texto, idioma: f.idioma || "português" }));
   if (src.contexto) blocks.push(fill(P.contexto, { contexto: src.contexto }));
   blocks.push(fill(P.pedido, { qtd: src.fontes.length }));
   blocks.push("Esta é uma NOVA versão: escreva diferente da anterior (outro título e outra abertura), mantendo os mesmos fatos.");
@@ -115,6 +119,137 @@ async function regenerate(d) {
   return putDraft(d);
 }
 
+/* ---- outras imagens para a capa ---- */
+const UA = { "User-Agent": "Mozilla/5.0 (compatible; NizzeraGamesBot/1.0)", Accept: "text/html,application/json;q=0.9,*/*;q=0.8" };
+const JUNK = /logo|icon|avatar|sprite|placeholder|emoji|gravatar|favicon|banner-?ad|\/ads?\/|pixel|1x1|blank\.|loading|spinner|badge|selo|author|autor|\.svg|\.gif/i;
+// palavras que não são nome de jogo (não adianta procurar na Steam)
+const NOT_GAME = new Set(["nintendo", "sony", "playstation", "ps5", "ps4", "xbox", "microsoft", "steam", "valve", "switch", "switch 2", "nintendo switch",
+  "nintendo switch 2", "pc", "mobile", "android", "ios", "console", "consoles", "remake", "remaster", "trailer", "lançamento", "oferta", "ofertas",
+  "amazon", "epic games", "epic games store", "game pass", "ps plus", "take-two", "rockstar", "rockstar games", "ubisoft", "ea", "capcom", "sega",
+  "bandai namco", "square enix", "esports", "black friday", "pirataria", "multiplayer", "rpg", "fps", "indie"]);
+const plain = (t) => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[™®©]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+const ROMAN = { ii: "2", iii: "3", iv: "4", v: "5", vi: "6", vii: "7", viii: "8", ix: "9", x: "10" };
+const toks = (t) => plain(t).split(" ").filter(Boolean).map((w) => ROMAN[w] || w);
+
+async function getText(url, max = 900000) {
+  const r = await fetch(url, { headers: UA, redirect: "follow", signal: AbortSignal.timeout(9000) });
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  const t = await r.text();
+  return t.slice(0, max);
+}
+function absUrl(u, base) {
+  try { const x = new URL(String(u).replace(/&amp;/g, "&").trim(), base); return x.protocol === "https:" || x.protocol === "http:" ? x.href : ""; } catch (_) { return ""; }
+}
+// fotos de uma matéria: og:image, twitter:image e as imagens do corpo do texto
+function pageImages(html, base) {
+  const out = [];
+  const meta = (prop) => {
+    const m = html.match(new RegExp('<meta[^>]+(?:property|name)=["\']' + prop + '["\'][^>]*content=["\']([^"\']+)', "i"))
+      || html.match(new RegExp('<meta[^>]+content=["\']([^"\']+)["\'][^>]*(?:property|name)=["\']' + prop + '["\']', "i"));
+    return m ? absUrl(m[1], base) : "";
+  };
+  [meta("og:image"), meta("twitter:image")].forEach((u) => u && out.push(u));
+  // só o corpo da matéria: começa no bloco do texto e para antes de "relacionadas", "leia também" e comentários
+  // (senão entram as fotos das outras matérias do site)
+  const start = html.search(/class=["'][^"']*\b(entry-content|post-content|td-post-content|article-body|articleBody|article__body|content-body|post-body|materia|single-content|texto)\b|itemprop=["']articleBody/i);
+  let art = start > -1 ? html.slice(start, start + 120000) : ((html.match(/<article\b[\s\S]*?<\/article>/i) || [""])[0]);
+  const end = art.search(/relacionad|related|leia (tamb[eé]m|mais)|veja (tamb[eé]m|mais)|jp-relatedposts|yarpp|you may also|comments|coment[aá]rios|newsletter/i);
+  if (end > 200) art = art.slice(0, end);
+  for (const tag of art.match(/<img\b[^>]*>/gi) || []) {
+    const attr = (n) => { const m = tag.match(new RegExp("\\s" + n + '=["\']([^"\']+)', "i")); return m ? m[1] : ""; };
+    const w = parseInt(attr("width"), 10);
+    if (w && w < 300) continue;
+    let src = attr("data-src") || attr("data-lazy-src") || attr("src");
+    const set = attr("data-srcset") || attr("srcset");
+    if (set) { // pega a maior opção do srcset
+      const best = set.split(",").map((x) => x.trim().split(/\s+/)).map(([u, d]) => [u, parseInt(d, 10) || 0]).sort((a, b) => b[1] - a[1])[0];
+      if (best && best[0]) src = best[0];
+    }
+    const u = absUrl(src, base);
+    if (u && !/^data:/i.test(src)) out.push(u);
+  }
+  return out;
+}
+// imagem do WordPress em tamanho reduzido (foto-640x400.jpg): oferece a original (o painel volta para a reduzida se não abrir)
+function bigger(u) {
+  const b = u.replace(/-\d{2,4}x\d{2,4}(?=\.(jpe?g|png|webp)(\?|$))/i, "");
+  return b !== u ? b : "";
+}
+async function steamImages(names) {
+  const out = [];
+  // "stellar blade complete edition" não acha nada na Steam: tenta também sem as últimas palavras
+  const terms = [];
+  for (const n of names) {
+    const w = n.split(/\s+/);
+    for (let k = w.length; k >= Math.min(2, w.length); k--) { const t = w.slice(0, k).join(" "); if (!terms.includes(t)) terms.push(t); }
+  }
+  const done = new Set();
+  for (const name of terms.slice(0, 10)) {
+    try {
+      const j = JSON.parse(await getText("https://store.steampowered.com/api/storesearch/?cc=br&l=portuguese&term=" + encodeURIComponent(name), 200000));
+      const want = toks(name);
+      // só aceita o jogo se o nome dele tiver todas as palavras procuradas (evita "GTA 6" virar GTA V)
+      // ou o nome do jogo inteiro dentro do termo ("Stellar Blade Complete Edition" acha "Stellar Blade™")
+      const hit = (j.items || []).find((it) => {
+        const name = toks(it.name), have = new Set(name), w = new Set(want);
+        return want.every((x) => have.has(x)) || (plain(it.name).length >= 5 && name.every((x) => w.has(x)));
+      });
+      if (!hit || done.has(hit.id)) continue;
+      done.add(hit.id);
+      const d = JSON.parse(await getText("https://store.steampowered.com/api/appdetails?l=portuguese&appids=" + hit.id, 1500000));
+      const data = d && d[hit.id] && d[hit.id].success ? d[hit.id].data : null;
+      if (!data) continue;
+      const pub = Array.isArray(data.publishers) && data.publishers[0] ? String(data.publishers[0]) : "";
+      // "PlayStation Publishing LLC (excluding China)" -> "PlayStation Publishing"
+      const credit = "divulgação / " + (pub.replace(/\s*\(.*?\)\s*/g, " ").replace(/,?\s+(LLC|Inc\.?|Ltd\.?|S\.?A\.?|GmbH|Co\.,? Ltd\.?)$/i, "").trim() || "Steam");
+      const label = "Steam: " + data.name;
+      if (data.header_image) out.push({ url: data.header_image, credito: credit, origem: label + " (capa)" });
+      (data.screenshots || []).slice(0, 8).forEach((x) => x && x.path_full && out.push({ url: x.path_full, credito: credit, origem: label }));
+    } catch (_) { /* Steam fora ou jogo não encontrado: segue */ }
+    if (out.length >= 18) break;
+  }
+  return out;
+}
+// nomes próprios do título: "Stellar Blade Complete Edition chega à Nintendo Switch 2" -> "Stellar Blade Complete Edition", "Nintendo Switch 2"
+function titleNames(t) {
+  const words = String(t || "").replace(/[“”"«»()\[\]]/g, " ").split(/\s+/).filter(Boolean);
+  const cap = (w) => /^[A-ZÀ-Ý0-9]/.test(w) || /^(i{1,3}|iv|vi{0,3}|ix|x)$/i.test(w.replace(/[:,.;!?]$/, "")) && /^[A-Z]/.test(w);
+  const runs = [];
+  let cur = [];
+  words.forEach((w, i) => {
+    const clean = w.replace(/[,.;!?]+$/, "");
+    if (cap(clean)) { cur.push(clean.replace(/:$/, "")); if (/:$/.test(clean)) { runs.push(cur); cur = []; } }
+    else if (cur.length && /^(of|the|and|&|de|do|da|of)$/i.test(clean) && words[i + 1] && cap(words[i + 1])) cur.push(clean);
+    else { if (cur.length) runs.push(cur); cur = []; }
+  });
+  if (cur.length) runs.push(cur);
+  return runs.map((r) => r.join(" ")).filter((n) => plain(n).length >= 4);
+}
+async function findImages(d) {
+  const fontes = (Array.isArray(d.fontes) ? d.fontes : []).filter((f) => f && /^https?:\/\//i.test(f.url || ""));
+  const fromPages = await Promise.all(fontes.map(async (f) => {
+    try {
+      return pageImages(await getText(f.url), f.url).map((u) => ({ url: u, credito: "divulgação / " + f.nome, origem: f.nome }));
+    } catch (_) { return []; }
+  }));
+  // nomes de jogo: palavras-chave do rascunho que não são empresa/plataforma
+  const names = [...new Set([...(d.tags || []), ...titleNames(d.titulo)].map((t) => String(t).trim().toLowerCase())
+    .filter((t) => t.length >= 3 && !NOT_GAME.has(t)))].slice(0, 5);
+  const steam = await steamImages(names);
+  const seen = new Set(), out = [];
+  const key = (u) => u.replace(/^https?:\/\//, "").replace(/\?.*$/, "").replace(/-\d{2,4}x\d{2,4}(?=\.\w+$)/, "").toLowerCase();
+  for (const x of [].concat(...fromPages, steam)) {
+    if (!x.url || JUNK.test(x.url) || x.url.length > 2000) continue;
+    const k = key(x.url);
+    if (seen.has(k) || (d.img && key(d.img) === k && x.url === d.img)) continue;
+    seen.add(k);
+    const big = bigger(x.url);
+    out.push(big ? { ...x, url: big, menor: x.url } : x);
+    if (out.length >= 36) break;
+  }
+  return out;
+}
+
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   if (!redisReady()) return res.status(503).json({ ok: false, error: "O banco (Upstash Redis) ainda não foi configurado no servidor." });
@@ -133,6 +268,16 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, items, gemini: !!process.env.GEMINI_API_KEY });
     }
     const body = readBody(req);
+    if (body.action === "images" && !body.id) {
+      const it = body.item || {};
+      const item = {
+        titulo: line(it.titulo, 300), img: txt(it.img, 2000),
+        tags: (Array.isArray(it.tags) ? it.tags : []).slice(0, 10).map((t) => line(t, 40)),
+        fontes: (Array.isArray(it.fontes) ? it.fontes : []).slice(0, 6).map((f) => ({ nome: line(f && f.nome, 120), url: txt(f && f.url, 2000) }))
+          .filter((f) => HTTP.test(f.url)),
+      };
+      return res.status(200).json({ ok: true, images: await findImages(item) });
+    }
     const d = await getDraft(body.id);
     if (body.action === "save") {
       const x = body.draft || {};
@@ -153,6 +298,9 @@ export default async function handler(req, res) {
         d.publicado = { newsId: Number(body.newsId) || 0, slug: /^[a-z0-9-]{1,90}$/.test(body.slug || "") ? body.slug : "", em: now() };
       }
       return res.status(200).json({ ok: true, draft: await putDraft(d) });
+    }
+    if (body.action === "images") {
+      return res.status(200).json({ ok: true, images: await findImages(d) });
     }
     if (body.action === "regen") {
       if (d.status !== "rascunho") throw new Bad("Só dá para gerar de novo um rascunho pendente.");

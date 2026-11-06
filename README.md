@@ -74,14 +74,18 @@ recusam salvar notícia sem foto.
 
 Todo dia às 03:40 (Brasília) o workflow `.github/workflows/rascunhos-ia.yml` roda `scripts/rascunhos_ia.py`:
 
-1. lê os feeds de `scripts/atualizar_noticias.py` e, para cada notícia nova, procura a mesma notícia nos
-   outros feeds (até 3 fontes; com uma só, gera mesmo assim);
+1. lê os feeds de `scripts/atualizar_noticias.py`: os brasileiros (`FEEDS`) e os de fora, em inglês
+   (`FEEDS_EXTERIOR`: IGN, GameSpot, Eurogamer, Gematsu, PC Gamer, Push Square e Nintendo Life), que o
+   Gemini traduz. Para cada notícia nova, procura a mesma notícia nos outros feeds (até 3 fontes; com uma só,
+   gera mesmo assim). No máximo 2 rascunhos por site e 3 por assunto em alta a cada dia;
 2. pede ao Google Gemini (modelo em `MODELO`, no topo do script) uma matéria original que combine as fontes.
    O texto do pedido (tom, tamanho, regras de fatos) fica em `SITE/api/_rascunho_ia.json`;
 3. grava o rascunho no Upstash Redis (o mesmo banco dos comentários). Nada vai para o site sozinho.
 
 No painel, aba **Rascunhos**: edite título, subtítulo, texto e o bloco **Na opinião do Nizzera**, e clique em
 **Publicar** (vira notícia normal, com "Fontes:" no fim), **Descartar** ou **Gerar de novo**.
+**Buscar outras imagens** (no rascunho e no editor de notícias) mostra fotos do mesmo assunto, tiradas das
+matérias de origem e da página do jogo na Steam, para trocar a capa; o crédito é preenchido junto.
 Limites do plano grátis: no máximo `MAX_POR_EXECUCAO` (10) por dia, com pausa entre as chamadas.
 Teste sem gastar nada: `python nizzera-games/scripts/rascunhos_ia.py --teste` (mostra o que seria gerado).
 Para voltar ao modo antigo (notícia dos feeds direto no site): `PUBLICAR_DIRETO = True` em `atualizar_noticias.py`.
