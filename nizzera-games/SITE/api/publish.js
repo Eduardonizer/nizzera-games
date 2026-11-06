@@ -78,7 +78,61 @@ function clean(d) {
     if (!name || !terms.length) throw new Bad("Cada assunto em alta precisa de nome e de pelo menos uma palavra-chave.");
     return { name, terms };
   });
-  return { site, cats, trend, news };
+  // reviews de jogos
+  const rawRv = Array.isArray(d.reviews) ? d.reviews : [];
+  if (rawRv.length > 200) throw new Bad("Reviews demais (máximo 200).");
+  const rvIds = new Set();
+  const arr = (v, max, label) => {
+    if (v == null) return [];
+    if (!Array.isArray(v) || v.length > max) throw new Bad(`${label}: no máximo ${max} itens.`);
+    return v;
+  };
+  const reviews = rawRv.map((r) => {
+    if (!r || typeof r !== "object") throw new Bad("Há uma review inválida.");
+    const id = Number(r.id);
+    if (!Number.isInteger(id) || id < 1 || id > 1e9 || rvIds.has(id)) throw new Bad("Há reviews com identificador inválido ou repetido.");
+    rvIds.add(id);
+    const game = str(r.game, 120, "O nome de um jogo").trim();
+    if (!game) throw new Bad("Há uma review sem o nome do jogo.");
+    const img = str(r.img, 3_000_000, "Uma imagem de review");
+    if (img && !(img.length <= 2000 && HTTP.test(img)) && !DATA_IMG.test(img)) throw new Bad(`A imagem da review de "${game.slice(0, 40)}" é inválida.`);
+    const scoreMax = [5, 10, 100].includes(Number(r.scoreMax)) ? Number(r.scoreMax) : 100;
+    const score = Number(r.score);
+    if (!Number.isFinite(score) || score < 0 || score > scoreMax) throw new Bad(`A nota da review de "${game.slice(0, 40)}" precisa ficar entre 0 e ${scoreMax}.`);
+    const date = str(r.date, 10, "Uma data"), release = str(r.release, 10, "Uma data de lançamento");
+    if ((date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) || (release && !/^\d{4}-\d{2}-\d{2}$/.test(release))) throw new Bad("Há uma data inválida numa review.");
+    const link = (u, label) => { const s = str(u, 2000, label); if (s && !HTTP.test(s)) throw new Bad(`${label} precisa começar com http:// ou https://.`); return s; };
+    const slug = str(r.slug, 90, "Um endereço");
+    return {
+      id,
+      slug: /^[a-z0-9-]{1,90}$/.test(slug) ? slug : "",
+      game,
+      title: str(r.title, 200, "Um título de review"),
+      verdict: str(r.verdict, 600, "Um veredito"),
+      img,
+      alt: str(r.alt, 300, "Um texto alternativo"),
+      credit: str(r.credit, 200, "Um crédito de imagem"),
+      platforms: str(r.platforms, 150, "As plataformas"),
+      release,
+      dev: str(r.dev, 120, "A desenvolvedora"),
+      genre: str(r.genre, 80, "O gênero"),
+      score,
+      scoreMax,
+      scoreLabel: str(r.scoreLabel, 80, "A origem da nota"),
+      myScore: str(r.myScore, 20, "A nota própria"),
+      critics: arr(r.critics, 20, "Notas da crítica").map((x) => ({
+        name: str(x && x.name, 60, "O nome de um veículo"), score: str(x && x.score, 20, "Uma nota"), url: link(x && x.url, "O link de uma nota"),
+      })),
+      synopsis: str(r.synopsis, 5000, "A sinopse"),
+      changes: arr(r.changes, 20, "Novidades").map((x) => str(x, 400, "Uma novidade")),
+      pros: arr(r.pros, 20, "Pontos positivos").map((x) => str(x, 400, "Um ponto positivo")),
+      cons: arr(r.cons, 20, "Pontos de atenção").map((x) => str(x, 400, "Um ponto de atenção")),
+      public: str(r.public, 5000, "A opinião do público"),
+      sources: arr(r.sources, 30, "Fontes").map((x) => ({ name: str(x && x.name, 150, "O nome de uma fonte"), url: link(x && x.url, "O link de uma fonte") })),
+      date,
+    };
+  });
+  return { site, cats, trend, reviews, news };
 }
 
 // Notícias que o robô colocou no site depois que você começou a editar
@@ -148,7 +202,7 @@ module.exports = async (req, res) => {
 
       let current = null;
       try { current = JSON.parse(html.slice(m.index + m[1].length, m.index + m[0].length - m[2].length)); } catch (_) {}
-      const out = { site: data.site, cats: data.cats.slice(), trend: data.trend, news: data.news.slice() };
+      const out = { site: data.site, cats: data.cats.slice(), trend: data.trend, reviews: data.reviews, news: data.news.slice() };
       const merged = mergeRobot(out, current, known);
 
       const json = JSON.stringify(out, null, 1).replace(/</g, "\\u003c");

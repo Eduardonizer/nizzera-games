@@ -28,6 +28,20 @@ function slugify(t){
 function newsSlug(n){return /^[a-z0-9-]{1,90}$/.test(n.slug||"")?n.slug:(+n.id||0)+"-"+slugify(n.title)}
 function newsUrl(n){return "/noticia/"+newsSlug(n)+"/"}
 
+/* ---- reviews (lista "reviews" do nz-data) ---- */
+function reviews(){var d=DATA&&Array.isArray(DATA.reviews)?DATA:BASE;return d&&Array.isArray(d.reviews)?d.reviews:[]}
+function reviewSlug(r){return /^[a-z0-9-]{1,90}$/.test(r.slug||"")?r.slug:(+r.id||0)+"-"+slugify(r.game)}
+function reviewUrl(r){return "/review/"+reviewSlug(r)+"/"}
+/* nota em 0–100 para escolher a cor do selo: verde (ótimo), amarelo (bom), coral (fraco) */
+function scorePct(r){var s=+r.score||0,m=+r.scoreMax||100;return m?Math.round(s/m*100):0}
+function scoreTone(r){var p=scorePct(r);return p>=85?"great":p>=70?"good":"low"}
+function scoreTxt(r){var s=+r.score||0;return (+r.scoreMax||100)===10?String(s).replace(".",","):String(s)}
+function reviewCard(r){
+  return '<a class="rv-card" href="'+esc(reviewUrl(r))+'"><div class="art">'+pic({id:r.id,img:r.img,alt:r.alt||r.game,title:r.game})+'</div>'
+    +'<span class="rv-score '+scoreTone(r)+'" title="'+esc(r.scoreLabel||"")+'"><b>'+esc(scoreTxt(r))+'</b><small>'+esc(r.scoreLabel?r.scoreLabel.split(" ")[0]:"nota")+'</small></span>'
+    +'<div class="tx"><span class="tag rv-tag">Review</span><h3>'+esc(r.game)+'</h3><p>'+esc(r.verdict)+'</p><span class="meta">'+esc(r.platforms||"")+'</span></div></a>';
+}
+
 /* ---- assuntos em alta (lista "trend" do nz-data, editável no painel em Site e categorias) ---- */
 function plain(t){return String(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()}
 var TREND_DIAS=21; /* notícia mais velha que isso não sobe para o "Em alta", mesmo sendo do assunto */

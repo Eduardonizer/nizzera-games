@@ -16,6 +16,14 @@
     {
       "source": "/noticia/:slug",
       "destination": "/noticia/:slug/index.html"
+    },
+    {
+      "source": "/reviews",
+      "destination": "/reviews/index.html"
+    },
+    {
+      "source": "/review/:slug",
+      "destination": "/review/:slug/index.html"
     }
   ],
   "headers": [

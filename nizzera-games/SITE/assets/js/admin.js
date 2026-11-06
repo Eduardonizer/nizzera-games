@@ -35,6 +35,8 @@
       var pub=null;try{pub=JSON.parse(lsGet(PKEY)||"null")}catch(_){}
       if(pub&&Date.now()-pub.at<15*60000&&pub.sig!==baseSig()){try{var d=JSON.parse(lsGet(DKEY));if(d&&Array.isArray(d.news))DATA=d}catch(_){}}
       else lsDel(PKEY);
+      /* rascunho salvo antes de existirem reviews/assuntos: completa com o publicado, para não apagá-los ao publicar */
+      ["trend","reviews"].forEach(function(k){if(!Array.isArray(DATA[k])&&Array.isArray(BASE[k]))DATA[k]=clone(BASE[k])});
     });
   }
   function knownIds(){var k=null;try{k=JSON.parse(lsGet(KKEY)||"null")}catch(_){}return Array.isArray(k)?k:BASE.news.map(function(n){return n.id})}
@@ -83,14 +85,14 @@
   /* ---- estrutura ---- */
   function shell(){
     adm.innerHTML='<div class="a-top"><strong class="a-title">Área admin</strong><span class="a-chip" id="a-status"></span><span class="a-sp"></span><a class="a-btn" href="/" target="_blank" rel="noopener">Ver site ↗</a><button class="a-btn" type="button" id="a-out">Sair</button></div>'
-      +'<div class="a-tabs" role="tablist"><button class="a-tab" role="tab" type="button" data-tab="news">Notícias</button><button class="a-tab" role="tab" type="button" data-tab="cm">Comentários</button><button class="a-tab" role="tab" type="button" data-tab="site">Site e categorias</button><button class="a-tab" role="tab" type="button" data-tab="back">Publicar e backup</button></div><div class="a-body" id="a-body"></div>';
+      +'<div class="a-tabs" role="tablist"><button class="a-tab" role="tab" type="button" data-tab="news">Notícias</button><button class="a-tab" role="tab" type="button" data-tab="rv">Reviews</button><button class="a-tab" role="tab" type="button" data-tab="cm">Comentários</button><button class="a-tab" role="tab" type="button" data-tab="site">Site e categorias</button><button class="a-tab" role="tab" type="button" data-tab="back">Publicar e backup</button></div><div class="a-body" id="a-body"></div>';
     status();
   }
   function tab(n){
-    if(n!==st.tab){if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;st.dirty=false;st.draft=null;st.sel=null;st.isNew=false}
+    if(n!==st.tab){if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;st.dirty=false;st.draft=null;st.sel=null;st.isNew=false;st.rvDraft=null;st.rvSel=null;st.rvNew=false}
     st.tab=n;
     [].forEach.call(adm.querySelectorAll(".a-tab"),function(b){b.setAttribute("aria-selected",b.dataset.tab===n)});
-    ({news:newsView,cm:cmView,site:siteView,back:backView})[n]();
+    ({news:newsView,rv:rvView,cm:cmView,site:siteView,back:backView})[n]();
     if(n==="back")svcView();
   }
 
@@ -188,6 +190,84 @@
         var fi=$("#f-img");fi.value="";fi.placeholder="Imagem enviada do computador";preview();toast("Imagem carregada. Clique em Salvar para aplicar.");
       };im.src=fr.result;
     };fr.readAsDataURL(f);
+  }
+
+  /* ---- aba Reviews ---- */
+  function rvList(){if(!Array.isArray(DATA.reviews))DATA.reviews=[];return DATA.reviews}
+  function rvFind(id){return rvList().filter(function(r){return r.id===id})[0]}
+  function trimS(s){return String(s).trim()}
+  function lines(a){return (a||[]).join("\n")}
+  function pairs(a,keys){return (a||[]).map(function(x){return keys.map(function(k){return x[k]||""}).join(" | ").replace(/( \| )+$/,"")}).join("\n")}
+  function parseLines(s){return String(s||"").split("\n").map(trimS).filter(Boolean)}
+  function parsePairs(s,keys){return parseLines(s).map(function(l){var p=l.split("|").map(trimS),o={};keys.forEach(function(k,i){o[k]=p[i]||""});return o})}
+  function rvView(){
+    $("#a-body").innerHTML='<div class="a-news"><aside class="a-list" aria-label="Lista de reviews"><div class="a-lhead"><button class="a-btn pri" type="button" id="rv-new">+ Nova review</button></div><div class="a-items" id="rv-items"></div></aside><section id="rv-edit"></section></div>';
+    rvItems();rvEditor();
+  }
+  function rvItems(){
+    var l=rvList().slice().sort(function(a,b){return String(b.date||"").localeCompare(String(a.date||""))});
+    $("#rv-items").innerHTML=l.map(function(r){
+      return '<div class="a-rowi'+(r.id===st.rvSel?" on":"")+'"><div class="art a-th">'+pic({id:r.id,img:r.img,title:r.game})+'</div><button type="button" class="a-pick" data-rvpick="'+r.id+'"><b>'+esc(r.game||"(sem nome)")+'</b><small>Nota '+esc(scoreTxt(r))+' · '+esc(fmt(r.date))+'</small></button><span></span></div>';
+    }).join("")||'<p class="a-hint">Nenhuma review ainda.</p>';
+  }
+  function rvEditor(){
+    var box=$("#rv-edit"),r=st.rvDraft;
+    if(!r){box.innerHTML='<div class="a-card a-ph"><h2>Editar review</h2><p>Escolha uma review na lista ao lado ou crie uma nova. Use notas e opiniões de fontes reais e liste as fontes no fim.</p></div>';return}
+    var mx=[100,10,5].map(function(v){return '<option value="'+v+'"'+((+r.scoreMax||100)===v?" selected":"")+'>de 0 a '+v+'</option>'}).join("");
+    box.innerHTML='<form id="rv-form" class="a-card" novalidate><h2>'+(st.rvNew?"Nova review":"Editar review")+'</h2>'
+      +fld("Nome do jogo","r-game",r.game)+fld("Título da review","r-title",r.title)
+      +area("Veredito (1 ou 2 frases; aparece no card)","r-verdict",r.verdict,2)
+      +'<h3>Nota</h3><div class="a-row3"><div>'+fld("Nota","r-score",r.score,"number")+'</div><div><label for="r-max">Escala</label><select class="a-in" id="r-max">'+mx+'</select></div><div>'+fld("Nota própria (opcional)","r-mine",r.myScore)+'</div></div>'
+      +fld("De onde vem a nota (ex.: Metacritic (média da crítica))","r-label",r.scoreLabel)
+      +area("Notas da crítica: uma por linha, no formato  Veículo | nota | link","r-critics",pairs(r.critics,["name","score","url"]),5)
+      +'<h3>Ficha</h3><div class="a-row2"><div>'+fld("Plataformas","r-plat",r.platforms)+'</div><div>'+fld("Lançamento","r-rel",r.release,"date")+'</div></div>'
+      +'<div class="a-row2"><div>'+fld("Desenvolvedora","r-dev",r.dev)+'</div><div>'+fld("Gênero","r-genre",r.genre)+'</div></div>'
+      +'<h3>Imagem</h3>'+fld("Link da imagem","r-img",/^data:/.test(r.img||"")?"":r.img,"url")
+      +'<div class="a-row2"><div>'+fld("Texto alternativo","r-alt",r.alt)+'</div><div>'+fld("Crédito da imagem","r-credit",r.credit)+'</div></div>'
+      +'<h3>Conteúdo</h3>'+area("Sinopse (uma linha em branco separa os parágrafos)","r-syn",r.synopsis,6)
+      +area("O que há de novo: um item por linha","r-chg",lines(r.changes),5)
+      +'<div class="a-row2"><div>'+area("O que a crítica elogia: um por linha","r-pros",lines(r.pros),6)+'</div><div>'+area("Pontos de atenção: um por linha","r-cons",lines(r.cons),6)+'</div></div>'
+      +area("O que o público está achando","r-pub",r.public,5)
+      +area("Fontes: uma por linha, no formato  Nome | link","r-src",pairs(r.sources,["name","url"]),5)
+      +fld("Data de publicação","r-date",r.date,"date")
+      +'<div class="a-err" id="r-err" role="alert"></div><div class="a-act"><button class="a-btn pri" type="submit">Salvar review</button><button type="button" class="a-btn" id="rv-disc">Descartar alterações</button>'
+      +(st.rvNew?"":'<a class="a-btn" href="'+esc(reviewUrl(r))+'" target="_blank" rel="noopener">Ver página ↗</a><button type="button" class="a-btn dan" id="rv-del">Excluir</button>')+'</div></form>';
+  }
+  function rvRead(){
+    var r=st.rvDraft,g=function(i){return $(i).value.trim()};
+    r.game=g("#r-game");r.title=g("#r-title");r.verdict=g("#r-verdict");r.score=parseFloat(g("#r-score").replace(",","."));r.scoreMax=+$("#r-max").value;
+    r.myScore=g("#r-mine");r.scoreLabel=g("#r-label");r.critics=parsePairs($("#r-critics").value,["name","score","url"]);
+    r.platforms=g("#r-plat");r.release=g("#r-rel");r.dev=g("#r-dev");r.genre=g("#r-genre");
+    var im=g("#r-img");if(im||!/^data:/.test(r.img||""))r.img=im;r.alt=g("#r-alt");r.credit=g("#r-credit");
+    r.synopsis=g("#r-syn");r.changes=parseLines($("#r-chg").value);r.pros=parseLines($("#r-pros").value);r.cons=parseLines($("#r-cons").value);
+    r.public=g("#r-pub");r.sources=parsePairs($("#r-src").value,["name","url"]);r.date=g("#r-date")||today();
+  }
+  function rvSave(){
+    var r=st.rvDraft;if(!r)return;rvRead();var err=$("#r-err");err.textContent="";
+    if(!r.game){err.textContent="Escreva o nome do jogo.";$("#r-game").focus();return}
+    if(!(r.score>=0&&r.score<=r.scoreMax)){err.textContent="A nota precisa ficar entre 0 e "+r.scoreMax+".";$("#r-score").focus();return}
+    if(r.img&&!/^https?:\/\//i.test(r.img)){err.textContent="O link da imagem precisa começar com http:// ou https://";$("#r-img").focus();return}
+    var bad=r.critics.concat(r.sources).filter(function(x){return x.url&&!/^https?:\/\//i.test(x.url)})[0];
+    if(bad){err.textContent="Link inválido: "+bad.url+" (precisa começar com http:// ou https://)";return}
+    if(!r.slug)r.slug=r.id+"-"+slugify(r.game);
+    var ok=mutate(function(){var l=rvList(),i=-1;l.forEach(function(x,k){if(x.id===r.id)i=k});if(i<0)l.unshift(clone(r));else l[i]=clone(r)},"Review salva. Publique para ela valer no site.");
+    if(ok){st.rvNew=false;st.rvSel=r.id;st.dirty=false;st.rvDraft=clone(rvFind(r.id));rvItems();rvEditor()}
+  }
+  function rvDel(){
+    var r=st.rvDraft;if(!r||st.rvNew||!confirm("Excluir a review de “"+r.game+"”?"))return;
+    if(mutate(function(){DATA.reviews=rvList().filter(function(x){return x.id!==r.id})},"Review excluída.")){st.rvSel=null;st.rvDraft=null;st.dirty=false;rvItems();rvEditor()}
+  }
+  function rvPick(id){
+    if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;
+    st.dirty=false;st.rvNew=false;st.rvSel=id;st.rvDraft=clone(rvFind(id));rvItems();rvEditor();
+    if(innerWidth<900)$("#rv-edit").scrollIntoView({behavior:"smooth",block:"start"});
+  }
+  function rvNew(){
+    if(st.dirty&&!confirm("Descartar alterações não salvas?"))return;
+    st.dirty=false;st.rvNew=true;st.rvSel=null;
+    var id=rvList().reduce(function(m,r){return Math.max(m,+r.id||0)},0)+1;
+    st.rvDraft={id:id,slug:"",game:"",title:"",verdict:"",img:"",alt:"",credit:"",platforms:"",release:"",dev:"",genre:"",score:0,scoreMax:100,scoreLabel:"Metacritic (média da crítica)",myScore:"",critics:[],synopsis:"",changes:[],pros:[],cons:[],public:"",sources:[],date:today()};
+    rvItems();rvEditor();var f=$("#r-game");if(f)f.focus();
   }
 
   /* ---- aba Comentários ---- */
@@ -311,6 +391,7 @@
   function norm(d){
     if(!d||!Array.isArray(d.news))return null;
     var o={site:{},cats:[],trend:[],news:[]},s=d.site||{},seen={};
+    if(Array.isArray(d.reviews))o.reviews=d.reviews.filter(function(r){return r&&r.game&&+r.id});
     if(Array.isArray(d.trend))o.trend=d.trend.filter(function(x){return x&&x.name&&Array.isArray(x.terms)}).map(function(x){return {name:String(x.name),terms:x.terms.map(String)}});
     ["name","tagline","intro","footer","credit"].forEach(function(k){o.site[k]=String(s[k]==null?BASE.site[k]:s[k])});
     d.news.forEach(function(n,i){
@@ -336,6 +417,10 @@
     var t=e.target.closest("button");if(!t)return;var id=t.id,ds=t.dataset;
     if(ds.tab){tab(ds.tab);return}
     if(ds.pick){pick(+ds.pick);return}
+    if(ds.rvpick){rvPick(+ds.rvpick);return}
+    if(id==="rv-new"){rvNew();return}
+    if(id==="rv-del"){rvDel();return}
+    if(id==="rv-disc"){st.dirty=false;st.rvDraft=st.rvNew?null:clone(rvFind(st.rvSel));st.rvNew=false;rvItems();rvEditor();return}
     if(ds.cmdel){cmDel(ds.cmdel,t);return}
     if(id==="cm-reload"){cmLoad();return}
     if(ds.mv){move(+ds.mid,+ds.mv);return}
@@ -388,6 +473,7 @@
     }
     else if(id==="a-form")saveNews();
     else if(id==="a-site")saveSite();
+    else if(id==="rv-form")rvSave();
 
   });
   adm.addEventListener("input",function(e){
@@ -395,6 +481,7 @@
     if(t.id==="a-q"){st.q=t.value;items();return}
     if(t.id==="t-list"){trendPreview();return}
     if(t.dataset&&t.dataset.ci!==undefined&&t.tagName==="INPUT"){st.cats[+t.dataset.ci].name=t.value;return}
+    if(t.closest&&t.closest("#rv-form")){st.dirty=true;return}
     if(!t.closest||!t.closest("#a-form")||!st.draft)return;
     st.dirty=true;readForm();
     if(t.id==="f-img")st.draft.img=t.value.trim();

@@ -36,6 +36,7 @@
     var h='<div class="grp">Navegar</div>'+link("/","home","Início",' data-page="topo"');
     h+=link("/#noticias","news","Todas as notícias",' data-cat="Todas"',hasNews?count("Todas"):null);
     if(!hasNews||CATS.indexOf("Eventos")>-1)h+=link("/?categoria=eventos#noticias","cal","Eventos",' data-cat="Eventos"',hasNews?count("Eventos"):null);
+    h+=link("/reviews/","star","Reviews",' data-page="/review"');
     h+=link("/ofertas/","tag","Ofertas da semana",' data-page="/ofertas/"');
     h+=link("/comentarios/","chat","Comentários",' data-page="/comentarios/"');
     h+='<div class="grp">Ferramentas</div>'+btn("contact","mail","Fale com a gente")+btn("search","search","Buscar")+btn("theme","theme","Tema claro/escuro")

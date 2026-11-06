@@ -64,6 +64,12 @@ function topNews(max){
   });
   return l.slice(0,max);
 }
+/* reviews mais recentes, logo depois do carrossel */
+function renderReviews(){
+  var box=document.getElementById("rvgrid"),sec=document.getElementById("reviews");if(!box)return;
+  var l=reviews().slice().sort(function(a,b){return String(b.date||"").localeCompare(String(a.date||""))}).slice(0,3);
+  sec.hidden=!l.length;box.innerHTML=l.map(reviewCard).join("");
+}
 /* barra "Assuntos do momento" acima do carrossel: cada botão filtra a lista por aquele assunto */
 var tbar=document.getElementById("trendbar");
 function renderTrendBar(){
@@ -211,7 +217,7 @@ function applySite(){
 }
 function refreshAll(){
   NEWS=DATA.news;CATS=["Todas"].concat(DATA.cats);
-  buildChips();renderFeat();renderCarr();renderTrendBar();render();applySite();
+  buildChips();renderFeat();renderCarr();renderTrendBar();renderReviews();render();applySite();
   if(window.buildSide)window.buildSide();
 }
 readUrl();

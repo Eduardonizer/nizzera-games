@@ -17,6 +17,8 @@ https://nizzera-games.vercel.app. Criado por Eduardo Nizer.
 │   │   ├── sitemap.xml           ┐
 │   │   ├── feed.xml              ├ gerados por scripts/gerar_paginas.py (não edite à mão)
 │   │   ├── noticia/<id>-<titulo>/│ uma página por notícia (endereço próprio)
+│   │   ├── reviews/              │ lista de reviews de jogos
+│   │   ├── review/<id>-<jogo>/   │ uma página por review
 │   │   ├── ofertas/              │ página das ofertas da semana
 │   │   ├── comentarios/          │ página de comentários e feedback
 │   │   ├── 404.html              ┘ página de "não encontrado"
@@ -58,6 +60,16 @@ O menu lateral, o rodapé e o chat das páginas internas são copiados do `index
 
 **Toda notícia precisa de foto.** O robô pula notícias sem imagem, e o painel e o servidor
 recusam salvar notícia sem foto.
+
+## Reviews
+
+No painel admin, aba **Reviews**: nome do jogo, título, veredito, nota (com a escala e de onde ela vem),
+notas de cada veículo, ficha técnica, sinopse, novidades, prós, pontos de atenção, o que o público
+está achando e as fontes. A página `/review/<id>-<jogo>/` é gerada depois de publicar; a review mais
+nova aparece no início, logo após o carrossel, e todas ficam em `/reviews/`.
+
+Use notas e opiniões de fontes reais e liste-as em "Fontes". O campo **Nota própria** fica para quando
+alguém da equipe jogar e quiser dar a nota do Nizzera Games.
 
 ## Assuntos em alta
 

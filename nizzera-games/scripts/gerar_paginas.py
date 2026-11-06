@@ -3,6 +3,8 @@
 
 Cria, dentro de SITE/:
   noticia/<id>-<titulo>/index.html   uma página estática por notícia (com dados estruturados)
+  reviews/index.html                 lista de reviews de jogos
+  review/<id>-<jogo>/index.html      uma página por review
   ofertas/index.html                 página das ofertas da semana
   comentarios/index.html             página de comentários e feedback
   404.html                           página de "não encontrado"
@@ -36,11 +38,13 @@ RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = os.path.join(RAIZ, "SITE")
 INDEX = os.path.join(SITE, "index.html")
 PASTA = os.path.join(SITE, "noticia")
+PASTA_RV = os.path.join(SITE, "review")
 MARCA = "<!-- gerado por scripts/gerar_paginas.py: não edite à mão -->"
 BLOCO = re.compile(r'(<script id="nz-data" type="application/json">\s*)(.*?)(\s*</script>)', re.S)
 MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho",
          "agosto", "setembro", "outubro", "novembro", "dezembro"]
 SLUG_OK = re.compile(r"^[a-z0-9-]{1,90}$")
+REVIEWS = []
 
 
 def e(s):
@@ -260,6 +264,130 @@ def pagina_comentarios(c, site):
     return layout(c, nome, cab, corpo)
 
 
+def rv_slug(r):
+    s = r.get("slug", "")
+    return s if SLUG_OK.match(s or "") else f"{int(r.get('id') or 0)}-{slugify(r.get('game'))}"
+
+
+def rv_nota(r):
+    s, mx = r.get("score") or 0, r.get("scoreMax") or 100
+    txt = (f"{s}".replace(".", ",") if mx == 10 else f"{s}")
+    pct = (s / mx * 100) if mx else 0
+    tom = "great" if pct >= 85 else "good" if pct >= 70 else "low"
+    return txt, tom
+
+
+def rv_card(r):
+    nota, tom = rv_nota(r)
+    rotulo = (r.get("scoreLabel") or "nota").split(" ")[0]
+    return (f'<a class="rv-card" href="/review/{e(rv_slug(r))}/">{arte({"id": r.get("id"), "img": r.get("img"), "alt": r.get("alt") or r.get("game"), "title": r.get("game")})}'
+            f'<span class="rv-score {tom}" title="{e(r.get("scoreLabel"))}"><b>{e(nota)}</b><small>{e(rotulo)}</small></span>'
+            f'<div class="tx"><span class="tag rv-tag">Review</span><h3>{e(r.get("game"))}</h3><p>{e(r.get("verdict"))}</p>'
+            f'<span class="meta">{e(r.get("platforms"))}</span></div></a>')
+
+
+def lista(itens):
+    return "".join(f"<li>{e(x)}</li>" for x in itens if str(x).strip())
+
+
+def pagina_reviews(c, site, revs):
+    nome = site.get("name") or "Nizzera Games"
+    cab = meta_pagina(f"Reviews de games | {nome}",
+                      "Reviews dos jogos do momento: nota da crítica, sinopse, novidades, prós e contras e o que os jogadores estão achando.",
+                      SITE_URL + "/reviews/", nome)
+    cards = "".join(rv_card(r) for r in revs) or '<p class="soon">As primeiras reviews chegam em breve.</p>'
+    corpo = f"""<main class="wrap page">
+  {trilha("Reviews")}
+  <h1 class="ph">Reviews de games</h1>
+  <p class="lead">Os jogos do momento em um só lugar: nota da crítica, sinopse, o que mudou, prós e contras e o que os jogadores estão achando.</p>
+  <div class="rv-grid">{cards}</div>
+</main>"""
+    return layout(c, nome, cab, corpo)
+
+
+def pagina_review(r, c, site, noticias):
+    nome = site.get("name") or "Nizzera Games"
+    url = f"{SITE_URL}/review/{rv_slug(r)}/"
+    titulo, jogo = r.get("title") or r.get("game", ""), r.get("game", "")
+    desc = r.get("verdict") or titulo
+    desc = desc if len(desc) <= 160 else desc[:157].rsplit(" ", 1)[0] + "…"
+    foto = http(r.get("img", ""))
+    nota, tom = rv_nota(r)
+    mx = r.get("scoreMax") or 100
+    ld = {"@context": "https://schema.org", "@type": "Article", "headline": titulo[:110], "description": desc,
+          "inLanguage": "pt-BR", "mainEntityOfPage": url,
+          "about": {"@type": "VideoGame", "name": jogo, "gamePlatform": r.get("platforms", ""),
+                    "genre": r.get("genre", ""), "publisher": {"@type": "Organization", "name": r.get("dev", "")}},
+          "author": {"@type": "Organization", "name": nome, "url": SITE_URL + "/"},
+          "publisher": {"@type": "Organization", "name": nome, "url": SITE_URL + "/",
+                        "logo": {"@type": "ImageObject", "url": SITE_URL + "/assets/icons/icon-192.png"}}}
+    if r.get("date"):
+        ld["datePublished"] = ld["dateModified"] = r["date"]
+    if foto:
+        ld["image"] = [foto]
+    og = (f'<meta property="og:image" content="{e(foto)}">\n<meta name="twitter:card" content="summary_large_image">' if foto
+          else f'<meta property="og:image" content="{SITE_URL}/assets/icons/icon-192.png">\n<meta name="twitter:card" content="summary">')
+    cab = meta_pagina(f"Review: {jogo} | {nome}", desc, url, nome, tipo="article") + f"""
+{og}
+<script type="application/ld+json">{json_ld(ld)}</script>"""
+
+    ficha = [("Plataformas", r.get("platforms")), ("Lançamento", data_br(r.get("release", "")) or r.get("release")),
+             ("Desenvolvedora", r.get("dev")), ("Gênero", r.get("genre"))]
+    ficha_html = "".join(f"<div><dt>{e(k)}</dt><dd>{e(v)}</dd></div>" for k, v in ficha if v)
+    criticos = "".join(
+        f'<li><span>{(f"<a href={chr(34)}{e(x["url"])}{chr(34)} target=_blank rel=noopener>{e(x["name"])}</a>") if http(x.get("url", "")) else e(x.get("name"))}</span><b>{e(x.get("score"))}</b></li>'
+        for x in r.get("critics", []) if x.get("name"))
+    minha = (f'<p class="rv-mine">Nota {e(nome)}: <b>{e(r["myScore"])}</b></p>' if r.get("myScore") else "")
+    fontes = "".join(f'<li><a href="{e(x["url"])}" target="_blank" rel="noopener">{e(x.get("name") or x["url"])}</a></li>'
+                     for x in r.get("sources", []) if http(x.get("url", "")))
+    # notícias do site sobre o jogo (palavras do nome do jogo depois dos ":")
+    chave = plain_jogo(jogo)
+    rel = [n for n in sorted(noticias, key=lambda n: n.get("date", ""), reverse=True)
+           if chave and chave in plain_jogo(n.get("title", "") + " " + n.get("sum", ""))][:3]
+
+    corpo = f"""<main class="wrap">
+  <nav class="crumbs" aria-label="Você está em"><ol><li><a href="/">Início</a></li><li><a href="/reviews/">Reviews</a></li><li aria-current="page">{e(jogo)}</li></ol></nav>
+  <article class="post rv">
+    <span class="tags"><span class="tag rv-tag">Review</span></span>
+    <h1>{e(titulo)}</h1>
+    <p class="lead">{e(r.get("verdict"))}</p>
+    <p class="meta">Publicada em <time datetime="{e(r.get("date"))}">{e(data_br(r.get("date", "")))}</time></p>
+    <figure>{arte({"id": r.get("id"), "img": r.get("img"), "alt": r.get("alt") or jogo, "title": jogo}, prioridade=True)}{('<figcaption>Imagem: ' + e(r["credit"]) + '</figcaption>') if r.get("credit") else ''}</figure>
+
+    <section class="rv-panel" aria-label="Nota e ficha técnica">
+      <div class="rv-big {tom}"><b>{e(nota)}</b><small>de {e(mx)}</small></div>
+      <div class="rv-pinfo">
+        <p class="rv-label">{e(r.get("scoreLabel"))}</p>
+        {minha}
+        <dl class="rv-ficha">{ficha_html}</dl>
+      </div>
+    </section>
+
+    {('<section class="rv-sec"><h2>Notas da crítica</h2><ul class="rv-critics">' + criticos + '</ul></section>') if criticos else ''}
+    {('<section class="rv-sec"><h2>Sinopse</h2><div class="body">' + paragrafos(r["synopsis"]) + '</div></section>') if r.get("synopsis") else ''}
+    {('<section class="rv-sec"><h2>O que há de novo</h2><ul class="rv-list">' + lista(r["changes"]) + '</ul></section>') if r.get("changes") else ''}
+    <section class="rv-sec rv-pc">
+      {('<div class="rv-pros"><h2>O que a crítica elogia</h2><ul>' + lista(r.get("pros", [])) + '</ul></div>') if r.get("pros") else ''}
+      {('<div class="rv-cons"><h2>Pontos de atenção</h2><ul>' + lista(r.get("cons", [])) + '</ul></div>') if r.get("cons") else ''}
+    </section>
+    {('<section class="rv-sec rv-public"><h2>O que o público está achando</h2><div class="body">' + paragrafos(r["public"]) + '</div></section>') if r.get("public") else ''}
+    {('<section class="rv-sec"><h2>Fontes</h2><ul class="rv-src">' + fontes + '</ul></section>') if fontes else ''}
+    <p class="share"><span>Link desta review:</span> <a href="{e(url)}">{e(url)}</a></p>
+  </article>
+  {('<section class="related" aria-label="Notícias sobre o jogo"><h2 class="sec">Notícias sobre o jogo</h2><div class="cards">' + ''.join(card(x) for x in rel) + '</div></section>') if rel else ''}
+</main>"""
+    return layout(c, nome, cab, corpo, '<script src="/assets/js/artigo.js"></script>\n')
+
+
+def plain_jogo(t):
+    """Parte principal do nome do jogo, sem acentos ("The Legend of Zelda: Ocarina of Time" -> "ocarina of time")."""
+    t = unicodedata.normalize("NFD", str(t or ""))
+    t = re.sub("[\u0300-\u036f]", "", t).lower()
+    if ":" in t and len(t.split(":")[-1].strip()) > 3:
+        t = t.split(":")[-1]
+    return re.sub(r"[^a-z0-9]+", " ", t).strip()
+
+
 def pagina_404(c, site):
     nome = site.get("name") or "Nizzera Games"
     cab = meta_pagina(f"Página não encontrada | {nome}", "Essa página não existe.", SITE_URL + "/", nome, indexar=False)
@@ -365,11 +493,15 @@ def sitemap(todas):
     linhas = ['<?xml version="1.0" encoding="UTF-8"?>',
               '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
               f"  <url><loc>{SITE_URL}/</loc><lastmod>{mais_nova}</lastmod></url>",
+              f"  <url><loc>{SITE_URL}/reviews/</loc></url>",
               f"  <url><loc>{SITE_URL}/ofertas/</loc></url>",
               f"  <url><loc>{SITE_URL}/comentarios/</loc></url>"]
     for n in todas:
         lm = f"<lastmod>{e(n['date'])}</lastmod>" if re.match(r"^\d{4}-\d{2}-\d{2}$", n.get("date", "")) else ""
         linhas.append(f"  <url><loc>{e(url_noticia(n))}</loc>{lm}</url>")
+    for r in REVIEWS:
+        lm = f"<lastmod>{e(r['date'])}</lastmod>" if re.match(r"^\d{4}-\d{2}-\d{2}$", r.get("date", "")) else ""
+        linhas.append(f"  <url><loc>{SITE_URL}/review/{e(rv_slug(r))}/</loc>{lm}</url>")
     linhas.append("</urlset>")
     return "\n".join(linhas) + "\n"
 
@@ -430,6 +562,19 @@ def main():
     c = casca(texto, site)
     trend = [x for x in dados.get("trend", []) if isinstance(x, dict) and x.get("terms")]
     mudou = sum(gravar(os.path.join(PASTA, n["slug"], "index.html"), pagina(n, todas, site, c, trend)) for n in todas)
+    # reviews
+    global REVIEWS
+    REVIEWS = sorted([r for r in dados.get("reviews", []) if r.get("game")], key=lambda r: r.get("date", ""), reverse=True)
+    mudou += gravar(os.path.join(SITE, "reviews", "index.html"), pagina_reviews(c, site, REVIEWS))
+    rv_vivos = set()
+    for r in REVIEWS:
+        rv_vivos.add(rv_slug(r))
+        mudou += gravar(os.path.join(PASTA_RV, rv_slug(r), "index.html"), pagina_review(r, c, site, noticias))
+    if os.path.isdir(PASTA_RV):
+        for nome_pasta in os.listdir(PASTA_RV):
+            arq = os.path.join(PASTA_RV, nome_pasta, "index.html")
+            if nome_pasta not in rv_vivos and os.path.isfile(arq) and MARCA in open(arq, encoding="utf-8").read(400):
+                shutil.rmtree(os.path.join(PASTA_RV, nome_pasta))
     mudou += gravar(os.path.join(SITE, "ofertas", "index.html"), pagina_ofertas(c, site))
     mudou += gravar(os.path.join(SITE, "comentarios", "index.html"), pagina_comentarios(c, site))
     mudou += gravar(os.path.join(SITE, "404.html"), pagina_404(c, site))

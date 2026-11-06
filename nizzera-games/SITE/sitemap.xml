@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://nizzera-games.vercel.app/</loc><lastmod>2026-11-05</lastmod></url>
+  <url><loc>https://nizzera-games.vercel.app/reviews/</loc></url>
   <url><loc>https://nizzera-games.vercel.app/ofertas/</loc></url>
   <url><loc>https://nizzera-games.vercel.app/comentarios/</loc></url>
   <url><loc>https://nizzera-games.vercel.app/noticia/38-amd-fsr-upscaling-4-1-2-ja-esta-disponivel-para-as-consolas/</loc><lastmod>2026-11-05</lastmod></url>
@@ -29,4 +30,5 @@
   <url><loc>https://nizzera-games.vercel.app/noticia/31-8-jogos-classicos-que-mereciam-um-remake/</loc><lastmod>2026-07-12</lastmod></url>
   <url><loc>https://nizzera-games.vercel.app/noticia/33-8-jogos-japoneses-que-nunca-viraram-um-anime/</loc><lastmod>2026-07-11</lastmod></url>
   <url><loc>https://nizzera-games.vercel.app/noticia/32-meia-idade-nos-games-10-tiozoes-e-tiazonas-que-ainda/</loc><lastmod>2026-07-11</lastmod></url>
+  <url><loc>https://nizzera-games.vercel.app/review/1-zelda-ocarina-of-time-switch-2/</loc><lastmod>2026-11-05</lastmod></url>
 </urlset>
