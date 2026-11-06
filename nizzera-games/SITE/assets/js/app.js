@@ -32,20 +32,29 @@ function readUrl(){
 function buildChips(){
   if(CATS.indexOf(cat)<0)cat="Todas";
   chips.innerHTML="";
+  /* os chips ficam num grupo próprio: no celular ele vira uma linha que desliza para o lado */
+  var row=document.createElement("div");row.className="chiprow";chips.appendChild(row);
   CATS.forEach(function(c){
     var b=document.createElement("button");b.className="chip";b.type="button";b.textContent=c;
     b.setAttribute("aria-pressed",c===cat);
-    b.onclick=function(){cat=c;page=1;[].forEach.call(chips.querySelectorAll(".chip"),function(x){x.setAttribute("aria-pressed",x===b)});syncUrl(false);render()};
-    chips.appendChild(b);
+    b.onclick=function(){cat=c;page=1;[].forEach.call(chips.querySelectorAll(".chip"),function(x){x.setAttribute("aria-pressed",x===b)});syncUrl(false);render();showChip(b)};
+    row.appendChild(b);
   });
   /* filtro de assunto ativo: aparece como um chip que dá para remover */
   if(topic){
     var tb=document.createElement("button");tb.className="chip hotchip";tb.type="button";tb.setAttribute("aria-pressed","true");
     tb.innerHTML=FLAME+esc(topic)+' <span aria-hidden="true">✕</span>';tb.setAttribute("aria-label","Remover filtro: "+topic);
     tb.onclick=function(){topic="";page=1;syncUrl(false);buildChips();render();renderTrendBar()};
-    chips.insertBefore(tb,chips.firstChild);
+    row.insertBefore(tb,row.firstChild);
   }
   chips.appendChild(s);
+  var on=row.querySelector('.chip[aria-pressed="true"]:not(.hotchip)');if(on&&on.textContent!=="Todas")showChip(on);
+}
+/* na linha deslizante, traz o chip escolhido para dentro da tela */
+function showChip(b){
+  var row=b.parentNode;if(!row||row.scrollWidth<=row.clientWidth)return;
+  var x=b.offsetLeft-(row.clientWidth-b.offsetWidth)/2;
+  try{row.scrollTo({left:Math.max(0,x),behavior:reduce?"auto":"smooth"})}catch(_){row.scrollLeft=x}
 }
 
 /* curtidas mostradas nos cards da lista (só leitura; curtir é na página da notícia) */
@@ -103,15 +112,25 @@ if(tbar)tbar.onclick=function(e){
   var sec=document.getElementById("noticias");sec.scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"});
 };
 var carr=document.getElementById("carr");
+/* celular: o "Em alta" vira uma fileira que se arrasta com o dedo, e cada card abre a notícia */
+var MOB=matchMedia("(max-width:899px)");
 function renderCarr(){
   var list=topNews(10);
   if(!list.length){carr.innerHTML="";carr.parentNode.hidden=true;return}
   carr.parentNode.hidden=false;
+  carr.classList.toggle("swipe",MOB.matches);
+  if(MOB.matches){
+    carr.innerHTML='<div class="track">'+list.map(function(n){
+      return '<a class="card" href="'+esc(newsUrl(n))+'" data-id="'+(+n.id||0)+'"><div class="art">'+pic(n)+'</div><div class="tx"><span class="tags"><span class="tag">'+esc(n.cat)+'</span>'+hotTag(n)+'</span><h3>'+esc(n.title)+'</h3><p>'+esc(n.sum)+'</p><span class="meta">'+fmt(n.date)+' · '+(+n.read||0)+' min de leitura</span></div></a>';
+    }).join("")+'</div>';
+    carr.scrollLeft=0;return;
+  }
   var reps=Math.max(1,Math.ceil(8/list.length)),half=[],r;
   for(r=0;r<reps;r++)list.forEach(function(n){half.push({n:n,dup:r>0})});
   var a=half.map(function(x){return cardHtml(x.n,0,x.dup,true)}).join(""),b=half.map(function(x){return cardHtml(x.n,0,true,true)}).join("");
   carr.innerHTML='<div class="track" aria-hidden="true" style="--dur:'+half.length*8+'s">'+a+b+'</div>';
 }
+if(MOB.addEventListener)MOB.addEventListener("change",function(){renderCarr();fillArt(carr)});
 function filtered(){
   return NEWS.filter(function(n){
     if(topic){var t=trendOf(n);if(!t||t.name!==topic)return false}
@@ -190,6 +209,17 @@ heroSide.addEventListener("mouseenter",function(){hHold=true});
 heroSide.addEventListener("mouseleave",function(){hHold=false});
 heroSide.addEventListener("focusin",function(){hHold=true});
 heroSide.addEventListener("focusout",function(){hHold=false});
+/* deslizar o dedo no destaque passa para a notícia seguinte/anterior (um toque simples continua abrindo) */
+(function(){
+  var x0=null,y0=0,moved=false;
+  feat.addEventListener("touchstart",function(e){var t=e.touches[0];x0=t.clientX;y0=t.clientY;moved=false;hHold=true},{passive:true});
+  feat.addEventListener("touchmove",function(e){
+    if(x0===null||moved)return;var t=e.touches[0],dx=t.clientX-x0,dy=t.clientY-y0;
+    if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.4){moved=true;showSlide(hi+(dx<0?1:-1));startHero()}
+  },{passive:true});
+  feat.addEventListener("touchend",function(){x0=null;hHold=false},{passive:true});
+  feat.addEventListener("click",function(e){if(moved){e.preventDefault();moved=false}});
+})();
 /* ===== título digitado ===== */
 var el=document.getElementById("typed"), reduce=matchMedia("(prefers-reduced-motion:reduce)").matches, typeTimer, typedNow="";
 function typeTitle(txt){
@@ -207,8 +237,13 @@ function typeTitle(txt){
   addEventListener("pointermove",pos);addEventListener("touchmove",pos,{passive:true});addEventListener("resize",size);size();
   if(window.ResizeObserver)new ResizeObserver(size).observe(cv);
   if(reduce)return;
-  var tick=0;
-  (function loop(){
+  /* só desenha enquanto o topo está na tela: poupa bateria e deixa a rolagem mais leve no celular */
+  var tick=0,vis=true,running=false;
+  if(window.IntersectionObserver)new IntersectionObserver(function(es){vis=es[0].isIntersecting;if(vis&&!running)loop()}).observe(cv);
+  document.addEventListener("visibilitychange",function(){if(!document.hidden&&vis&&!running)loop()});
+  function loop(){
+    if(!vis||document.hidden){running=false;return}
+    running=true;
     tick++; if(tick%40===0)poke(Math.random()*cv.clientWidth,Math.random()*cv.clientHeight,.6);
     g.clearRect(0,0,cv.clientWidth,cv.clientHeight);
     for(var y=0;y<rows;y++)for(var x=0;x<cols;x++){
@@ -217,7 +252,8 @@ function typeTitle(txt){
       if(h>.02){g.fillStyle="rgba(255,210,63,"+h.toFixed(2)+")";g.fillRect(x*S+3,y*S+3,S-6,S-6);heat[k]=h*.93}
     }
     requestAnimationFrame(loop);
-  })();
+  }
+  loop();
 })();
 
 function applySite(){

@@ -19,6 +19,7 @@
     ticket:'<path d="M4 8a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 000 4v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2a2 2 0 000-4z"/><path d="M14 6v12"/>',
     chev:'<path d="M15 6l-6 6 6 6"/>',
     chat:'<path d="M4 5h16a1 1 0 011 1v10a1 1 0 01-1 1H10l-5 4v-4H4a1 1 0 01-1-1V6a1 1 0 011-1z"/><path d="M8 10h8M8 13h5"/>',
+    menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
     mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'
   };
   var CATICON={"Todas":"news","Lançamentos":"rocket","PlayStation":"pad","Xbox":"pad","Nintendo":"pad","Serviços":"cloud","Steam":"monitor","Game Pass":"ticket","Esports":"trophy","Eventos":"cal"};
@@ -62,9 +63,26 @@
       if(on)it.setAttribute("aria-current","page");else it.removeAttribute("aria-current");
     });
   }
+  /* ---- celular: barra fixa embaixo, ao alcance do polegar (o CSS só mostra até 899px) ---- */
+  var tabMenu=null;
+  (function buildTabbar(){
+    var tabs=[["/","home","Início","home"],["/reviews/","star","Reviews","/review"],["/ofertas/","tag","Ofertas","/ofertas/"],["/gratis/","gift","Grátis","/gratis/"]];
+    var bar=document.createElement("nav");bar.className="tabbar";bar.id="tabbar";bar.setAttribute("aria-label","Atalhos");
+    bar.innerHTML=tabs.map(function(t){
+      var on=t[3]==="home"?HOME:PATH.indexOf(t[3])===0;
+      return '<a class="tab" href="'+t[0]+'"'+(on?' aria-current="page"':'')+'><span class="ti">'+svg(t[1])+'</span><span class="tl">'+t[2]+'</span></a>';
+    }).join("")+'<button class="tab menu" type="button" aria-controls="side" aria-expanded="false" aria-label="Abrir menu"><span class="ti">'+svg("menu")+'</span><span class="tl">Menu</span></button>';
+    document.body.appendChild(bar);html.classList.add("has-tabbar");
+    tabMenu=bar.querySelector(".menu");
+    tabMenu.onclick=function(){openMenu(!html.classList.contains("menu-open"))};
+    /* no início, tocar em "Início" volta suavemente ao topo em vez de recarregar */
+    bar.querySelector(".tab").addEventListener("click",function(e){if(HOME&&!e.ctrlKey&&!e.metaKey){e.preventDefault();closeMenu();go("topo")}});
+  })();
   function openMenu(o){
     html.classList.toggle("menu-open",o);mbtn.setAttribute("aria-expanded",o);
-    if(o){var f=list.querySelector(".item");if(f)f.focus()}else if(matchMedia("(max-width:899px)").matches)mbtn.focus();
+    if(tabMenu){tabMenu.setAttribute("aria-expanded",o);tabMenu.setAttribute("aria-label",o?"Fechar menu":"Abrir menu")}
+    if(o){var f=list.querySelector(".item");if(f)f.focus({preventScroll:true})}
+    else if(matchMedia("(max-width:899px)").matches)(tabMenu||mbtn).focus({preventScroll:true});
   }
   function closeMenu(){if(html.classList.contains("menu-open"))openMenu(false)}
 
@@ -94,8 +112,24 @@
   addEventListener("keydown",function(e){if(e.key==="Escape")closeMenu()});
   addEventListener("resize",function(){if(!matchMedia("(max-width:899px)").matches)html.classList.remove("menu-open")});
 
-  var tick=false;
-  addEventListener("scroll",function(){if(!tick){tick=true;requestAnimationFrame(function(){tick=false;update()})}},{passive:true});
+  /* deslizar o dedo para a esquerda fecha o menu lateral */
+  (function(){
+    var side=document.getElementById("side"),x0=null,y0=0;
+    side.addEventListener("touchstart",function(e){var t=e.touches[0];x0=t.clientX;y0=t.clientY},{passive:true});
+    side.addEventListener("touchmove",function(e){
+      if(x0===null)return;var t=e.touches[0],dx=t.clientX-x0,dy=t.clientY-y0;
+      if(dx<-60&&Math.abs(dx)>Math.abs(dy)*1.5){x0=null;closeMenu()}
+    },{passive:true});
+    side.addEventListener("touchend",function(){x0=null},{passive:true});
+  })();
+
+  /* html.sdown enquanto rola para baixo: o CSS esconde o botão de mensagem para não cobrir o texto */
+  var tick=false,lastY=scrollY;
+  function scrollDir(){
+    var y=scrollY,d=y-lastY;
+    if(Math.abs(d)>10){html.classList.toggle("sdown",d>0&&y>160);lastY=y}
+  }
+  addEventListener("scroll",function(){if(!tick){tick=true;requestAnimationFrame(function(){tick=false;update();scrollDir()})}},{passive:true});
   if(typeof render==="function"){var _render=render;render=function(){_render();update()}}
   window.buildSide=buildSide;window.updateSide=update;buildSide();
   if(HOME&&location.hash==="#buscar")focusSearch();
