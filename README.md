@@ -38,7 +38,7 @@ https://nizzera-games.vercel.app. Criado por Eduardo Nizer.
 │   │   │   └── icons/
 │   │   ├── data/ofertas.json     ofertas da semana (gerado pelo robô)
 │   │   ├── googlecd4f...html     verificação do Google Search Console (não apague)
-│   │   └── api/                  funções da Vercel: login, sessão, publicar, comentários, curtidas, contato
+│   │   └── api/                  funções da Vercel: login, sessão, publicar, comentários, curtidas, votação, contato
 │   └── scripts/
 │       ├── atualizar_noticias.py lê os feeds RSS e grava as notícias no index.html
 │       ├── atualizar_ofertas.py  busca as promoções da Steam
@@ -108,7 +108,7 @@ Variáveis na Vercel (Settings → Environment Variables), depois faça um novo 
 | `GITHUB_TOKEN` | token fine-grained só deste repositório, com permissão *Contents: Read and write* |
 | `GITHUB_FILE` | `nizzera-games/SITE/index.html` |
 | `GITHUB_BRANCH` | opcional, padrão `main` |
-| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | comentários e curtidas (Vercel → Storage → Upstash Redis). `KV_REST_API_URL`/`KV_REST_API_TOKEN` também servem |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | comentários, curtidas e votação do GOTY (Vercel → Storage → Upstash Redis). `KV_REST_API_URL`/`KV_REST_API_TOKEN` também servem |
 | `RESEND_API_KEY` | envio da caixa "Fale com a gente" (resend.com) |
 | `CONTACT_TO` / `CONTACT_FROM` | opcionais: quem recebe e quem envia o e-mail |
 

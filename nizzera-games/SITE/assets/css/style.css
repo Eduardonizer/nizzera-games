@@ -386,3 +386,40 @@ a.feat{display:block;text-decoration:none}
 .rv-public{background:var(--card);border-radius:16px;padding:18px 22px;border-left:5px solid var(--cobalt)}
 .rv-src{margin:0;padding-left:20px;display:grid;gap:6px;font-size:.92rem}
 @media (max-width:640px){.rv-panel{grid-template-columns:1fr;justify-items:start}.rv-pc{grid-template-columns:1fr}}
+
+/* ===== votação da página inicial (assets/js/enquete.js) ===== */
+.poll{margin-top:44px}
+.poll-box{background:var(--card);border:2px solid var(--fg);border-radius:22px;padding:24px 26px 20px;box-shadow:8px 8px 0 var(--cobalt);display:grid;gap:18px}
+.poll-kicker{display:inline-block;background:var(--sun);color:var(--ink);font:800 .75rem "DM Sans",sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:99px}
+.poll-t{font-size:clamp(1.5rem,3.4vw,2.2rem);font-weight:800;letter-spacing:-.01em;margin:10px 0 6px}
+.poll-sub{margin:0;color:var(--muted);max-width:60ch}
+.poll-opts{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:stretch}
+.poll-opt{--c:var(--cobalt);position:relative;display:grid;gap:10px;align-content:start;border:2px solid var(--line);border-radius:16px;padding:16px 18px;transition:border-color .2s,box-shadow .2s}
+.poll-opt[data-opt="gta6"]{--c:var(--coral)}
+.poll-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.poll-name{font:800 1.15rem "Bricolage Grotesque",sans-serif}
+.poll-pct{font:800 1.9rem/1 "Bricolage Grotesque",sans-serif;color:var(--c);font-variant-numeric:tabular-nums}
+.poll-bar{height:14px;border-radius:99px;background:var(--line);overflow:hidden}
+.poll-bar i{display:block;height:100%;width:0;background:var(--c);border-radius:inherit;transition:width .8s cubic-bezier(.2,.9,.3,1)}
+.poll-btn{justify-self:start;border:0;border-radius:99px;background:var(--c);color:#fff;font:700 .95rem "DM Sans",sans-serif;padding:10px 20px;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.poll-btn:hover{transform:translateY(-2px);box-shadow:4px 4px 0 var(--sun)}
+.poll-btn:disabled{opacity:.6;cursor:wait;transform:none;box-shadow:none}
+.poll-btn[hidden]{display:none}
+.poll-vs{align-self:center;font:800 1.1rem "Bricolage Grotesque",sans-serif;background:var(--fg);color:var(--bg);width:46px;height:46px;border-radius:50%;display:grid;place-items:center}
+.poll-opt.lead{border-color:var(--c)}
+.poll-opt.mine{border-color:var(--c);box-shadow:4px 4px 0 var(--c)}
+.poll-opt.mine::after{content:"✓ Seu voto";position:absolute;top:-12px;right:14px;background:var(--sun);color:var(--ink);font:800 .75rem "DM Sans",sans-serif;padding:3px 10px;border-radius:99px}
+.poll-msg{margin:0;font-weight:700;font-size:.92rem;color:var(--muted);min-height:1.4em}
+.poll.done .poll-msg{color:var(--fg)}
+@media (max-width:680px){
+  .poll-box{padding:20px 18px 16px;box-shadow:5px 5px 0 var(--cobalt)}
+  .poll-opts{grid-template-columns:1fr}
+  .poll-vs{justify-self:center;width:38px;height:38px;font-size:.95rem;margin:-6px 0}
+  .poll-btn{justify-self:stretch}
+}
+@media (prefers-reduced-motion:reduce){.poll-bar i{transition:none}}
+
+/* curtidas nos cards da lista de notícias (assets/js/app.js) */
+.card .lk{display:inline-flex;align-items:center;gap:4px;margin-left:8px;color:var(--coral);font-weight:700}
+.card .lk svg{width:14px;height:14px;fill:currentColor}
+.card .lk:empty{display:none}

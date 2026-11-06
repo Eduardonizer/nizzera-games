@@ -48,8 +48,23 @@ function buildChips(){
   chips.appendChild(s);
 }
 
+/* curtidas mostradas nos cards da lista (só leitura; curtir é na página da notícia) */
+var LIKES={},HEART='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>';
+function likeHtml(c){return c==null?"":HEART+c}   /* c==null: ainda não carregou */
+function likeLabel(c){return c==null?"":(c===1?"1 curtida":c+" curtidas")}
+function loadLikes(list){
+  var slugs=list.map(newsSlug);if(!slugs.length||!window.fetch)return;
+  fetch("/api/likes?posts="+encodeURIComponent(slugs.join(",")),{cache:"no-store",credentials:"same-origin"}).then(function(r){return r.json()}).then(function(j){
+    if(!j||!j.ok||!j.counts)return;
+    for(var k in j.counts)LIKES[k]=j.counts[k];
+    [].forEach.call(cards.querySelectorAll("[data-lk]"),function(el){
+      var c=LIKES[el.getAttribute("data-lk")];el.innerHTML=likeHtml(c);el.setAttribute("aria-label",likeLabel(c));
+    });
+  },function(){});
+}
 function cardHtml(n,i,dup,mq){
-  var inner='<div class="art">'+pic(n)+'</div><div class="tx"><span class="tags"><span class="tag">'+esc(n.cat)+'</span>'+hotTag(n)+'</span><h3>'+esc(n.title)+'</h3><p>'+esc(n.sum)+'</p><span class="meta">'+fmt(n.date)+' · '+(+n.read||0)+' min de leitura</span></div>';
+  var lk=mq?'':'<span class="lk" data-lk="'+esc(newsSlug(n))+'" aria-label="'+likeLabel(LIKES[newsSlug(n)])+'">'+likeHtml(LIKES[newsSlug(n)])+'</span>';
+  var inner='<div class="art">'+pic(n)+'</div><div class="tx"><span class="tags"><span class="tag">'+esc(n.cat)+'</span>'+hotTag(n)+'</span><h3>'+esc(n.title)+'</h3><p>'+esc(n.sum)+'</p><span class="meta">'+fmt(n.date)+' · '+(+n.read||0)+' min de leitura'+lk+'</span></div>';
   /* carrossel "Em alta": só decoração (sem clique); lista: link de verdade para a página da notícia */
   if(mq)return '<div class="card'+(dup?' dup':'')+'" data-id="'+(+n.id||0)+'">'+inner+'</div>';
   return '<a class="card in" href="'+esc(newsUrl(n))+'" style="animation-delay:'+i*50+'ms" data-id="'+(+n.id||0)+'">'+inner+'</a>';
@@ -132,6 +147,7 @@ function render(){
   var start=(page-1)*PER,part=list.slice(start,start+PER);
   cards.innerHTML=part.map(function(n,i){return cardHtml(n,i,false,false)}).join("");
   renderPager(list.length,pages,start,part.length);
+  loadLikes(part);
 }
 function goPage(p){
   page=p;syncUrl(true);render();
