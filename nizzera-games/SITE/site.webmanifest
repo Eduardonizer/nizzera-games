@@ -1,7 +1,7 @@
 {
  "name": "Nizzera Games",
  "short_name": "Nizzera",
- "description": "Notícias de games em textos curtos e sem enrolação.",
+ "description": "Notícias, ofertas, jogos grátis, reviews e tier list de games, sem enrolação.",
  "lang": "pt-BR",
  "start_url": "/",
  "display": "standalone",

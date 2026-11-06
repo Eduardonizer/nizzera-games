@@ -131,8 +131,9 @@ def cabeca_comum():
     return """<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0b12">
-<link rel="icon" href="/favicon.ico" sizes="48x48">
-<link rel="icon" href="/assets/icons/icon-192.png" type="image/png" sizes="192x192">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" href="/assets/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/assets/icons/favicon-96.png" type="image/png" sizes="96x96">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
 <link rel="alternate" type="application/rss+xml" title="Nizzera Games" href="/feed.xml">
@@ -989,7 +990,7 @@ def feed(todas, site):
             f"<category>{e(n.get('cat'))}</category><description>{e(n.get('sum'))}</description></item>")
     return ('<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n<channel>\n'
             f"  <title>{e(nome)}</title>\n  <link>{SITE_URL}/</link>\n"
-            f"  <description>{e(site.get('intro') or 'Notícias de games')}</description>\n  <language>pt-BR</language>\n"
+            f"  <description>{e(site.get('intro') or 'Notícias, ofertas, jogos grátis e reviews de games')}</description>\n  <language>pt-BR</language>\n"
             f'  <atom:link href="{SITE_URL}/feed.xml" rel="self" type="application/rss+xml"/>\n'
             + "\n".join(itens) + "\n</channel>\n</rss>\n")
 
