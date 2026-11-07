@@ -21,6 +21,7 @@
     chat:'<path d="M4 5h16a1 1 0 011 1v10a1 1 0 01-1 1H10l-5 4v-4H4a1 1 0 01-1-1V6a1 1 0 011-1z"/><path d="M8 10h8M8 13h5"/>',
     menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
     top:'<path d="M4 20h16"/><rect x="5" y="11" width="3.5" height="7" rx="1"/><rect x="10.25" y="5" width="3.5" height="13" rx="1"/><rect x="15.5" y="8" width="3.5" height="10" rx="1"/>',
+    discord:'<path d="M8 7.5a14 14 0 018 0M7 16.5a14 14 0 0010 0"/><path d="M8.5 6.5L8 5a13 13 0 00-4 1.6C2.2 9.6 1.6 12.8 2 16a13 13 0 004 2l1-1.8M15.5 6.5L16 5a13 13 0 014 1.6c1.8 3 2.4 6.2 2 9.4a13 13 0 01-4 2l-1-1.8"/><circle cx="9" cy="12.5" r="1.2"/><circle cx="15" cy="12.5" r="1.2"/>',
     tiers:'<rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="13" height="4" rx="1"/><rect x="3" y="16" width="8" height="4" rx="1"/>',
     info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/>',
     mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'
@@ -46,6 +47,7 @@
     h+=link("/gratis/","gift","Jogos grátis",' data-page="/gratis/"');
     h+=link("/maisjogados/","top","Mais jogados",' data-page="/maisjogados/"');
     h+=link("/tierlist/","tiers","Tier List",' data-page="/tierlist/"');
+    h+=link("/comunidade/","discord","Comunidade",' data-page="/comunidade/"');
     h+=link("/comentarios/","chat","Comentários",' data-page="/comentarios/"');
     h+=link("/sobre/","info","Sobre",' data-page="/sobre/"');
     h+='<div class="grp">Ferramentas</div>'+btn("contact","mail","Fale com a gente")+btn("search","search","Buscar")+btn("theme","theme","Tema claro/escuro")

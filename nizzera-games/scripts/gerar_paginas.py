@@ -31,7 +31,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from atualizar_noticias import assunto  # mesma regra de "assunto em alta" do robô e do site
 
 # ---------------- CONFIGURAÇÃO ----------------
-from config import SITE_URL, DOMINIOS_ANTIGOS  # noqa: E402  (o domínio fica só em scripts/config.py)
+from config import SITE_URL, DOMINIOS_ANTIGOS, DISCORD_INVITE  # noqa: E402  (o domínio fica só em scripts/config.py)
 RELACIONADAS = 3                                # quantas "leia também" no fim de cada notícia
 NO_FEED = 30                                    # quantas notícias entram no feed RSS
 STEAM_PERFIL = ""                               # endereço do seu perfil na Steam (vazio = página Sobre sem o botão)
@@ -454,6 +454,84 @@ def cards_html(mes, cards):
     ano, m = mes
     titulo = f"{MESES[m - 1].capitalize()} de {ano}"
     return f'<section class="ev-sec"><h2 class="ev-h">{e(titulo)}</h2><div class="ev-list">{"".join(cards)}</div></section>'
+
+
+# ---------------- comunidade do Discord ----------------
+DISCORD_SVG = ('<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.3 4.4A19.6 19.6 0 0015.4 3l-.6 1.3a18.2 18.2 0 00-5.6 0L8.6 3'
+               'a19.5 19.5 0 00-4.9 1.4C.6 9 0 13.6.3 18.1a19.8 19.8 0 006 3l1.3-2a12.8 12.8 0 01-2-1l.5-.4a14 14 0 0012 0l.5.4'
+               'a12.8 12.8 0 01-2 1l1.3 2a19.7 19.7 0 006-3c.4-5.2-.7-9.8-3.6-13.7zM8.5 15.3c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4'
+               ' 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4zm7 0c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4z"/></svg>')
+CANAIS_DISCORD = [  # (canal, emoji, o que chega lá) — os mesmos canais que recebem os posts automáticos
+    ("todas-as-noticias", "📰", "Todas as notícias do site, assim que saem."),
+    ("lancamentos", "🚀", "Jogos novos, datas e trailers."),
+    ("steam", "🖥️", "Novidades da Steam e do PC."),
+    ("playstation", "🎮", "Tudo de PS5 e PlayStation Plus."),
+    ("xbox", "🟢", "Novidades do Xbox e do PC da Microsoft."),
+    ("nintendo", "🍄", "Switch 2, Zelda, Mario e companhia."),
+    ("game-pass", "🎟️", "O que entra e o que sai do Game Pass."),
+    ("servicos", "☁️", "Assinaturas e jogos na nuvem."),
+    ("esports", "🏆", "CS2, Valorant, LoL e mais campeonatos."),
+    ("eventos", "📅", "Feiras, premiações e o calendário de eventos."),
+    ("reviews", "⭐", "As reviews do site, com a nota."),
+    ("ofertas-da-semana", "🔥", "As melhores promoções da semana."),
+    ("jogos-gratis", "🎁", "Jogos grátis para resgatar na Epic e na Steam."),
+    ("novidades-do-site", "✨", "Recursos novos do Nizzera Games."),
+]
+
+
+def botao_discord(classe=""):
+    if http(DISCORD_INVITE):
+        return (f'<a class="dc-btn {classe}" href="{e(DISCORD_INVITE)}" target="_blank" rel="noopener">'
+                f'{DISCORD_SVG}<span>Entrar no servidor</span></a>')
+    return f'<span class="dc-btn off {classe}" aria-disabled="true">{DISCORD_SVG}<span>Convite chegando em breve</span></span>'
+
+
+def pagina_comunidade(c, site):
+    nome = site.get("name") or "Nizzera Games"
+    cab = meta_pagina(f"Comunidade no Discord | {nome}",
+                      f"Entre no servidor do {nome} no Discord: notícias, ofertas, jogos grátis, eventos e reviews chegando "
+                      "na hora, em canais separados por plataforma, e papo com outros gamers.",
+                      SITE_URL + "/comunidade/", nome)
+    canais = "".join(f'<li class="dc-ch"><span class="dc-emo" aria-hidden="true">{emo}</span><div><b># {e(n)}</b>'
+                     f'<span>{e(t)}</span></div></li>' for n, emo, t in CANAIS_DISCORD)
+    corpo = f"""<main class="wrap page dcp">
+  {trilha("Comunidade")}
+  <section class="dc-hero" aria-labelledby="dc-t">
+    <div class="dc-hero-tx">
+      <span class="dc-kicker">{DISCORD_SVG}Servidor no Discord</span>
+      <h1 class="ph" id="dc-t">A comunidade do {e(nome)}</h1>
+      <p class="lead">O nosso cantinho no Discord: tudo o que sai no site chega lá na hora, em canais separados por plataforma.
+      E, claro, espaço para trocar ideia com outros gamers, chamar a galera pra jogar e dar pitaco nas notícias.</p>
+      <div class="dc-cta">{botao_discord("big")}<a class="dc-sec" href="#dc-canais">Ver os canais ↓</a></div>
+    </div>
+    <div class="dc-art" aria-hidden="true">
+      <div class="dc-msg"><span class="dc-av"></span><div><b>Nizzera Games <i>BOT</i></b><p>📰 Saiu notícia nova no site!</p><span class="dc-card"></span></div></div>
+      <div class="dc-msg"><span class="dc-av u1"></span><div><b>gamer_br</b><p>bora uma partida hoje? 🎮</p></div></div>
+      <div class="dc-msg"><span class="dc-av u2"></span><div><b>steamzeira</b><p>essa oferta tá muito boa 🔥</p></div></div>
+    </div>
+  </section>
+
+  <section class="dc-sec-b" aria-labelledby="dc-como">
+    <h2 class="sec" id="dc-como">Por que entrar</h2>
+    <ul class="dc-why">
+      <li><b>⚡ Na hora</b><span>Notícia, review, oferta e jogo grátis chegam no Discord assim que aparecem no site.</span></li>
+      <li><b>🎯 Só o que você curte</b><span>Canais por plataforma: silencie o que não te interessa e fique só com a sua.</span></li>
+      <li><b>💬 Papo de gamer</b><span>Comente as notícias, ache gente pra jogar e sugira pautas pro site.</span></li>
+    </ul>
+  </section>
+
+  <section class="dc-sec-b" id="dc-canais" aria-labelledby="dc-ch-t">
+    <h2 class="sec" id="dc-ch-t">Canais com posts automáticos do site</h2>
+    <ul class="dc-chs">{canais}</ul>
+  </section>
+
+  <section class="dc-end">
+    <h2>Bora pro servidor?</h2>
+    <p>É de graça e leva um clique. Se ainda não tem Discord, dá pra usar no navegador, no PC ou no celular.</p>
+    {botao_discord("big")}
+  </section>
+</main>"""
+    return layout(c, nome, cab, corpo)
 
 
 def pagina_comentarios(c, site):
@@ -1124,6 +1202,7 @@ def sitemap(todas):
               f"  <url><loc>{SITE_URL}/gratis/</loc></url>",
               f"  <url><loc>{SITE_URL}/maisjogados/</loc></url>",
               f"  <url><loc>{SITE_URL}/eventos/</loc></url>",
+              f"  <url><loc>{SITE_URL}/comunidade/</loc></url>",
               f"  <url><loc>{SITE_URL}/comentarios/</loc></url>",
               f"  <url><loc>{SITE_URL}/sobre/</loc></url>",
               f"  <url><loc>{SITE_URL}/tierlist/</loc></url>",
@@ -1239,6 +1318,7 @@ def main():
     mudou += gravar(os.path.join(SITE, "gratis", "index.html"), pagina_gratis(c, site))
     mudou += gravar(os.path.join(SITE, "maisjogados", "index.html"), pagina_maisjogados(c, site))
     mudou += gravar(os.path.join(SITE, "eventos", "index.html"), pagina_eventos(c, site))
+    mudou += gravar(os.path.join(SITE, "comunidade", "index.html"), pagina_comunidade(c, site))
     mudou += gravar(os.path.join(SITE, "comentarios", "index.html"), pagina_comentarios(c, site))
     mudou += gravar(os.path.join(SITE, "sobre", "index.html"), pagina_sobre(c, site))
     mudou += gravar(os.path.join(SITE, "tierlist", "index.html"), pagina_tierlist(c, site))

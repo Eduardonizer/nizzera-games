@@ -15,3 +15,8 @@ DOMINIOS_ANTIGOS = ["https://nizzera-games.vercel.app"]
 
 # como os robôs se identificam ao visitar lojas e feeds (com o endereço do site, como manda a boa prática)
 USER_AGENT = f"Mozilla/5.0 (compatible; NizzeraGamesBot/1.0; +{SITE_URL})"
+
+# convite do servidor do Discord (página /comunidade/). Use um convite que NÃO expira:
+# no Discord, clique com o botão direito no servidor > Convidar pessoas > Editar link do convite >
+# "Expirar depois de: Nunca". Ex.: "https://discord.gg/abc123". Vazio = o botão mostra "em breve".
+DISCORD_INVITE = ""
