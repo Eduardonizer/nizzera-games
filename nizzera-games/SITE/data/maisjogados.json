@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-07T15:12:59Z",
+ "updated": "2026-11-07T15:18:56Z",
  "peak_day": "2026-11-06",
  "games": [
   {
@@ -13,23 +13,23 @@
   {
    "id": 570,
    "name": "Dota 2",
-   "players": 802447,
+   "players": 804042,
    "peak": 737873,
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570/header.jpg?t=1791407503",
-   "prev": 3
+   "prev": 2
   },
   {
    "id": 578080,
    "name": "PUBG: BATTLEGROUNDS",
-   "players": 735517,
+   "players": 723978,
    "peak": 778966,
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/578080/841ea38bc58cabb70aef65365cf50bc2d79329d9/header.jpg?t=1792718193",
-   "prev": 2
+   "prev": 3
   },
   {
    "id": 4115450,
    "name": "Phantom Blade Zero",
-   "players": 542338,
+   "players": 525073,
    "peak": 578265,
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4115450/7f882f889630270d3d3fb93825ac6f55b55e7a6c/header.jpg?t=1793261976",
    "prev": 4
@@ -37,7 +37,7 @@
   {
    "id": 1172470,
    "name": "Apex Legends",
-   "players": 246959,
+   "players": 235110,
    "peak": 257821,
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1172470/4219c147f1e094297c726d537518babba7f3ae2d/header.jpg?t=1793909605",
    "prev": 5
@@ -45,7 +45,7 @@
   {
    "id": 3393110,
    "name": "AION 2",
-   "players": 201820,
+   "players": 203413,
    "peak": 194539,
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3393110/10aa4b096ebe6af0d1dd7882e5ba004271aef6f7/header.jpg?t=1792771538",
    "prev": 6
@@ -56,15 +56,15 @@
    "players": 193716,
    "peak": 164515,
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1938090/23af6cf41e2d09620caa07700a4cb3288dbcbaa8/header.jpg?t=1793941964",
-   "prev": 8
+   "prev": 7
   },
   {
    "id": 4348910,
    "name": "Probably Stolen - Cyberpunk Shopkeeper Sim",
-   "players": 182602,
+   "players": 181821,
    "peak": 166537,
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4348910/b241a3bc1cb144e70a4840157e127212738ea5b3/header_alt_assets_3.jpg?t=1793942460",
-   "prev": 7
+   "prev": 8
   },
   {
    "id": 252490,
@@ -77,7 +77,7 @@
   {
    "id": 1091500,
    "name": "Cyberpunk 2077",
-   "players": 128742,
+   "players": 129415,
    "peak": 108949,
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1091500/48a93d6445a67520ea49833c93dae8f2e68fc540/header_alt_assets_9.jpg?t=1792682505",
    "prev": 10

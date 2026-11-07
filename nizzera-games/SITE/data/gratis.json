@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-06T12:35:19Z",
+ "updated": "2026-11-07T15:18:51Z",
  "epic": [
   {
    "name": "Flotsam",
@@ -20,20 +20,20 @@
  ],
  "steam": [
   {
-   "id": 1272080,
-   "name": "PAYDAY 3",
-   "kind": "weekend",
-   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1272080/3d85d86a3d2c792046792b19df83ceca0e6c58d3/header_alt_assets_12.jpg?t=1793958317",
-   "discount": 70,
-   "price": "R$ 26,99"
-  },
-  {
    "id": 1669000,
    "name": "Age of Wonders 4",
    "kind": "weekend",
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1669000/68c09090edc5317dfbdcbb5bb2b693a4301e727e/header_alt_assets_15.jpg?t=1793955877",
    "discount": 60,
    "price": "R$ 75,59"
+  },
+  {
+   "id": 1272080,
+   "name": "PAYDAY 3",
+   "kind": "weekend",
+   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1272080/3d85d86a3d2c792046792b19df83ceca0e6c58d3/header_alt_assets_12.jpg?t=1793958317",
+   "discount": 70,
+   "price": "R$ 26,99"
   },
   {
    "id": 4693960,
