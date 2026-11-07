@@ -20,7 +20,7 @@ a{color:inherit}
 /* fundo do topo com a foto do destaque desfocada (app.js liga com a classe .photo-bg; sem ela fica o azul) */
 .hero-bg{position:absolute;inset:0;overflow:hidden;display:none}
 .photo-bg .hero-bg{display:block}
-.hero-bg img{position:absolute;inset:-80px;width:calc(100% + 160px);height:calc(100% + 160px);object-fit:cover;filter:blur(56px) saturate(1.35);transform:scale(1.1);opacity:0;transition:opacity 1.4s ease}
+.hero-bg img{position:absolute;inset:-80px;width:calc(100% + 160px);height:calc(100% + 160px);object-fit:cover;filter:blur(38px) saturate(1.35);transform:scale(1.1);opacity:0;transition:opacity 1.4s ease}
 .hero-bg img.on{opacity:1}
 .hero-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,13,43,.42),rgba(36,51,240,.38) 60%,rgba(11,13,43,.5))}
 @media (prefers-reduced-motion:reduce){.hero-bg img{transition:none}}
