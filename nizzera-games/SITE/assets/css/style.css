@@ -32,18 +32,36 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0
 @keyframes blink{50%{transform:translate(2px,2px);box-shadow:4px 4px 0 var(--coral)}}
 .tbtn{background:rgba(255,255,255,.15);color:#fff;border:0;border-radius:99px;padding:8px 16px;font:inherit;cursor:pointer}
 .tbtn:hover{background:rgba(255,255,255,.28)}
-/* interruptor de tema (claro/escuro) no topo */
-.tsw{flex:none;border:0;background:none;padding:4px;margin:0;cursor:pointer;border-radius:99px;-webkit-tap-highlight-color:transparent}
-.tsw-track{position:relative;display:block;width:62px;height:32px;border-radius:99px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);transition:background .3s}
-.tsw:hover .tsw-track{background:rgba(255,255,255,.28)}
-.tsw-i{position:absolute;top:8px;width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.75;transition:opacity .3s}
-.tsw-s{left:8px}.tsw-m{right:8px}
-.tsw-knob{position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:var(--sun) center/16px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e1033' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4'/%3E%3C/svg%3E");box-shadow:0 2px 6px rgba(0,0,0,.3)}
-.tsw.ready .tsw-knob{transition:transform .35s cubic-bezier(.3,1.4,.5,1),background-color .3s}
-.tsw[aria-checked="true"] .tsw-track{background:rgba(11,13,43,.55)}
-.tsw[aria-checked="true"] .tsw-knob{transform:translateX(30px);background-color:#f2f0ff;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230e1033'%3E%3Cpath d='M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z'/%3E%3C/svg%3E")}
-.tsw[aria-checked="true"] .tsw-m,.tsw[aria-checked="false"] .tsw-s{opacity:0}
-@media (prefers-reduced-motion:reduce){.tsw-knob,.tsw-track,.tsw-i{transition:none}}
+/* tema claro/escuro: um controle de videogame (claro = branco; escuro = neon). Ao clicar ele vibra. */
+.tsw{flex:none;border:0;background:none;padding:2px;margin:0;cursor:pointer;line-height:0;border-radius:14px;-webkit-tap-highlight-color:transparent}
+.pad{display:block;width:66px;height:40px;overflow:visible;transition:transform .2s,filter .4s}
+.tsw:hover .pad{transform:translateY(-2px) rotate(-4deg)}
+.pad *{transition:fill .4s,stroke .4s,opacity .3s,transform .15s}
+.pad-body{fill:#fff;stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round}
+.pad-dpad{fill:var(--ink)}
+.pad-stick{fill:#d9d6f5;stroke:var(--ink);stroke-width:1.2}
+.pad-scr{fill:var(--ink)}
+.pad-sun circle{fill:var(--sun)}
+.pad-sun path{stroke:var(--sun);stroke-width:1.1;stroke-linecap:round;fill:none}
+.pad-moon{fill:#f2f0ff;opacity:0}
+.pad-b{stroke:var(--ink);stroke-width:1}
+.by{fill:var(--sun)}.bx{fill:var(--cobalt)}.bb{fill:var(--coral)}.ba{fill:#12b886}
+.ba{transform-box:fill-box;transform-origin:center}
+/* modo escuro: corpo escuro com contorno e botões em neon */
+.tsw[aria-checked="true"] .pad{filter:drop-shadow(0 0 5px rgba(122,140,255,.85))}
+.tsw[aria-checked="true"] .pad-body{fill:#15184a;stroke:#9aa6ff}
+.tsw[aria-checked="true"] .pad-dpad{fill:#9aa6ff}
+.tsw[aria-checked="true"] .pad-stick{fill:#0b0d2b;stroke:#9aa6ff}
+.tsw[aria-checked="true"] .pad-scr{fill:#0b0d2b}
+.tsw[aria-checked="true"] .pad-sun{opacity:0}
+.tsw[aria-checked="true"] .pad-moon{opacity:1}
+.tsw[aria-checked="true"] .pad-b{stroke:none}
+.tsw[aria-checked="true"] .by{fill:#ffe46b}.tsw[aria-checked="true"] .bx{fill:#6f7cff}.tsw[aria-checked="true"] .bb{fill:#ff7d96}.tsw[aria-checked="true"] .ba{fill:#38e3a6}
+/* clique: aperta o A e o controle vibra */
+.tsw.hit .pad{animation:rumble .32s linear}
+.tsw.hit .ba{transform:scale(.7)}
+@keyframes rumble{0%,100%{transform:none}15%{transform:translate(-2px,1px) rotate(-3deg)}30%{transform:translate(2px,-1px) rotate(3deg)}45%{transform:translate(-2px,0) rotate(-2deg)}60%{transform:translate(2px,1px) rotate(2deg)}75%{transform:translate(-1px,0) rotate(-1deg)}}
+@media (prefers-reduced-motion:reduce){.pad,.pad *{transition:none}.tsw.hit .pad{animation:none}}
 .heroin{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:48px 0 72px}
 .heroin h1{font-size:clamp(2.4rem,6.2vw,4.8rem);font-weight:800;letter-spacing:-.02em}
 .heroin p{max-width:46ch;font-size:1.1rem;opacity:.92;margin:18px 0 0}

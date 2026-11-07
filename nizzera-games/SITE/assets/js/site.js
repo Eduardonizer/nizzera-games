@@ -105,10 +105,12 @@
     var nx=curTheme()==="dark"?"light":"dark";
     html.setAttribute("data-theme",nx);try{localStorage.setItem("nz-theme",nx)}catch(_){}
     syncTheme();
+    var b=document.getElementById("theme");
+    if(b){b.classList.remove("hit");void b.offsetWidth;b.classList.add("hit");clearTimeout(b._hit);b._hit=setTimeout(function(){b.classList.remove("hit")},360)} /* controle vibra */
+    if(navigator.vibrate&&matchMedia("(pointer:coarse)").matches)try{navigator.vibrate(30)}catch(_){} /* no celular, vibra de verdade */
   }
   var tb=document.getElementById("theme");if(tb)tb.onclick=toggleTheme;
   syncTheme();
-  if(tb)requestAnimationFrame(function(){requestAnimationFrame(function(){tb.classList.add("ready")})}); /* anima só nos cliques, não ao abrir a página */
   /* sem escolha salva, segue o tema do aparelho quando ele muda */
   if(darkMq.addEventListener)darkMq.addEventListener("change",syncTheme);
 
