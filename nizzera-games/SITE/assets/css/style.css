@@ -372,9 +372,25 @@ a.feat{display:block;text-decoration:none}
 .stop-mv.up{color:#0b7a55;background:#d3f5e8}.stop-mv.down{color:#b3243f;background:#ffe0e6}
 .stop-mv.same{color:var(--muted)}.stop-mv.new{color:var(--ink);background:var(--sun)}
 @media (max-width:560px){.stop-row{grid-template-columns:1.6rem minmax(0,1fr) auto 2.8rem;gap:10px}.stop-row img,.stop-row .stop-noimg{display:none}.stop-n{font-size:1.2rem}}
-.rv-home{padding-bottom:24px}
-.rv-home .sec{margin-top:8px}
+.rv-home{margin-top:44px;padding-bottom:24px}
+.rv-home .sec{margin-top:0}
 .rv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px;margin-top:18px}
+/* página inicial: o layout muda com a quantidade (data-n, posto pelo app.js e pelo gerar_paginas.py) */
+.rv-home[data-n="1"] .sechead,.rv-home[data-n="1"] .rv-grid{max-width:960px;margin-inline:auto}
+.rv-home[data-n="2"] .sechead,.rv-home[data-n="2"] .rv-grid{max-width:1000px;margin-inline:auto}
+.rv-home[data-n="2"] .rv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.rv-home[data-n="3"] .rv-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (min-width:761px){
+  .rv-home[data-n="1"] .rv-grid{grid-template-columns:1fr}
+  .rv-home[data-n="1"] .rv-card{flex-direction:row;min-height:300px}
+  .rv-home[data-n="1"] .rv-card .art{flex:0 0 54%;aspect-ratio:auto;align-self:stretch}
+  .rv-home[data-n="1"] .rv-card .tx{padding:28px 32px;justify-content:center;gap:12px}
+  .rv-home[data-n="1"] .rv-card h3{font-size:clamp(1.6rem,2.6vw,2.1rem)}
+  .rv-home[data-n="1"] .rv-card p{font-size:1.05rem;line-height:1.55}
+  .rv-home[data-n="1"] .rv-score{left:calc(54% - 76px);right:auto}
+}
+@media (max-width:1000px) and (min-width:761px){.rv-home[data-n="3"] .rv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.rv-home .rv-grid{grid-template-columns:1fr}}
 .rv-card{position:relative;display:flex;flex-direction:column;background:var(--card);border-radius:18px;overflow:hidden;text-decoration:none;color:inherit;transition:transform .2s,box-shadow .2s}
 @media (hover:hover){.rv-card:hover{transform:translateY(-6px);box-shadow:8px 8px 0 var(--sun)}}
 .rv-card .art{aspect-ratio:16/9}

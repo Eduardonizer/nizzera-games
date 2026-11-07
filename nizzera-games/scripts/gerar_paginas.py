@@ -954,7 +954,8 @@ def pagina_inicial(texto, dados, trend):
     # reviews (as 3 mais recentes)
     revs = sorted([r for r in dados.get("reviews", []) if r.get("game")], key=lambda r: r.get("date", ""), reverse=True)[:3]
     texto = miolo(texto, "rvgrid", "".join(rv_card(r) for r in revs))
-    texto = oculto(texto, "reviews", not revs)
+    texto = trocar(texto, r'<section class="wrap rv-home" id="reviews"[^>]*>',
+                   f'<section class="wrap rv-home" id="reviews" aria-labelledby="rvh-t" data-n="{len(revs)}"{"" if revs else " hidden"}>')
 
     # lista de notícias: a 1ª página em cards, e as demais como links simples (o JavaScript troca pela paginação)
     texto = miolo(texto, "cards", "".join(card(n, trend) for n in noticias[:POR_PAGINA]))

@@ -89,10 +89,20 @@ function topNews(max){
   return l.slice(0,max);
 }
 /* reviews mais recentes, logo depois do carrossel */
+/* até 3 na página inicial (as outras ficam só em /reviews/). Com mais de 3, entram as mais em alta:
+   as mais curtidas, e no empate as mais recentes. O layout muda com a quantidade (data-n no CSS). */
+var RVLIKES=null;
 function renderReviews(){
   var box=document.getElementById("rvgrid"),sec=document.getElementById("reviews");if(!box)return;
-  var l=reviews().slice().sort(function(a,b){return String(b.date||"").localeCompare(String(a.date||""))}).slice(0,3);
-  sec.hidden=!l.length;box.innerHTML=l.map(reviewCard).join("");
+  var all=reviews().slice(),lk=function(r){return RVLIKES?(RVLIKES["review-"+reviewSlug(r)]||0):0};
+  all.sort(function(a,b){return lk(b)-lk(a)||String(b.date||"").localeCompare(String(a.date||""))});
+  var l=all.slice(0,3);
+  sec.hidden=!l.length;sec.setAttribute("data-n",l.length);box.innerHTML=l.map(reviewCard).join("");
+  if(all.length>3&&RVLIKES===null&&window.fetch){
+    RVLIKES={};
+    fetch("/api/likes?posts="+encodeURIComponent(all.slice(0,40).map(function(r){return "review-"+reviewSlug(r)}).join(",")),{cache:"no-store",credentials:"same-origin"})
+      .then(function(r){return r.json()}).then(function(j){if(j&&j.ok&&j.counts){RVLIKES=j.counts;renderReviews()}},function(){});
+  }
 }
 /* barra "Assuntos do momento" acima do carrossel: cada botão filtra a lista por aquele assunto */
 var tbar=document.getElementById("trendbar");
