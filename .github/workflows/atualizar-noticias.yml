@@ -62,12 +62,32 @@ jobs:
       - name: Gerar páginas das notícias, sitemap e feed
         run: python nizzera-games/scripts/gerar_paginas.py
 
+      - name: Postar no Discord o que é novo (notícias, reviews, ofertas, grátis, eventos)
+        continue-on-error: true      # se o Discord falhar, o site é salvo do mesmo jeito
+        env:                         # os webhooks ficam em Settings > Secrets and variables > Actions
+          DISCORD_WEBHOOK_TODAS_AS_NOTICIAS: ${{ secrets.DISCORD_WEBHOOK_TODAS_AS_NOTICIAS }}
+          DISCORD_WEBHOOK_LANCAMENTOS: ${{ secrets.DISCORD_WEBHOOK_LANCAMENTOS }}
+          DISCORD_WEBHOOK_STEAM: ${{ secrets.DISCORD_WEBHOOK_STEAM }}
+          DISCORD_WEBHOOK_PLAYSTATION: ${{ secrets.DISCORD_WEBHOOK_PLAYSTATION }}
+          DISCORD_WEBHOOK_XBOX: ${{ secrets.DISCORD_WEBHOOK_XBOX }}
+          DISCORD_WEBHOOK_NINTENDO: ${{ secrets.DISCORD_WEBHOOK_NINTENDO }}
+          DISCORD_WEBHOOK_GAME_PASS: ${{ secrets.DISCORD_WEBHOOK_GAME_PASS }}
+          DISCORD_WEBHOOK_SERVICOS: ${{ secrets.DISCORD_WEBHOOK_SERVICOS }}
+          DISCORD_WEBHOOK_ESPORTS: ${{ secrets.DISCORD_WEBHOOK_ESPORTS }}
+          DISCORD_WEBHOOK_EVENTOS: ${{ secrets.DISCORD_WEBHOOK_EVENTOS }}
+          DISCORD_WEBHOOK_REVIEWS: ${{ secrets.DISCORD_WEBHOOK_REVIEWS }}
+          DISCORD_WEBHOOK_OFERTAS_DA_SEMANA: ${{ secrets.DISCORD_WEBHOOK_OFERTAS_DA_SEMANA }}
+          DISCORD_WEBHOOK_JOGOS_GRATIS: ${{ secrets.DISCORD_WEBHOOK_JOGOS_GRATIS }}
+          DISCORD_WEBHOOK_NOVIDADES_DO_SITE: ${{ secrets.DISCORD_WEBHOOK_NOVIDADES_DO_SITE }}
+        run: python nizzera-games/scripts/discord_sync.py
+
       - name: Salvar no GitHub se mudou
         run: |
-          if [ -n "$(git status --porcelain nizzera-games/SITE)" ]; then
+          if [ -n "$(git status --porcelain nizzera-games/SITE nizzera-games/scripts/discord_enviados.json)" ]; then
             git config user.name "nizzera-bot"
             git config user.email "actions@users.noreply.github.com"
             git add -A nizzera-games/SITE
+            git add nizzera-games/scripts/discord_enviados.json 2>/dev/null || true   # o que já foi postado no Discord
             git commit -m "Atualiza notícias, ofertas e páginas automaticamente"
             git pull --rebase origin main
             git push origin main

@@ -7,3 +7,7 @@ Thumbs.db
 
 # arquivos extras que o Windows cria ao copiar para o WSL
 *:Zone.Identifier
+
+# segredos: webhooks do Discord e outras variáveis locais (NUNCA subir)
+discord_webhooks.env
+.env*
