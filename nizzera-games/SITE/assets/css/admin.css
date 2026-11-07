@@ -275,3 +275,11 @@ a.a-btn{display:inline-flex;align-items:center;text-decoration:none}
 .a-iopt small{font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .a-iopt:hover{border-color:var(--cobalt)}
 .a-iopt.on{border-color:var(--cobalt);box-shadow:3px 3px 0 var(--sun)}
+
+/* resposta do Nizzera aos comentários */
+.n-reply{margin:8px 0 0;padding:8px 12px;border-radius:10px;background:var(--card);border-left:3px solid var(--cobalt,#2433f0)}
+.n-reply p{margin:2px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
+.n-rlbl{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--cobalt,#2433f0)}
+.n-rform{display:grid;gap:6px;margin-top:8px}
+.n-rform textarea{width:100%;resize:vertical;min-height:80px}
+.a-mini[hidden]{display:none}

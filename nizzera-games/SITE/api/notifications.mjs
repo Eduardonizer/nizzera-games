@@ -50,7 +50,7 @@ export default async function handler(req, res) {
 
     const items = [];
     for (const c of comments.slice(0, 300)) {
-      items.push({ t: "comment", id: c.id, name: c.name, msg: c.msg, post: c.post, title: c.title, ts: c.ts, blocked: ofensivo(c.name, c.msg) || undefined });
+      items.push({ t: "comment", id: c.id, name: c.name, msg: c.msg, post: c.post, title: c.title, ts: c.ts, reply: c.reply || undefined, blocked: ofensivo(c.name, c.msg) || undefined });
     }
     for (const raw of evs || []) {
       try {

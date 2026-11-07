@@ -295,6 +295,25 @@ def pagina_gratis(c, site):
     return layout(c, nome, cab, corpo, '<script src="/assets/js/gratis.js"></script>\n')
 
 
+def pagina_maisjogados(c, site):
+    """Top 10 da Steam numa página própria (no menu lateral; saiu da página inicial)."""
+    nome = site.get("name") or "Nizzera Games"
+    lista, quando = mais_jogados()
+    cab = meta_pagina(f"Mais jogados na Steam agora | {nome}",
+                      "Os 10 jogos com mais gente jogando ao mesmo tempo na Steam, atualizados automaticamente todo dia.",
+                      SITE_URL + "/maisjogados/", nome)
+    conteudo = (f'<ol class="stop-list" id="stoplist">{lista}</ol>' if lista else
+                '<p class="soon">A lista dos mais jogados não está disponível agora. Volte mais tarde.</p>')
+    corpo = f"""<main class="wrap page stop" id="maisjogados">
+  {trilha("Mais jogados")}
+  <h1 class="ph">Mais jogados na Steam agora</h1>
+  <p class="lead">Os 10 jogos com mais gente jogando ao mesmo tempo na Steam.</p>
+  <p class="meta stop-upd">{quando}</p>
+  {conteudo}
+</main>"""
+    return layout(c, nome, cab, corpo)
+
+
 def pagina_comentarios(c, site):
     nome = site.get("name") or "Nizzera Games"
     cab = meta_pagina(f"Comentários e feedback | {nome}",
@@ -932,12 +951,6 @@ def pagina_inicial(texto, dados, trend):
     texto = trocar(texto, r'(<div class="trendbar" id="trendbar"[^>]*>).*?</div>', f'<div class="trendbar" id="trendbar">{barra}</div>')
     texto = oculto(texto, "trendbar", not vivos)
 
-    # mais jogados na Steam (top 10)
-    lista, quando = mais_jogados()
-    texto = miolo(texto, "stoplist", lista)
-    texto = miolo(texto, "stopupd", quando)
-    texto = oculto(texto, "maisjogados", not lista)
-
     # reviews (as 3 mais recentes)
     revs = sorted([r for r in dados.get("reviews", []) if r.get("game")], key=lambda r: r.get("date", ""), reverse=True)[:3]
     texto = miolo(texto, "rvgrid", "".join(rv_card(r) for r in revs))
@@ -966,6 +979,7 @@ def sitemap(todas):
               f"  <url><loc>{SITE_URL}/reviews/</loc></url>",
               f"  <url><loc>{SITE_URL}/ofertas/</loc></url>",
               f"  <url><loc>{SITE_URL}/gratis/</loc></url>",
+              f"  <url><loc>{SITE_URL}/maisjogados/</loc></url>",
               f"  <url><loc>{SITE_URL}/comentarios/</loc></url>",
               f"  <url><loc>{SITE_URL}/sobre/</loc></url>",
               f"  <url><loc>{SITE_URL}/tierlist/</loc></url>",
@@ -1079,6 +1093,7 @@ def main():
                 shutil.rmtree(os.path.join(PASTA_RV, nome_pasta))
     mudou += gravar(os.path.join(SITE, "ofertas", "index.html"), pagina_ofertas(c, site))
     mudou += gravar(os.path.join(SITE, "gratis", "index.html"), pagina_gratis(c, site))
+    mudou += gravar(os.path.join(SITE, "maisjogados", "index.html"), pagina_maisjogados(c, site))
     mudou += gravar(os.path.join(SITE, "comentarios", "index.html"), pagina_comentarios(c, site))
     mudou += gravar(os.path.join(SITE, "sobre", "index.html"), pagina_sobre(c, site))
     mudou += gravar(os.path.join(SITE, "tierlist", "index.html"), pagina_tierlist(c, site))

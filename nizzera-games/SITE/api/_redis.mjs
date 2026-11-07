@@ -74,7 +74,7 @@ export async function readComments() {
   for (const [id, v] of pairs) {
     try {
       const c = JSON.parse(v);
-      if (c && c.msg) items.push({ id, name: c.name || "", msg: c.msg, ts: Number(c.ts) || 0, post: c.post || "", title: c.title || "" });
+      if (c && c.msg) items.push({ id, name: c.name || "", msg: c.msg, ts: Number(c.ts) || 0, post: c.post || "", title: c.title || "", reply: c.reply || "", rts: Number(c.rts) || 0 });
     } catch { /* ignora registro quebrado */ }
   }
   items.sort((a, b) => b.ts - a.ts);

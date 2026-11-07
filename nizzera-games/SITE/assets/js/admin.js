@@ -184,13 +184,47 @@
   var AVC=["#2433f0","#ff5c7a","#0f9f6e","#7a3cff","#e07a00","#0e7fa8"];
   function avColor(n){var h=0;String(n||"?").split("").forEach(function(c){h=(h*31+c.charCodeAt(0))>>>0});return AVC[h%AVC.length]}
   function placeLink(p,hash){return '<a class="n-where" href="'+esc(p.url+(hash||""))+'" target="_blank" rel="noopener"><span class="n-kind">'+esc(p.kind)+'</span><span class="n-lbl">'+esc(p.label)+'</span>'+svg("ext")+'</a>'}
+  /* ---- resposta do Nizzera Games aos comentários (aparece embaixo do comentário no site) ---- */
+  var CMR={}; /* id do comentário -> resposta atual */
+  function repView(id){
+    var r=CMR[id]||"";
+    return r?'<div class="n-reply"><span class="n-rlbl">Sua resposta</span><p>'+esc(r)+'</p></div>':"";
+  }
+  function repBox(c){CMR[c.id]=c.reply||"";return '<div class="n-rep" data-rep="'+esc(c.id)+'">'+repView(c.id)+'</div>'}
+  function repBtn(c){return '<button type="button" class="a-mini" data-cmrep="'+esc(c.id)+'">'+svg("chat")+'<span>'+(c.reply?"Editar resposta":"Responder")+'</span></button>'}
+  function repOpen(id,btn){
+    var li=btn.closest("li"),box=li&&li.querySelector('.n-rep');if(!box)return;
+    var cur=CMR[id]||"";
+    box.innerHTML='<div class="n-rform"><label class="a-hint" for="cmr-'+esc(id)+'">Resposta do Nizzera Games (aparece embaixo do comentário, para todo mundo)</label>'
+      +'<textarea class="a-in" id="cmr-'+esc(id)+'" rows="3" maxlength="1000" placeholder="Escreva sua resposta…">'+esc(cur)+'</textarea>'
+      +'<div class="n-act"><button type="button" class="a-btn pri" data-cmsave="'+esc(id)+'">Publicar resposta</button><button type="button" class="a-btn" data-cmcancel="'+esc(id)+'">Cancelar</button>'
+      +(cur?'<button type="button" class="a-mini dan" data-cmunrep="'+esc(id)+'">'+svg("trash")+'<span>Apagar resposta</span></button>':'')+'</div></div>';
+    btn.hidden=true;var ta=box.querySelector("textarea");if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}
+  }
+  function repClose(id,btn){
+    var li=btn.closest("li");if(!li)return;var box=li.querySelector(".n-rep"),rb=li.querySelector("[data-cmrep]");
+    if(box)box.innerHTML=repView(id);
+    if(rb){rb.hidden=false;rb.querySelector("span").textContent=CMR[id]?"Editar resposta":"Responder"}
+  }
+  function repSave(id,btn,apagar){
+    var li=btn.closest("li"),ta=li&&li.querySelector("textarea"),txt=apagar?"":(ta?ta.value.trim():"");
+    if(!apagar&&!txt){toast("Escreva a resposta antes de publicar.",true);if(ta)ta.focus();return}
+    if(apagar&&!confirm("Apagar sua resposta a este comentário?"))return;
+    btn.disabled=true;
+    api("PATCH","/api/comments",{id:id,reply:txt}).then(function(r){
+      btn.disabled=false;
+      if(r.ok){CMR[id]=r.reply||"";NT.items.forEach(function(x){if(x.t==="comment"&&x.id===id)x.reply=r.reply||undefined});repClose(id,btn);toast(apagar?"Resposta apagada.":"Resposta publicada no site.")}
+      else if(r.status===401){authOk=false;toast("Sua sessão expirou. Entre de novo.",true);paint()}
+      else toast(r.error||"Não consegui salvar a resposta.",true);
+    },function(){btn.disabled=false;toast("Não consegui falar com o servidor.",true)});
+  }
   function ntRow(x){
     var isNew=x.ts>NT.hl,icon,cls,head="",body="",p,act="";
     if(x.t==="comment"){
       p=place(x.post);icon="chat";cls="cm";
       head='<b>'+esc(x.name||"Anônimo")+'</b> comentou'+(x.blocked?' <span class="a-flag" title="Tem palavra da lista de api/_filtro.mjs: não aparece no site">Oculto pelo filtro</span>':'');
-      body='<p class="n-msg">'+esc(x.msg)+'</p>'+placeLink(p,"#comentarios");
-      act='<button type="button" class="a-mini dan" data-cmdel="'+esc(x.id)+'" title="Remover comentário">'+svg("trash")+'<span>Remover</span></button>';
+      body='<p class="n-msg">'+esc(x.msg)+'</p>'+repBox(x)+placeLink(p,"#comentarios");
+      act=repBtn(x)+'<button type="button" class="a-mini dan" data-cmdel="'+esc(x.id)+'" title="Remover comentário">'+svg("trash")+'<span>Remover</span></button>';
     }else if(x.t==="like"){
       p=place(x.post);icon="heart";cls="lk";
       head='Alguém <b>curtiu</b> '+(p.kind==="Review"?"a review":"a notícia");
@@ -755,7 +789,7 @@
       var n=$("#cm-count");if(n)n.textContent=r.items.length+" comentário(s)";
       box.innerHTML=r.items.length?'<ul class="n-list">'+r.items.map(function(c){
         var p=place(c.post);if(c.title&&p.label===pretty(String(c.post).replace(/^review-/,"")))p.label=c.title;
-        return '<li class="n-it n-cm"><span class="cm-av" style="background:'+avColor(c.name)+'">'+esc(initials(c.name||"Anônimo"))+'</span><div class="n-tx"><div class="n-head"><span><b>'+esc(c.name||"Anônimo")+'</b>'+(c.blocked?' <span class="a-flag" title="Tem palavra da lista de api/_filtro.mjs: não aparece no site">Oculto pelo filtro</span>':'')+'</span><time title="'+esc(cmDate(c.ts))+'">'+esc(ago(c.ts))+'</time></div><p class="n-msg">'+esc(c.msg)+'</p>'+placeLink(p,c.post?"#comentarios":"")+'<div class="n-act"><button type="button" class="a-mini dan" data-cmdel="'+esc(c.id)+'">'+svg("trash")+'<span>Remover</span></button></div></div></li>';
+        return '<li class="n-it n-cm"><span class="cm-av" style="background:'+avColor(c.name)+'">'+esc(initials(c.name||"Anônimo"))+'</span><div class="n-tx"><div class="n-head"><span><b>'+esc(c.name||"Anônimo")+'</b>'+(c.blocked?' <span class="a-flag" title="Tem palavra da lista de api/_filtro.mjs: não aparece no site">Oculto pelo filtro</span>':'')+'</span><time title="'+esc(cmDate(c.ts))+'">'+esc(ago(c.ts))+'</time></div><p class="n-msg">'+esc(c.msg)+'</p>'+repBox(c)+placeLink(p,c.post?"#comentarios":"")+'<div class="n-act">'+repBtn(c)+'<button type="button" class="a-mini dan" data-cmdel="'+esc(c.id)+'">'+svg("trash")+'<span>Remover</span></button></div></div></li>';
       }).join("")+'</ul>':'<div class="a-empty">'+svg("chat")+'<b>Nenhum comentário ainda.</b></div>';
     },function(){box=$("#cm-list");if(box)box.innerHTML='<p class="a-err">Não consegui falar com o servidor.</p>'});
   }
@@ -971,6 +1005,10 @@
     if(id==="rv-del"){rvDel();return}
     if(id==="rv-disc"){st.dirty=false;st.rvDraft=st.rvNew?null:clone(rvFind(st.rvSel));st.rvNew=false;rvItems();rvEditor();return}
     if(ds.cmdel){cmDel(ds.cmdel,t);return}
+    if(ds.cmrep){repOpen(ds.cmrep,t);return}
+    if(ds.cmsave){repSave(ds.cmsave,t,false);return}
+    if(ds.cmunrep){repSave(ds.cmunrep,t,true);return}
+    if(ds.cmcancel){repClose(ds.cmcancel,t);return}
     if(ds.imgfind){imgFind(ds.imgfind,t);return}
     if(ds.iopt!==undefined){imgUse(+ds.iopt,t);return}
     if(ds.drpick){drPick(ds.drpick);return}

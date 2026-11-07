@@ -4,6 +4,7 @@
 //   GET    /api/comments?all=1        -> lista do admin (gerais + das notícias) — exige login de admin
 //   POST   /api/comments              -> { name, msg, post?, title? } publica um comentário
 //   DELETE /api/comments?id=XXXX      -> remove um comentário — exige login de admin
+//   PATCH  /api/comments              -> { id, reply } resposta do Nizzera Games (reply vazio apaga) — exige login de admin
 //
 // Guarda os dados no Upstash Redis (Vercel → Storage). Veja api/_redis.mjs.
 // Palavras ofensivas: veja api/_filtro.mjs (recusa no envio e esconde da lista pública).
@@ -27,7 +28,7 @@ export default async function handler(req, res) {
   if (!redisReady()) {
     return res.status(503).json({ ok: false, error: "Os comentários ainda não foram configurados no servidor." });
   }
-  if ((req.method === "POST" || req.method === "DELETE") && !sameOrigin(req)) {
+  if ((req.method === "POST" || req.method === "DELETE" || req.method === "PATCH") && !sameOrigin(req)) {
     return res.status(403).json({ ok: false, error: "Origem não permitida." });
   }
   try {
@@ -82,7 +83,22 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    res.setHeader("Allow", "GET, POST, DELETE");
+    if (req.method === "PATCH") {
+      if (!(await isAdmin(req))) return res.status(401).json({ ok: false, error: "Faça login como admin." });
+      const b = readBody(req);
+      const id = String(b.id || "");
+      if (!/^[a-z0-9]{6,32}$/.test(id)) return res.status(400).json({ ok: false, error: "Comentário inválido." });
+      const reply = clean(b.reply, 1000);
+      const [raw] = await redis([["HGET", KEY, id]]);
+      if (!raw) return res.status(404).json({ ok: false, error: "Esse comentário não existe mais." });
+      let rec;
+      try { rec = JSON.parse(raw); } catch { return res.status(500).json({ ok: false, error: "Comentário corrompido." }); }
+      if (reply) { rec.reply = reply; rec.rts = Date.now(); } else { delete rec.reply; delete rec.rts; }
+      await redis([["HSET", KEY, id, JSON.stringify(rec)]]);
+      return res.status(200).json({ ok: true, reply: rec.reply || "", rts: rec.rts || 0 });
+    }
+
+    res.setHeader("Allow", "GET, POST, DELETE, PATCH");
     return res.status(405).json({ ok: false, error: "Método não permitido." });
   } catch (e) {
     console.error("comments:", e && e.message);

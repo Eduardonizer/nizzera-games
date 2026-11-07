@@ -28,7 +28,13 @@
   function item(c){
     var name=c.name||"Anônimo";
     return '<article class="cm-item'+(c.id===fresh?' new':'')+'"><span class="cm-av" style="background:'+color(c.name)+'" aria-hidden="true">'+esc(initials(c.name))+'</span>'
-      +'<div class="cm-body"><header><b>'+esc(name)+'</b><time datetime="'+esc(new Date(c.ts).toISOString())+'" title="'+esc(full(c.ts))+'">'+esc(ago(c.ts))+'</time></header><p>'+esc(c.msg)+'</p></div></article>';
+      +'<div class="cm-body"><header><b>'+esc(name)+'</b><time datetime="'+esc(new Date(c.ts).toISOString())+'" title="'+esc(full(c.ts))+'">'+esc(ago(c.ts))+'</time></header><p>'+esc(c.msg)+'</p>'+reply(c)+'</div></article>';
+  }
+  /* resposta da equipe, escrita no painel admin (aba Comentários) */
+  function reply(c){
+    if(!c.reply)return "";
+    var t=c.rts?'<time datetime="'+esc(new Date(c.rts).toISOString())+'" title="'+esc(full(c.rts))+'">'+esc(ago(c.rts))+'</time>':"";
+    return '<div class="cm-reply"><span class="cm-av cm-nz" aria-hidden="true"></span><div class="cm-body"><header><b>Nizzera Games</b><span class="cm-badge">Resposta</span>'+t+'</header><p>'+esc(c.reply)+'</p></div></div>';
   }
   function draw(){
     list.setAttribute("aria-busy","false");

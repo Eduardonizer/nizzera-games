@@ -708,3 +708,25 @@ html.tl-dragging,html.tl-dragging *{cursor:grabbing!important;-webkit-user-selec
 .priv .sb-sec h3{font-size:1.15rem;margin:18px 0 6px}
 .priv .sb-sec ul{margin:0 0 1em;padding-left:20px;display:grid;gap:6px}
 .priv .sb-head .meta{margin:0 0 18px;color:var(--muted);font-size:.9rem}
+
+/* resposta do Nizzera Games embaixo do comentário (escrita no painel admin) */
+.cm-reply{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;margin-top:12px;padding:10px 14px;border-radius:12px;background:var(--bg);border-left:3px solid var(--cobalt)}
+.cm-reply .cm-av{width:34px;height:34px}
+.cm-nz{background:var(--logo) center/78% no-repeat,var(--cobalt)}
+.cm-badge{background:var(--sun);color:var(--ink);font:800 .7rem "DM Sans",sans-serif;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:99px}
+.cm-reply header{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cm-reply p{margin:4px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* barra de compartilhar das notícias e reviews (assets/js/artigo.js) */
+.shr{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0 0}
+.shr-t{font-weight:800;font-size:.9rem;margin-right:4px}
+.shr-b{display:inline-flex;align-items:center;gap:7px;border:2px solid var(--line);background:var(--card);color:var(--fg);border-radius:99px;padding:7px 14px;font:700 .85rem "DM Sans",sans-serif;text-decoration:none;cursor:pointer;transition:border-color .2s,transform .2s}
+.shr-b:hover{transform:translateY(-1px)}
+.shr-b svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.shr-b.wa:hover{border-color:#25d366}
+.shr-b.x:hover{border-color:var(--fg)}
+.shr-b.fb:hover{border-color:#1877f2}
+.shr-b.tg:hover{border-color:#29a9eb}
+.shr-b[data-shr="copy"]:hover{border-color:var(--cobalt)}
+.shr-main{background:var(--cobalt);border-color:var(--cobalt);color:#fff}
+@media (max-width:560px){.shr-b span{display:none}.shr-b{padding:9px}.shr-main span{display:inline}.shr-main{padding:8px 16px}}
