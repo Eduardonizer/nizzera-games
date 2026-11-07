@@ -1,13 +1,13 @@
 {
- "updated": "2026-11-06T07:04:27Z",
+ "updated": "2026-11-07T15:12:56Z",
  "steam": [
   {
-   "id": 391220,
-   "name": "Rise of the Tomb Raider™",
-   "discount": 90,
-   "orig": "R$ 124,99",
-   "price": "R$ 12,49",
-   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/391220/29279804029df9b7540caef5c086c9f0393e2e2d/header_alt_assets_0.jpg?t=1792675385"
+   "id": 2492040,
+   "name": "FATAL FURY: City of the Wolves",
+   "discount": 75,
+   "orig": "R$ 59,99",
+   "price": "R$ 14,99",
+   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2492040/20f8f1e03649d45e095315cc4a99104dda0364ab/header.jpg?t=1792688653"
   },
   {
    "id": 12210,
@@ -34,14 +34,6 @@
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/275850/9f1ca9e3b7d1dccb7b5af404a6739ddc1118ef32/header_alt_assets_26.jpg?t=1793196605"
   },
   {
-   "id": 2448570,
-   "name": "Road Rash™: Edição de 30º Aniversário",
-   "discount": 50,
-   "orig": "R$ 49,00",
-   "price": "R$ 24,50",
-   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2448570/a12ed683c51938590f28400c89cd8c8204e1e8db/header.jpg?t=1793919166"
-  },
-  {
    "id": 1790600,
    "name": "DRAGON BALL: Sparking! ZERO",
    "discount": 40,
@@ -55,7 +47,15 @@
    "discount": 40,
    "orig": "R$ 339,90",
    "price": "R$ 203,94",
-   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3768760/c5b553fd05ba41aefa6daeddac95849a10c93022/header_alt_assets_4.jpg?t=1791886607"
+   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3768760/be65391533f072e79699be70ef2d47b7b2ac57ee/header_alt_assets_5.jpg?t=1793979129"
+  },
+  {
+   "id": 3527290,
+   "name": "PEAK",
+   "discount": 38,
+   "orig": "R$ 23,99",
+   "price": "R$ 14,87",
+   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3527290/31bac6b2eccf09b368f5e95ce510bae2baf3cfcd/header.jpg?t=1792684718"
   },
   {
    "id": 3241660,
@@ -66,12 +66,12 @@
    "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3241660/62177765c05399116f0453fe1177b00ceed698c4/header_alt_assets_3.jpg?t=1793278962"
   },
   {
-   "id": 1799840,
-   "name": "Queen's Domain",
-   "discount": 15,
-   "orig": "R$ 63,99",
-   "price": "R$ 54,39",
-   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1799840/1a209734951f53b019ec9fa03f835def14f2a968/header.jpg?t=1793628353"
+   "id": 3669870,
+   "name": "CONTROL Resonant",
+   "discount": 20,
+   "orig": "R$ 229,99",
+   "price": "R$ 183,99",
+   "img": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3669870/1e0c76e4253d347bb1304c3f213570251d924edf/header.jpg?t=1793357289"
   },
   {
    "id": 4348910,
