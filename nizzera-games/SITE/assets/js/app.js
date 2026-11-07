@@ -195,9 +195,28 @@ addEventListener("popstate",function(){
 
 /* ===== destaque do topo (cada slide é um link para a notícia) ===== */
 var F=null, feat=document.getElementById("feat"), fdots=document.getElementById("fdots"), HS=[], hi=0, hTimer, hHold=false;
+/* ===== fundo do topo com a foto do destaque, bem desfocada (troca junto com o slide) =====
+   Para voltar ao fundo azul de sempre: troque FUNDO_FOTO para false.
+   Para comparar sem mudar nada: abra o site com ?fundo=azul no fim do endereço. */
+var FUNDO_FOTO=true;
+var heroBg=document.getElementById("herobg"),hbImgs=heroBg?heroBg.querySelectorAll("img"):[],hbCur=-1,hbUrl="";
+if(FUNDO_FOTO&&heroBg&&!/[?&]fundo=azul\b/.test(location.search))document.querySelector(".hero").classList.add("photo-bg");else heroBg=null;
+function heroBackground(n){
+  if(!heroBg||!n||!/^https?:/i.test(n.img||"")||n.img===hbUrl)return;
+  var url=hbUrl=n.img,next=hbImgs[(hbCur+1)%2],pre=new Image();
+  pre.referrerPolicy="no-referrer";
+  pre.onload=function(){
+    if(url!==hbUrl)return; /* já trocou de slide de novo */
+    next.src=url;
+    [].forEach.call(hbImgs,function(im){im.classList.toggle("on",im===next)});
+    hbCur=(hbCur+1)%2;
+  };
+  pre.src=url;
+}
 function showSlide(i,anim){
   if(!HS.length)return;
   hi=(i+HS.length)%HS.length;F=HS[hi];feat.href=newsUrl(F);feat.setAttribute("aria-label","Destaque: "+F.title);
+  heroBackground(F);
   feat.innerHTML='<div class="slide'+'"><div class="art">'+pic(F)+'</div><div class="tx"><span class="tags"><span class="tag">'+esc(F.cat)+'</span>'+hotTag(F)+'</span><h2>'+esc(F.title)+'</h2><span class="meta">'+fmt(F.date)+' · '+F.read+' min de leitura</span></div></div>';
   [].forEach.call(fdots.children,function(d,k){d.setAttribute("aria-selected",k===hi)});
 }
