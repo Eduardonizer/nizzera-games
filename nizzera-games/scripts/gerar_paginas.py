@@ -462,19 +462,19 @@ DISCORD_SVG = ('<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.3 4.4A1
                'a12.8 12.8 0 01-2 1l1.3 2a19.7 19.7 0 006-3c.4-5.2-.7-9.8-3.6-13.7zM8.5 15.3c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4'
                ' 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4zm7 0c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4z"/></svg>')
 CANAIS_DISCORD = [  # (canal, emoji, o que chega lá) — os mesmos canais que recebem os posts automáticos
-    ("todas-as-noticias", "📰", "Todas as notícias do site, assim que saem."),
-    ("lancamentos", "🚀", "Jogos novos, datas e trailers."),
+    ("todas-as-notícias", "📰", "Todas as notícias do site, assim que saem."),
+    ("lançamentos", "🚀", "Jogos novos, datas e trailers."),
     ("steam", "🖥️", "Novidades da Steam e do PC."),
     ("playstation", "🎮", "Tudo de PS5 e PlayStation Plus."),
     ("xbox", "🟢", "Novidades do Xbox e do PC da Microsoft."),
     ("nintendo", "🍄", "Switch 2, Zelda, Mario e companhia."),
     ("game-pass", "🎟️", "O que entra e o que sai do Game Pass."),
-    ("servicos", "☁️", "Assinaturas e jogos na nuvem."),
+    ("serviços", "☁️", "Assinaturas e jogos na nuvem."),
     ("esports", "🏆", "CS2, Valorant, LoL e mais campeonatos."),
     ("eventos", "📅", "Feiras, premiações e o calendário de eventos."),
     ("reviews", "⭐", "As reviews do site, com a nota."),
     ("ofertas-da-semana", "🔥", "As melhores promoções da semana."),
-    ("jogos-gratis", "🎁", "Jogos grátis para resgatar na Epic e na Steam."),
+    ("jogos-grátis", "🎁", "Jogos grátis para resgatar na Epic e na Steam."),
     ("novidades-do-site", "✨", "Recursos novos do Nizzera Games."),
 ]
 
@@ -527,7 +527,7 @@ def pagina_comunidade(c, site):
 
   <section class="dc-end">
     <h2>Bora pro servidor?</h2>
-    <p>É de graça e leva um clique. Se ainda não tem Discord, dá pra usar no navegador, no PC ou no celular.</p>
+    <p>É de graça e leva um clique: você cai direto no <b>#boas-vindas</b>. Se ainda não tem Discord, dá pra usar no navegador, no PC ou no celular.</p>
     {botao_discord("big")}
   </section>
 </main>"""

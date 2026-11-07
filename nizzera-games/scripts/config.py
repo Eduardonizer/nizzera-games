@@ -19,4 +19,4 @@ USER_AGENT = f"Mozilla/5.0 (compatible; NizzeraGamesBot/1.0; +{SITE_URL})"
 # convite do servidor do Discord (página /comunidade/). Use um convite que NÃO expira:
 # no Discord, clique com o botão direito no servidor > Convidar pessoas > Editar link do convite >
 # "Expirar depois de: Nunca". Ex.: "https://discord.gg/abc123". Vazio = o botão mostra "em breve".
-DISCORD_INVITE = ""
+DISCORD_INVITE = "https://discord.gg/8RmMYmQgVS"  # permanente, sem limite de usos; cai no #boas-vindas
