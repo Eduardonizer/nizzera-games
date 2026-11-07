@@ -914,3 +914,6 @@ html.g6-open{overflow:hidden}
 @media (max-width:860px){.g6-box{grid-template-columns:1fr;padding:20px;box-shadow:5px 5px 0 var(--coral)}}
 @media (max-width:560px){.g6-mosaic{grid-template-columns:repeat(2,1fr)}.g6-mosaic .g6-t:nth-child(n+6){display:none}.g6-grid{grid-template-columns:repeat(2,1fr);gap:6px}.g6-lb{padding:56px 8px}.g6-nav{width:40px;height:56px;font-size:1.8rem;background:rgba(0,0,0,.45)}}
 @media (prefers-reduced-motion:reduce){.g6-t img{transition:none}}
+.dc-count{display:inline-flex;align-items:center;gap:8px;margin:14px 0 0;font-weight:700;font-size:.95rem;color:var(--muted)}
+.dc-count[hidden]{display:none}
+.dc-on{width:10px;height:10px;border-radius:50%;background:#23a55a;box-shadow:0 0 0 3px rgba(35,165,90,.25)}

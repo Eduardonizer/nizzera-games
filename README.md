@@ -226,6 +226,11 @@ diária quanto quando o painel admin publica, e posta no servidor do Discord só
 - O que já foi postado fica em `scripts/discord_enviados.json` (só ids do site). Na 1ª execução nada é postado:
   tudo o que já existe é marcado como enviado (`--backfill` posta tudo).
 - Se o Discord falhar, o erro só aparece no log do Actions; o site é salvo do mesmo jeito.
+- **Menção de cargo:** nos canais de plataforma (#steam, #playstation, #xbox, #game-pass, #nintendo), em #ofertas-da-semana e
+  em #jogos-grátis a mensagem menciona o cargo (`<@&ID>`), só ele (`allowed_mentions.roles`). #todas-as-notícias vai sem menção.
+  Os IDs ficam em `DISCORD_CARGOS` no `scripts/config.py`. Teste: `--teste-cargo STEAM`.
+- **Contador da /comunidade/:** `api/discord.mjs` lê "membros" e "online" da API pública do convite (sem token) e fica
+  10 min no cache da CDN da Vercel. O código do convite fica nesse arquivo e precisa bater com `DISCORD_INVITE`.
 - Comandos: `python nizzera-games/scripts/discord_sync.py --teste` (mensagem de teste em #novidades-do-site),
   `--seco` (mostra o que seria postado, sem postar).
 
