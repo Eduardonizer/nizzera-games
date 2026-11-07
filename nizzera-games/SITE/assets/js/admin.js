@@ -10,6 +10,7 @@
     chat:'<path d="M4 5h16a1 1 0 011 1v10a1 1 0 01-1 1H10l-5 4v-4H4a1 1 0 01-1-1V6a1 1 0 011-1z"/><path d="M8 10h8M8 13h5"/>',
     gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
     upload:'<path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/>',
+    chart:'<path d="M4 20h16"/><path d="M6 16l4-5 3 3 5-7"/><circle cx="18" cy="7" r="1.2"/>',
     bell:'<path d="M6 16V11a6 6 0 0112 0v5l2 2H4zM10 20a2 2 0 004 0"/>',
     heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
     vote:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/>',
@@ -103,7 +104,7 @@
 
   /* ---- estrutura ---- */
   /* abas: [id, ícone, nome, nome curto (barra do celular)] */
-  var TABS=[["home","home","Início"],["news","news","Notícias"],["dr","draft","Rascunhos","Rascunho"],["rv","star","Reviews"],["tl","tiers","Tier List","Tier"],["cm","chat","Comentários","Coment."],["site","gear","Site e categorias","Site"],["back","upload","Publicar e backup","Publicar"]];
+  var TABS=[["home","home","Início"],["an","chart","Análise"],["news","news","Notícias"],["dr","draft","Rascunhos","Rascunho"],["rv","star","Reviews"],["tl","tiers","Tier List","Tier"],["cm","chat","Comentários","Coment."],["site","gear","Site e categorias","Site"],["back","upload","Publicar e backup","Publicar"]];
   function shell(){
     adm.innerHTML='<header class="a-top"><span class="a-logo" aria-hidden="true"></span><strong class="a-title">Painel</strong><span class="a-chip" id="a-status"></span><span class="a-sp"></span>'
       +'<button class="a-ico" type="button" id="a-bell" aria-label="Notificações" title="Notificações">'+svg("bell")+'<b class="a-badge" data-badge hidden></b></button>'
@@ -119,9 +120,128 @@
     st.tab=n;
     [].forEach.call(adm.querySelectorAll(".a-tab"),function(b){b.setAttribute("aria-selected",b.dataset.tab===n)});
     var body=$("#a-body");if(body)body.scrollTop=0;
-    ({home:homeView,news:newsView,dr:drView,rv:rvView,tl:tlView,cm:cmView,site:siteView,back:backView})[n]();
+    ({home:homeView,an:anView,news:newsView,dr:drView,rv:rvView,tl:tlView,cm:cmView,site:siteView,back:backView})[n]();
     if(n==="back")svcView();
   }
+
+  /* ---- aba Análise: números do Vercel Web Analytics (via /api/notifications?analytics=DIAS) ----
+     O token da Vercel fica só no servidor. Cores validadas (claro e escuro) para daltonismo e contraste. */
+  var AN={dias:7,data:{},busy:false,table:false};
+  var PAGINAS={"/":"Página inicial","/ofertas/":"Ofertas da semana","/gratis/":"Jogos grátis","/reviews/":"Reviews","/eventos/":"Eventos",
+    "/comunidade/":"Comunidade","/comentarios/":"Comentários","/maisjogados/":"Mais jogados","/tierlist/":"Tier List","/sobre/":"Sobre",
+    "/privacidade/":"Privacidade","/gta6/":"GTA VI: imagens","/admin/":"Painel admin"};
+  function anNum(n){return Number(n||0).toLocaleString("pt-BR")}
+  function anPage(p){
+    if(!p)return "(sem endereço)";var k=p.replace(/\/?$/,"/").replace(/^\/\//,"/");
+    if(PAGINAS[k])return PAGINAS[k];
+    var m=k.match(/^\/noticia\/([^/]+)\/$/);if(m){var n=(DATA.news||[]).filter(function(x){return x.slug===m[1]})[0];return n?n.title:"Notícia: "+m[1].replace(/^\d+-/,"").replace(/-/g," ")}
+    m=k.match(/^\/review\/([^/]+)\/$/);if(m){var r=((DATA.reviews)||[]).filter(function(x){return (x.slug||"")===m[1]})[0];return r?"Review: "+r.game:"Review: "+m[1].replace(/^\d+-/,"").replace(/-/g," ")}
+    return p;
+  }
+  var anRegion=null;try{anRegion=new Intl.DisplayNames(["pt-BR"],{type:"region"})}catch(_){}
+  function anCountry(c){if(!c)return "Desconhecido";try{return anRegion?anRegion.of(c):c}catch(_){return c}}
+  function anDevice(d){return ({desktop:"Computador",mobile:"Celular",tablet:"Tablet"})[String(d||"").toLowerCase()]||d||"Outro"}
+  function anRef(h){return h?h.replace(/^www\./,""):"Direto (sem origem)"}
+  function anView(){
+    $("#a-body").innerHTML='<div class="a-wrap an-wrap"><div class="a-card an-head"><div><h2>Análise do site</h2><p class="a-hint">Visitas do site publicado, direto do Vercel Analytics. Os números chegam com alguns minutos de atraso.</p></div>'
+      +'<div class="an-range" role="group" aria-label="Período">'+[[1,"Hoje"],[7,"7 dias"],[30,"30 dias"]].map(function(x){return '<button class="a-btn" type="button" data-andias="'+x[0]+'" aria-pressed="'+(AN.dias===x[0])+'">'+x[1]+'</button>'}).join("")
+      +'<button class="a-ico an-reload" type="button" id="an-reload" title="Atualizar" aria-label="Atualizar">↻</button></div></div><div id="an-body"><p class="a-hint">Carregando…</p></div></div>';
+    anLoad(false);
+  }
+  function anLoad(force){
+    var d=AN.data[AN.dias];if(d&&!force){anFill();return}
+    if(AN.busy)return;AN.busy=true;var dias=AN.dias,box=$("#an-body");if(box&&!d)box.innerHTML='<p class="a-hint">Carregando…</p>';
+    api("GET","/api/notifications?analytics="+dias).then(function(r){
+      AN.busy=false;
+      if(r.status===401){authOk=false;toast("Sua sessão expirou. Entre de novo.",true);paint();return}
+      AN.data[dias]=r;if(st.tab==="an"&&AN.dias===dias)anFill();
+    },function(){AN.busy=false;AN.data[dias]={ok:false,error:"Não consegui falar com o servidor."};if(st.tab==="an")anFill()});
+  }
+  function anDelta(cur,prev){
+    if(prev==null)return "";if(!prev)return cur?'<span class="an-d up">novo</span>':"";
+    var p=Math.round((cur-prev)/prev*100);
+    return '<span class="an-d '+(p>0?"up":p<0?"down":"")+'" title="Comparado com o período anterior">'+(p>0?"▲ ":p<0?"▼ ":"")+Math.abs(p)+'%</span>';
+  }
+  function anFill(){
+    var box=$("#an-body"),d=AN.data[AN.dias];if(!box||!d)return;
+    [].forEach.call(adm.querySelectorAll("[data-andias]"),function(b){b.setAttribute("aria-pressed",+b.dataset.andias===AN.dias)});
+    if(!d.ok){box.innerHTML=d.setup?anSetup(d.error):'<div class="a-card"><p class="a-err">'+esc(d.error||"Não consegui carregar a análise.")+'</p></div>';return}
+    var T=d.totals,P=d.prev,ppv=T.visitors?(T.pageviews/T.visitors):0,pppv=P&&P.visitors?(P.pageviews/P.visitors):null;
+    var nomeP={1:"nas últimas 24 h",7:"nos últimos 7 dias",30:"nos últimos 30 dias"}[AN.dias];
+    var h='<div class="an-kpis">'
+      +'<div class="a-card an-kpi"><span>Visualizações</span><b>'+anNum(T.pageviews)+'</b>'+anDelta(T.pageviews,P&&P.pageviews)+'</div>'
+      +'<div class="a-card an-kpi"><span>Visitantes</span><b>'+anNum(T.visitors)+'</b>'+anDelta(T.visitors,P&&P.visitors)+'</div>'
+      +'<div class="a-card an-kpi"><span>Páginas por visitante</span><b>'+ppv.toLocaleString("pt-BR",{maximumFractionDigits:1})+'</b>'+(pppv!=null?anDelta(ppv,pppv):"")+'</div></div>'
+      +'<div class="a-card"><div class="an-ctop"><h3>Visitas '+esc(nomeP)+'</h3><div class="an-legend"><span><i class="an-sw s1"></i>Visualizações</span><span><i class="an-sw s2"></i>Visitantes</span></div></div>'
+      +'<div class="an-chart" id="an-chart"></div><button class="a-btn an-tbtn" type="button" id="an-table" aria-expanded="'+AN.table+'">'+(AN.table?"Esconder tabela":"Ver como tabela")+'</button>'
+      +(AN.table?anTable(d):"")+'</div>'
+      +'<div class="an-grid">'
+      +anList("Páginas mais vistas",d.top.pages,anPage,true)
+      +anList("De onde vêm",d.top.refs,anRef)
+      +anList("Países",d.top.countries,anCountry)
+      +anList("Aparelhos",d.top.devices,anDevice)
+      +anList("Navegadores",d.top.browsers,function(x){return x||"Outro"})
+      +anList("Sistemas",d.top.os,function(x){return x||"Outro"})
+      +'</div><p class="a-hint">Fonte: Vercel Web Analytics (só o site publicado). No plano grátis a Vercel guarda 1 mês de dados.</p>';
+    box.innerHTML=h;anChart(d);
+  }
+  function anSetup(err){
+    return '<div class="a-card"><h2>Falta ligar a análise</h2><p class="a-err" style="margin-top:0">'+esc(err||"")+'</p><ol class="a-steps">'
+      +'<li>Na Vercel, abra <b>Account Settings → Tokens</b> (vercel.com/account/tokens) e clique em <b>Create</b>. Dê um nome (ex.: <i>Painel Nizzera</i>), escolha o escopo da sua conta e uma validade.</li>'
+      +'<li>Copie o token. No projeto do site na Vercel: <b>Settings → Environment Variables → Add</b>, com <b>Key</b> <code>VERCEL_ANALYTICS_TOKEN</code> e o token em <b>Value</b>. Marque <b>Production</b> e salve.</li>'
+      +'<li>Se o projeto na Vercel não se chama <code>nizzera-games</code>, crie também <code>VERCEL_ANALYTICS_PROJECT</code> com o nome dele.</li>'
+      +'<li>Faça um <b>Redeploy</b> (Deployments → ⋯ → Redeploy) e volte aqui.</li></ol>'
+      +'<p class="a-hint">O token fica só no servidor da Vercel: ele não aparece no site nem no navegador.</p></div>';
+  }
+  function anList(titulo,rows,nome,isPage){
+    rows=(rows||[]).filter(function(r){return r.pageviews>0});
+    var max=rows.reduce(function(m,r){return Math.max(m,r.pageviews)},0)||1;
+    return '<div class="a-card an-list"><h3>'+esc(titulo)+'</h3>'+(rows.length?'<ol>'+rows.map(function(r){
+      var label=nome(r.k),w=Math.max(2,Math.round(r.pageviews/max*100));
+      return '<li title="'+esc(label)+': '+anNum(r.pageviews)+' visualizações, '+anNum(r.visitors)+' visitantes"><div class="an-lrow"><span class="an-lname">'
+        +(isPage&&r.k?'<a href="'+esc(r.k)+'" target="_blank" rel="noopener">'+esc(label)+'</a>':esc(label))+'</span><span class="an-lval">'+anNum(r.pageviews)+'</span></div>'
+        +'<span class="an-bar"><i style="width:'+w+'%"></i></span></li>';
+    }).join("")+'</ol>':'<p class="a-hint">Ainda sem dados neste período.</p>')+'</div>';
+  }
+  function anLabel(t,gran,curto){
+    var x=new Date(t);if(isNaN(x))return "";
+    if(gran==="hour")return x.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+    return x.toLocaleDateString("pt-BR",curto?{day:"2-digit",month:"2-digit"}:{weekday:"short",day:"numeric",month:"short"});
+  }
+  function anTable(d){
+    return '<div class="an-tablewrap"><table class="an-table"><thead><tr><th scope="col">'+(d.gran==="hour"?"Hora":"Dia")+'</th><th scope="col">Visualizações</th><th scope="col">Visitantes</th></tr></thead><tbody>'
+      +d.series.map(function(r){return '<tr><td>'+esc(anLabel(r.t,d.gran))+'</td><td>'+anNum(r.pageviews)+'</td><td>'+anNum(r.visitors)+'</td></tr>'}).join("")+'</tbody></table></div>';
+  }
+  function anChart(d){
+    var el=$("#an-chart");if(!el)return;var S=d.series||[];
+    if(!S.length){el.innerHTML='<p class="a-hint">Ainda sem visitas neste período.</p>';return}
+    var W=Math.max(320,el.clientWidth||640),H=220,L=44,R=12,Tp=12,B=28,iw=W-L-R,ih=H-Tp-B;
+    var max=Math.max(1,S.reduce(function(m,r){return Math.max(m,r.pageviews,r.visitors)},0));
+    var step=Math.pow(10,Math.floor(Math.log10(max))),nice=Math.ceil(max/step)*step;if(nice/step>5&&step>=1)nice=Math.ceil(max/(step*2))*step*2;
+    var x=function(i){return L+(S.length<2?iw/2:i*iw/(S.length-1))},y=function(v){return Tp+ih-v/nice*ih};
+    var path=function(k){return S.map(function(r,i){return (i?"L":"M")+x(i).toFixed(1)+","+y(r[k]).toFixed(1)}).join("")};
+    var grid="",ticks=4;
+    for(var g=0;g<=ticks;g++){var v=nice*g/ticks,yy=y(v).toFixed(1);grid+='<line class="an-gl" x1="'+L+'" x2="'+(W-R)+'" y1="'+yy+'" y2="'+yy+'"/><text class="an-ax" x="'+(L-6)+'" y="'+yy+'" dy="4" text-anchor="end">'+anNum(Math.round(v))+'</text>'}
+    var every=Math.max(1,Math.ceil(S.length/(W<480?4:7))),xl="";
+    S.forEach(function(r,i){if(i%every===0||i===S.length-1)xl+='<text class="an-ax" x="'+x(i).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+esc(anLabel(r.t,d.gran,true))+'</text>'});
+    var dots=S.length<=40?S.map(function(r,i){return '<circle class="an-dot s1" cx="'+x(i).toFixed(1)+'" cy="'+y(r.pageviews).toFixed(1)+'" r="3"/><circle class="an-dot s2" cx="'+x(i).toFixed(1)+'" cy="'+y(r.visitors).toFixed(1)+'" r="3"/>'}).join(""):"";
+    el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'" role="img" aria-label="Gráfico de visualizações e visitantes; use Ver como tabela para os números">'
+      +grid+xl+'<path class="an-line s1" d="'+path("pageviews")+'"/><path class="an-line s2" d="'+path("visitors")+'"/>'+dots
+      +'<line class="an-cross" id="an-cross" y1="'+Tp+'" y2="'+(Tp+ih)+'" x1="0" x2="0"/>'
+      +'<rect class="an-hit" x="'+L+'" y="'+Tp+'" width="'+iw+'" height="'+ih+'"/></svg><div class="an-tip" id="an-tip" hidden></div>';
+    var svgEl=el.querySelector("svg"),hit=el.querySelector(".an-hit"),cross=el.querySelector("#an-cross"),tip=el.querySelector("#an-tip");
+    function move(ev){
+      var p=ev.touches?ev.touches[0]:ev,rc=svgEl.getBoundingClientRect(),px=(p.clientX-rc.left)*W/rc.width;
+      var i=S.length<2?0:Math.round((px-L)/iw*(S.length-1));i=Math.max(0,Math.min(S.length-1,i));var r=S[i],cx=x(i);
+      cross.setAttribute("x1",cx);cross.setAttribute("x2",cx);cross.classList.add("on");
+      tip.innerHTML='<b>'+esc(anLabel(r.t,d.gran))+'</b><span><i class="an-sw s1"></i>'+anNum(r.pageviews)+' visualizações</span><span><i class="an-sw s2"></i>'+anNum(r.visitors)+' visitantes</span>';
+      tip.hidden=false;var left=cx/W*rc.width;tip.style.left=Math.min(Math.max(left,70),rc.width-70)+"px";
+    }
+    function out(){cross.classList.remove("on");tip.hidden=true}
+    hit.addEventListener("mousemove",move);hit.addEventListener("mouseleave",out);
+    hit.addEventListener("touchstart",move,{passive:true});hit.addEventListener("touchmove",move,{passive:true});hit.addEventListener("touchend",function(){setTimeout(out,1500)});
+  }
+  addEventListener("resize",function(){if(st.tab==="an"&&AN.data[AN.dias]&&AN.data[AN.dias].ok){clearTimeout(AN.rt);AN.rt=setTimeout(function(){anChart(AN.data[AN.dias])},150)}});
 
   /* ---- notificações (curtidas, comentários, votos e mensagens) ----
      O servidor guarda até onde você já leu: abrir o Início marca tudo como lido em todos os aparelhos. */
@@ -1004,6 +1124,9 @@
     if(id==="rv-new"){rvNew();return}
     if(id==="rv-del"){rvDel();return}
     if(id==="rv-disc"){st.dirty=false;st.rvDraft=st.rvNew?null:clone(rvFind(st.rvSel));st.rvNew=false;rvItems();rvEditor();return}
+    if(ds.andias){AN.dias=+ds.andias;AN.table=false;anFill();anLoad(false);return}
+    if(id==="an-reload"){delete AN.data[AN.dias];anLoad(true);return}
+    if(id==="an-table"){AN.table=!AN.table;anFill();return}
     if(ds.cmdel){cmDel(ds.cmdel,t);return}
     if(ds.cmrep){repOpen(ds.cmrep,t);return}
     if(ds.cmsave){repSave(ds.cmsave,t,false);return}

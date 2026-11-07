@@ -240,3 +240,19 @@ diária quanto quando o painel admin publica, e posta no servidor do Discord só
 `SITE/data/gta6.json` só com os endereços das fotos. **As fotos não são baixadas**: o site mostra direto do servidor
 da Rockstar, em miniatura (480px) e grande (1920px) só ao abrir, então nada pesa no servidor do site.
 Foto nova na galeria ganha a etiqueta "Nova" por 14 dias. O resumo fica em `GTA6_RESUMO` no `gerar_paginas.py`.
+
+## Análise no painel (aba "Análise")
+
+O painel mostra os números do **Vercel Web Analytics** (visualizações, visitantes, páginas mais vistas, de onde vêm,
+países, aparelhos, navegadores e sistemas) pela API pública da Vercel. A consulta é feita no servidor, em
+`api/notifications.mjs?analytics=DIAS` (fica nessa função porque o plano grátis aceita no máximo 12), com 5 min de cache.
+
+Variáveis na Vercel (Settings → Environment Variables, depois Redeploy):
+
+| Variável | Para quê |
+|---|---|
+| `VERCEL_ANALYTICS_TOKEN` | **obrigatória**: token criado em vercel.com/account/tokens |
+| `VERCEL_ANALYTICS_PROJECT` | opcional: nome do projeto na Vercel (padrão `nizzera-games`) |
+| `VERCEL_TEAM_ID` | opcional: o painel descobre sozinho o time dono do projeto |
+
+No plano grátis (Hobby) a Vercel guarda 1 mês de dados, por isso os períodos são Hoje, 7 e 30 dias.
