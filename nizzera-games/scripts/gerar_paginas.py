@@ -503,6 +503,7 @@ def pagina_comunidade(c, site):
       <p class="lead">O nosso cantinho no Discord: tudo o que sai no site chega lá na hora, em canais separados por plataforma.
       E, claro, espaço para trocar ideia com outros gamers, chamar a galera pra jogar e dar pitaco nas notícias.</p>
       <div class="dc-cta">{botao_discord("big")}<a class="dc-sec" href="#dc-canais">Ver os canais ↓</a></div>
+      <p class="dc-count" id="dccount" aria-live="polite" hidden><span class="dc-on" aria-hidden="true"></span><span id="dccount-t"></span></p>
     </div>
     <div class="dc-art" aria-hidden="true">
       <div class="dc-msg"><span class="dc-av"></span><div><b>Nizzera Games <i>BOT</i></b><p>📰 Saiu notícia nova no site!</p><span class="dc-card"></span></div></div>
@@ -531,7 +532,7 @@ def pagina_comunidade(c, site):
     {botao_discord("big")}
   </section>
 </main>"""
-    return layout(c, nome, cab, corpo)
+    return layout(c, nome, cab, corpo, '<script src="/assets/js/discord.js"></script>\n')
 
 
 # ---------------- GTA VI: galeria oficial (SITE/data/gta6.json, gravado por atualizar_gta6.py) ----------------

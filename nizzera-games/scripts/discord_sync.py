@@ -24,7 +24,7 @@ import argparse, json, os, re, sys, time, urllib.error, urllib.request
 from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from config import SITE_URL  # noqa: E402
+from config import SITE_URL, DISCORD_CARGOS  # noqa: E402
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 RAIZ = os.path.dirname(AQUI)                      # nizzera-games/
@@ -68,14 +68,21 @@ def webhook(canal):
     return url if re.match(r"^https://(discord|discordapp)\.com/api/webhooks/\d+/[\w-]+$", url) else ""
 
 
-def enviar(canal, embeds, texto=""):
-    """Manda uma mensagem (até 10 embeds) no canal. Devolve True se o Discord aceitou.
-    Nunca levanta erro e nunca imprime o URL do webhook."""
+def enviar(canal, embeds, texto="", cargo=None):
+    """Manda uma mensagem (até 10 embeds) no canal. Devolve a mensagem criada (dict) se o Discord
+    aceitou, ou False. Nunca levanta erro e nunca imprime o URL do webhook.
+    cargo: None = o cargo do canal em DISCORD_CARGOS (se houver); "" = sem menção; ou um ID."""
     url = webhook(canal)
     if not url:
         print(f"[discord] sem webhook para {canal}: pulei")
         return False
-    corpo = {"username": NOME, "avatar_url": AVATAR, "embeds": embeds[:10], "allowed_mentions": {"parse": []}}
+    if cargo is None:
+        cargo = "" if canal == "TODAS_AS_NOTICIAS" else DISCORD_CARGOS.get(canal, "")
+    cargo = cargo if re.match(r"^\d{15,25}$", str(cargo or "")) else ""
+    # menção só do cargo certo (nunca @everyone/@here): fica no texto, fora do embed
+    corpo = {"username": NOME, "avatar_url": AVATAR, "embeds": embeds[:10],
+             "allowed_mentions": {"parse": [], "roles": [cargo]} if cargo else {"parse": []}}
+    texto = (f"<@&{cargo}> " + texto).strip() if cargo else texto
     if texto:
         corpo["content"] = texto[:2000]
     dados = json.dumps(corpo).encode("utf-8")
@@ -83,10 +90,13 @@ def enviar(canal, embeds, texto=""):
         req = urllib.request.Request(url + "?wait=true", data=dados, method="POST",
                                      headers={"Content-Type": "application/json", "User-Agent": UA})
         try:
-            with urllib.request.urlopen(req, timeout=20):
-                pass
+            with urllib.request.urlopen(req, timeout=20) as r:
+                try:
+                    msg = json.loads(r.read().decode("utf-8") or "{}")
+                except Exception:
+                    msg = {}
             time.sleep(PAUSA)
-            return True
+            return msg or {"ok": True}
         except urllib.error.HTTPError as e:
             if e.code == 429:  # limite do Discord: espera o tempo que ele pede e tenta de novo
                 try:
@@ -325,7 +335,8 @@ def sincronizar(backfill=False, seco=False):
                 print(f"  {len(lote)} → {canal}: " + ", ".join(x.get("name", "")[:30] for _, _, x in lote))
                 continue
             texto = titulo + (f" — veja tudo em {SITE_URL}/{'ofertas' if prefixo == 'oferta' else 'gratis' if prefixo == 'gratis' else 'eventos'}/" if i == 0 else "")
-            if enviar(canal, [fazer(x, t) for _, t, x in lote], texto):
+            # menciona o cargo só na 1ª mensagem do lote, para não avisar a mesma pessoa várias vezes
+            if enviar(canal, [fazer(x, t) for _, t, x in lote], texto, cargo=None if i == 0 else ""):
                 for c, _, _ in lote:
                     marcar(c)
     if not seco:
@@ -335,6 +346,7 @@ def sincronizar(backfill=False, seco=False):
 def main():
     ap = argparse.ArgumentParser(description="Posta no Discord o que é novo no site.")
     ap.add_argument("--teste", action="store_true", help="manda uma mensagem de teste em #novidades-do-site")
+    ap.add_argument("--teste-cargo", metavar="CANAL", help="teste em #novidades-do-site mencionando o cargo do canal (ex.: STEAM)")
     ap.add_argument("--novidade", metavar="TEXTO", help="posta uma novidade do site em #novidades-do-site")
     ap.add_argument("--backfill", action="store_true", help="na 1ª execução, posta também o que já existe")
     ap.add_argument("--seco", action="store_true", help="só mostra o que seria postado")
@@ -348,6 +360,25 @@ def main():
                 "color": COR_SITE, "footer": {"text": f"Novidades do site · {NOME}"},
                 "timestamp": datetime.now(timezone.utc).isoformat(), "thumbnail": {"url": AVATAR}}])
             print("[discord] teste enviado." if ok else "[discord] o teste falhou (veja o erro acima).")
+            return
+        if a.teste_cargo:
+            canal = a.teste_cargo.upper().replace("-", "_")
+            cargo = DISCORD_CARGOS.get(canal, "")
+            if not cargo:
+                print(f"[discord] não há cargo para {canal}. Opções: {', '.join(DISCORD_CARGOS)}")
+                return
+            msg = enviar("NOVIDADES_DO_SITE", [{
+                "title": "Teste de menção de cargo", "url": SITE_URL + "/", "color": COR_SITE,
+                "description": f"Quem tem o cargo do canal {canal} deve ter recebido uma notificação com esta mensagem.",
+                "footer": {"text": f"Novidades do site · {NOME}"}, "timestamp": datetime.now(timezone.utc).isoformat()}],
+                "teste de aviso para quem escolheu essa plataforma", cargo=cargo)
+            if not msg:
+                print("[discord] o teste falhou (veja o erro acima).")
+            elif cargo in (msg.get("mention_roles") or []):
+                print(f"[discord] teste enviado: o Discord registrou a menção do cargo {cargo} (vai notificar).")
+            else:
+                print(f"[discord] teste enviado, mas o Discord NÃO registrou a menção do cargo {cargo}: "
+                      "a menção aparece como texto e não notifica. Ligue 'Permitir que qualquer um mencione este cargo'.")
             return
         if a.novidade:
             ok = enviar("NOVIDADES_DO_SITE", [{"title": "Novidade no site", "url": SITE_URL + "/",

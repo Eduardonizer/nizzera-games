@@ -9,7 +9,12 @@
   "redirects": [
     {
       "source": "/:path(.*)",
-      "has": [{ "type": "host", "value": "nizzera-games.vercel.app" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "nizzera-games.vercel.app"
+        }
+      ],
       "destination": "https://www.nizzeragames.com.br/:path",
       "statusCode": 301
     }
@@ -108,7 +113,7 @@
       ]
     },
     {
-      "source": "/api/(.*)",
+      "source": "/api/((?!discord).*)",
       "headers": [
         {
           "key": "X-Robots-Tag",
@@ -117,6 +122,15 @@
         {
           "key": "Cache-Control",
           "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/api/discord",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
         }
       ]
     },
