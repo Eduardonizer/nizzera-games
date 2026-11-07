@@ -206,3 +206,25 @@ para não dar conflito.
 - **Feiras, premiações e apresentações** (BGS, Gamescom, The Game Awards...): não há fonte automática confiável, então
   ficam em `scripts/eventos_fixos.json`. Para adicionar um, copie um item da lista e troque os campos
   (`start`/`end` no formato AAAA-MM-DD; `time` é opcional, ex.: "22h (Brasília)"). Eventos que já passaram saem sozinhos.
+
+## Discord (posts automáticos)
+
+`nizzera-games/scripts/discord_sync.py` roda no GitHub Actions logo depois do `gerar_paginas.py`, tanto na rodada
+diária quanto quando o painel admin publica, e posta no servidor do Discord só o que é novo:
+
+| O quê | Canal (webhook) |
+|---|---|
+| Notícias | `TODAS_AS_NOTICIAS` + canal da categoria (Lançamentos, Steam, PlayStation, Xbox, Nintendo, Game Pass, Serviços, Esports, Eventos) |
+| Reviews (com a nota) | `REVIEWS` |
+| Ofertas da semana (até 10 por mensagem) | `OFERTAS_DA_SEMANA` |
+| Jogos grátis (Epic e Steam) | `JOGOS_GRATIS` |
+| Eventos novos de /eventos/ | `EVENTOS` |
+| Novidades do site (manual: `--novidade "texto"`) | `NOVIDADES_DO_SITE` |
+
+- Os webhooks ficam **só** em variáveis `DISCORD_WEBHOOK_*`: nos Secrets do GitHub Actions (produção) e, no computador,
+  no arquivo `discord_webhooks.env` da raiz (está no `.gitignore`, nunca suba).
+- O que já foi postado fica em `scripts/discord_enviados.json` (só ids do site). Na 1ª execução nada é postado:
+  tudo o que já existe é marcado como enviado (`--backfill` posta tudo).
+- Se o Discord falhar, o erro só aparece no log do Actions; o site é salvo do mesmo jeito.
+- Comandos: `python nizzera-games/scripts/discord_sync.py --teste` (mensagem de teste em #novidades-do-site),
+  `--seco` (mostra o que seria postado, sem postar).
