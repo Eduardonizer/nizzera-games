@@ -2,8 +2,11 @@ name: Atualizar notícias e ofertas
 
 on:
   schedule:
-    - cron: "23 10 * * *"   # 1 vez por dia, às 10:23 UTC = 07:23 em Brasília. Fugir do minuto 0 reduz os atrasos do GitHub.
-                             # Para mudar o horário, troque o 10 (hora em UTC = hora de Brasília + 3)
+    # 1 vez por dia, de madrugada. São 3 horários porque o GitHub às vezes atrasa ou pula um;
+    # só o primeiro que rodar trabalha (veja o job "checar"). Hora em UTC = hora de Brasília + 3.
+    - cron: "23 8 * * *"    # 05:23 em Brasília (o principal)
+    - cron: "23 9 * * *"    # 06:23 em Brasília (reserva)
+    - cron: "53 10 * * *"   # 07:53 em Brasília (reserva)
   workflow_dispatch:         # permite rodar na mão: aba Actions > Atualizar notícias e ofertas > Run workflow
   push:                      # quando o painel admin publica, gera as páginas das notícias na hora
     branches: [main]
@@ -20,7 +23,38 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # O agendador do GitHub é "quando der": em horário de pico ele atrasa horas ou pula a rodada.
+  # Por isso há 3 horários por dia, e este passo faz só o PRIMEIRO que rodar trabalhar;
+  # os outros veem que o trabalho de hoje (horário de Brasília) já foi feito e param em segundos.
+  # Rodar na mão (Actions > Run workflow) sempre trabalha.
+  checar:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read            # só para ver as rodadas anteriores deste robô
+    outputs:
+      ja_rodou: ${{ steps.hoje.outputs.ja_rodou }}
+    steps:
+      - name: Conferir se o trabalho de hoje já foi feito
+        id: hoje
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then echo "ja_rodou=nao" >> "$GITHUB_OUTPUT"; exit 0; fi
+          HOJE=$(TZ=America/Sao_Paulo date +%F)
+          N=0
+          for EV in schedule workflow_dispatch; do   # filtra pelo tipo: as rodadas de publicação (push) não contam
+            K=$(gh run list -R "$GITHUB_REPOSITORY" --workflow "atualizar-noticias.yml" --event "$EV" --status success --limit 10 \
+                  --json createdAt,databaseId \
+                  -q "[.[] | select(.databaseId != ${{ github.run_id }})
+                       | select((.createdAt | sub(\"\\\\.[0-9]+Z$\";\"Z\") | fromdateiso8601) - 10800 | strftime(\"%Y-%m-%d\") == \"$HOJE\")] | length" || echo 0)
+            N=$((N + ${K:-0}))
+          done
+          echo "Rodadas que já trabalharam hoje ($HOJE): $N"
+          if [ "${N:-0}" -gt 0 ]; then echo "ja_rodou=sim" >> "$GITHUB_OUTPUT"; else echo "ja_rodou=nao" >> "$GITHUB_OUTPUT"; fi
+
   atualizar:
+    needs: checar
+    if: needs.checar.outputs.ja_rodou != 'sim'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
