@@ -196,3 +196,13 @@ Abra http://localhost:8000. O painel e a API só funcionam na Vercel (ou com `ve
 
 O robô faz commits sozinho. Antes de editar algo na sua máquina, rode `git pull`
 para não dar conflito.
+
+## Eventos (/eventos/)
+
+`scripts/atualizar_eventos.py` roda todo dia e grava `SITE/data/eventos.json`:
+
+- **Campeonatos** (CS2, Valorant, LoL, Dota 2, Rainbow Six, Free Fire): vêm do [Liquipedia](https://liquipedia.net/)
+  (só S-Tier e A-Tier, sem classificatórias). Licença CC BY-SA: a página cita o Liquipedia e cada evento tem link para lá.
+- **Feiras, premiações e apresentações** (BGS, Gamescom, The Game Awards...): não há fonte automática confiável, então
+  ficam em `scripts/eventos_fixos.json`. Para adicionar um, copie um item da lista e troque os campos
+  (`start`/`end` no formato AAAA-MM-DD; `time` é opcional, ex.: "22h (Brasília)"). Eventos que já passaram saem sozinhos.

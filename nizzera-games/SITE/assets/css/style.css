@@ -783,3 +783,39 @@ html.tl-dragging,html.tl-dragging *{cursor:grabbing!important;-webkit-user-selec
 .shr-b[data-shr="copy"]:hover{border-color:var(--cobalt)}
 .shr-main{background:var(--cobalt);border-color:var(--cobalt);color:#fff}
 @media (max-width:560px){.shr-b span{display:none}.shr-b{padding:9px}.shr-main span{display:inline}.shr-main{padding:8px 16px}}
+
+/* ===== página /eventos/ ===== */
+.ev-tools{margin:18px 0 4px}
+.ev-sec{margin-top:30px}
+.ev-sec[hidden]{display:none}
+.ev-h{display:flex;align-items:center;gap:10px;font-size:1.3rem;margin:0 0 14px}
+.ev-dot{width:12px;height:12px;border-radius:50%;background:var(--coral);box-shadow:0 0 0 0 rgba(255,92,122,.6);animation:evpulse 1.6s infinite}
+@keyframes evpulse{70%{box-shadow:0 0 0 10px rgba(255,92,122,0)}100%{box-shadow:0 0 0 0 rgba(255,92,122,0)}}
+.ev-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,460px),1fr));gap:16px}
+.ev{display:grid;grid-template-columns:64px 1fr;gap:16px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px;transition:transform .2s,box-shadow .2s}
+.ev[hidden]{display:none}
+@media (hover:hover){.ev:hover{transform:translateY(-3px);box-shadow:6px 6px 0 var(--sun)}}
+.ev-date{display:grid;place-items:center;align-content:center;width:64px;height:68px;border-radius:14px;background:var(--cobalt);color:#fff;line-height:1}
+.ev-date b{font:800 1.7rem "Bricolage Grotesque",sans-serif}
+.ev-date span{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+.ev-tx{min-width:0;display:grid;gap:8px}
+.ev-tags{display:flex;flex-wrap:wrap;gap:6px}
+.ev-tags span{font:800 .72rem "DM Sans",sans-serif;letter-spacing:.03em;padding:3px 9px;border-radius:99px;background:var(--bg);color:var(--fg);border:1px solid var(--line)}
+.ev-tags .ev-game{color:#fff;border:0}
+.ev-game.cs2{background:#d98b16}.ev-game.val{background:#e8394d}.ev-game.lol{background:#a77e2e}
+.ev-game.dota{background:#b33a28}.ev-game.r6{background:#3f5fcf}.ev-game.ff{background:#e06a00}
+.ev-game.ev-other{background:var(--cobalt)}
+.ev-tags .ev-live{background:var(--coral);color:#fff;border:0}
+.ev-tags .ev-live[hidden]{display:none}
+.ev h3{font-size:1.15rem;line-height:1.25;overflow-wrap:anywhere}
+.ev-info{margin:0;color:var(--muted);font-size:.92rem;line-height:1.5}
+.ev-dl{margin:0;display:grid;gap:4px;font-size:.9rem}
+.ev-dl div{display:grid;grid-template-columns:92px 1fr;gap:8px}
+.ev-dl dt{color:var(--muted);font-weight:700}
+.ev-dl dd{margin:0;overflow-wrap:anywhere}
+.ev-more{justify-self:start;font-weight:700;font-size:.88rem;color:var(--fg);text-decoration:none;border-bottom:2px solid var(--sun)}
+.ev-more:hover{color:var(--cobalt)}
+.ev-empty{margin:24px 0;color:var(--muted);font-weight:700}
+.ev-src{margin:34px 0 0;padding-bottom:48px}
+@media (max-width:560px){.ev{grid-template-columns:52px 1fr;gap:12px;padding:14px}.ev-date{width:52px;height:58px}.ev-date b{font-size:1.4rem}.ev-dl div{grid-template-columns:1fr;gap:0}}
+@media (prefers-reduced-motion:reduce){.ev-dot{animation:none}}

@@ -40,7 +40,7 @@
   function buildSide(){
     var h='<div class="grp">Navegar</div>'+link("/","home","Início",' data-page="topo"');
     h+=link("/#noticias","news","Todas as notícias",' data-cat="Todas"',hasNews?count("Todas"):null);
-    if(!hasNews||CATS.indexOf("Eventos")>-1)h+=link("/?categoria=eventos#noticias","cal","Eventos",' data-cat="Eventos"',hasNews?count("Eventos"):null);
+    h+=link("/eventos/","cal","Eventos",' data-page="/eventos/"');
     h+=link("/reviews/","star","Reviews",' data-page="/review"');
     h+=link("/ofertas/","tag","Ofertas da semana",' data-page="/ofertas/"');
     h+=link("/gratis/","gift","Jogos grátis",' data-page="/gratis/"');

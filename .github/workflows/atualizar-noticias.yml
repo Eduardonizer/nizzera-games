@@ -46,6 +46,11 @@ jobs:
         continue-on-error: true      # se a Steam falhar, as notícias ainda são salvas
         run: python nizzera-games/scripts/atualizar_maisjogados.py
 
+      - name: Rodar o script de eventos (campeonatos, feiras e premiações)
+        if: github.event_name != 'push'
+        continue-on-error: true      # se o Liquipedia falhar, fica a lista anterior
+        run: python nizzera-games/scripts/atualizar_eventos.py
+
       - name: Rodar o script de notícias
         if: github.event_name != 'push'
         run: python nizzera-games/scripts/atualizar_noticias.py

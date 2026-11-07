@@ -314,6 +314,148 @@ def pagina_maisjogados(c, site):
     return layout(c, nome, cab, corpo)
 
 
+# ---------------- eventos (SITE/data/eventos.json, gravado por atualizar_eventos.py) ----------------
+MESES_CURTOS = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
+COR_JOGO = {"CS2": "cs2", "Valorant": "val", "LoL": "lol", "Dota 2": "dota", "Rainbow Six": "r6", "Free Fire": "ff"}
+
+
+def periodo(ini, fim):
+    """'10 dez 2026' ou '24 nov – 13 dez 2026'."""
+    if ini == fim:
+        return f"{ini.day} {MESES_CURTOS[ini.month - 1]} {ini.year}"
+    if ini.year != fim.year:
+        return f"{ini.day} {MESES_CURTOS[ini.month - 1]} {ini.year} – {fim.day} {MESES_CURTOS[fim.month - 1]} {fim.year}"
+    if ini.month == fim.month:
+        return f"{ini.day} a {fim.day} {MESES_CURTOS[ini.month - 1]} {ini.year}"
+    return f"{ini.day} {MESES_CURTOS[ini.month - 1]} – {fim.day} {MESES_CURTOS[fim.month - 1]} {fim.year}"
+
+
+def ev_card(x, ini, fim, hoje):
+    grupo = x.get("game") or x.get("kind") or "Evento"
+    filtro = slugify(x.get("game") or "feiras")
+    ao_vivo = ini <= hoje <= fim
+    modo = x.get("mode", "")
+    onde = " · ".join(v for v in [x.get("venue", ""), x.get("place", "")] if v)
+    info = [("Quando", periodo(ini, fim) + (f" · {x['time']}" if x.get("time") else ""))]
+    if onde:
+        info.append(("Onde", onde))
+    elif modo == "Online":
+        info.append(("Onde", "Online, com transmissão ao vivo"))
+    if x.get("organizer"):
+        info.append(("Organização", x["organizer"]))
+    if x.get("prize"):
+        info.append(("Premiação", x["prize"]))
+    dl = "".join(f"<div><dt>{e(k)}</dt><dd>{e(v)}</dd></div>" for k, v in info)
+    link = (f'<a class="ev-more" href="{e(x["url"])}" target="_blank" rel="noopener">Mais informações{(" no " + e(x["source"])) if x.get("source") else ""} ↗</a>'
+            if http(x.get("url")) else "")
+    return (f'<article class="ev" data-f="{e(filtro)}" data-start="{ini.isoformat()}" data-end="{fim.isoformat()}">'
+            f'<div class="ev-date" aria-hidden="true"><b>{ini.day}</b><span>{MESES_CURTOS[ini.month - 1]}</span></div>'
+            f'<div class="ev-tx"><div class="ev-tags"><span class="ev-game {COR_JOGO.get(x.get("game"), "ev-other")}">{e(grupo)}</span>'
+            + (f'<span class="ev-mode">{e(modo)}</span>' if modo else "")
+            + (f'<span class="ev-tier">{e(x["tier"])}</span>' if x.get("tier") else "")
+            + f'<span class="ev-live"{"" if ao_vivo else " hidden"}>● Ao vivo</span></div>'
+            f'<h3>{e(x["name"])}</h3>'
+            + (f'<p class="ev-info">{e(x["info"])}</p>' if x.get("info") else "")
+            + f'<dl class="ev-dl">{dl}</dl>{link}</div></article>')
+
+
+def ev_ld(x, ini, fim):
+    """Dados estruturados (schema.org/Event): ajudam o Google a mostrar os eventos na busca."""
+    modo = x.get("mode", "")
+    lugar_real = {"@type": "Place", "name": x.get("venue") or x.get("place") or x["name"],
+                  "address": x.get("place") or x.get("venue") or ""}
+    virtual = {"@type": "VirtualLocation", "url": x.get("url") or SITE_URL + "/eventos/"}
+    ld = {"@type": "Event", "name": x["name"], "startDate": ini.isoformat(), "endDate": fim.isoformat(),
+          "eventStatus": "https://schema.org/EventScheduled",
+          "eventAttendanceMode": ("https://schema.org/OnlineEventAttendanceMode" if modo == "Online" else
+                                  "https://schema.org/MixedEventAttendanceMode" if modo == "Presencial e online" else
+                                  "https://schema.org/OfflineEventAttendanceMode"),
+          "location": virtual if modo == "Online" else [lugar_real, virtual] if modo == "Presencial e online" else lugar_real,
+          "description": x.get("info") or f"{x.get('kind', 'Evento')} de {x.get('game') or 'games'}: {x['name']}."}
+    if x.get("organizer"):
+        ld["organizer"] = {"@type": "Organization", "name": x["organizer"]}
+    if http(x.get("url")):
+        ld["url"] = x["url"]
+    return ld
+
+
+def pagina_eventos(c, site):
+    nome = site.get("name") or "Nizzera Games"
+    try:
+        with open(os.path.join(SITE, "data", "eventos.json"), encoding="utf-8") as f:
+            d = json.load(f)
+    except Exception:
+        d = {}
+    hoje = datetime.now(timezone(timedelta(hours=-3))).date()
+    lista = []
+    for x in d.get("events") or []:
+        try:
+            ini, fim = date.fromisoformat(x["start"]), date.fromisoformat(x.get("end") or x["start"])
+        except (KeyError, ValueError):
+            continue
+        if fim >= hoje and x.get("name"):
+            lista.append((ini, fim, x))
+    lista.sort(key=lambda t: (t[0], t[1], t[2]["name"]))
+    agora = [t for t in lista if t[0] <= hoje]
+    depois = [t for t in lista if t[0] > hoje]
+
+    # filtros: os jogos que aparecem + feiras e premiações
+    jogos = []
+    for _, _, x in lista:
+        g = x.get("game") or ""
+        if g and g not in jogos:
+            jogos.append(g)
+    tem_feiras = any(not x.get("game") for _, _, x in lista)
+    chips = '<button class="chip" type="button" data-evf="" aria-pressed="true">Todos</button>' + "".join(
+        f'<button class="chip" type="button" data-evf="{e(slugify(g))}" aria-pressed="false">{e(g)}</button>' for g in jogos)
+    if tem_feiras:
+        chips += '<button class="chip" type="button" data-evf="feiras" aria-pressed="false">Feiras e premiações</button>'
+
+    blocos = []
+    if agora:
+        blocos.append('<section class="ev-sec" aria-labelledby="ev-now"><h2 class="ev-h" id="ev-now"><span class="ev-dot"></span>Acontecendo agora</h2>'
+                      '<div class="ev-list">' + "".join(ev_card(x, i, f, hoje) for i, f, x in agora) + "</div></section>")
+    mes_atual, cards = None, []
+    for i, f, x in depois:
+        chave = (i.year, i.month)
+        if chave != mes_atual:
+            if cards:
+                blocos.append(cards_html(mes_atual, cards))
+            mes_atual, cards = chave, []
+        cards.append(ev_card(x, i, f, hoje))
+    if cards:
+        blocos.append(cards_html(mes_atual, cards))
+    corpo_lista = "".join(blocos) if blocos else '<p class="soon">Nenhum evento encontrado agora. A lista é atualizada todo dia.</p>'
+
+    quando = ""
+    try:
+        t = datetime.strptime(d.get("updated", ""), "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc) - timedelta(hours=3)
+        quando = f"Atualizado em {t.day}/{t.month} às {t:%H:%M} (Brasília)."
+    except Exception:
+        pass
+    ld = {"@context": "https://schema.org", "@graph": [ev_ld(x, i, f) for i, f, x in lista[:40]]}
+    cab = meta_pagina(f"Eventos de games: campeonatos, feiras e premiações | {nome}",
+                      "Calendário de eventos de games: campeonatos de CS2, Valorant, LoL, Dota 2, Rainbow Six e Free Fire, "
+                      "feiras e premiações como The Game Awards, presenciais e online, em ordem de data.",
+                      SITE_URL + "/eventos/", nome) + (f'\n<script type="application/ld+json">{json_ld(ld)}</script>' if lista else "")
+    corpo = f"""<main class="wrap page evp">
+  {trilha("Eventos")}
+  <h1 class="ph">Eventos de games</h1>
+  <p class="lead">Campeonatos de esports, feiras e premiações pelo mundo, presenciais e online, em ordem de data. Atualizado todo dia.</p>
+  <div class="tools ev-tools" role="group" aria-label="Filtrar eventos">{chips}</div>
+  <div id="evlist">{corpo_lista}</div>
+  <p class="ev-empty" id="evempty" hidden>Nenhum evento desse tipo agora.</p>
+  <p class="meta ev-src">{e(quando)} Campeonatos: dados do <a href="https://liquipedia.net/" target="_blank" rel="noopener">Liquipedia</a> (CC BY-SA). Datas e locais podem mudar: confira no link de cada evento.</p>
+</main>"""
+    return layout(c, nome, cab, corpo, '<script src="/assets/js/eventos.js"></script>\n')
+
+
+def cards_html(mes, cards):
+    ano, m = mes
+    titulo = f"{MESES[m - 1].capitalize()} de {ano}"
+    return f'<section class="ev-sec"><h2 class="ev-h">{e(titulo)}</h2><div class="ev-list">{"".join(cards)}</div></section>'
+
+
 def pagina_comentarios(c, site):
     nome = site.get("name") or "Nizzera Games"
     cab = meta_pagina(f"Comentários e feedback | {nome}",
@@ -981,6 +1123,7 @@ def sitemap(todas):
               f"  <url><loc>{SITE_URL}/ofertas/</loc></url>",
               f"  <url><loc>{SITE_URL}/gratis/</loc></url>",
               f"  <url><loc>{SITE_URL}/maisjogados/</loc></url>",
+              f"  <url><loc>{SITE_URL}/eventos/</loc></url>",
               f"  <url><loc>{SITE_URL}/comentarios/</loc></url>",
               f"  <url><loc>{SITE_URL}/sobre/</loc></url>",
               f"  <url><loc>{SITE_URL}/tierlist/</loc></url>",
@@ -1095,6 +1238,7 @@ def main():
     mudou += gravar(os.path.join(SITE, "ofertas", "index.html"), pagina_ofertas(c, site))
     mudou += gravar(os.path.join(SITE, "gratis", "index.html"), pagina_gratis(c, site))
     mudou += gravar(os.path.join(SITE, "maisjogados", "index.html"), pagina_maisjogados(c, site))
+    mudou += gravar(os.path.join(SITE, "eventos", "index.html"), pagina_eventos(c, site))
     mudou += gravar(os.path.join(SITE, "comentarios", "index.html"), pagina_comentarios(c, site))
     mudou += gravar(os.path.join(SITE, "sobre", "index.html"), pagina_sobre(c, site))
     mudou += gravar(os.path.join(SITE, "tierlist", "index.html"), pagina_tierlist(c, site))
