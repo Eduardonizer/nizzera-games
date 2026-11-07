@@ -93,11 +93,24 @@
   function closeMenu(){if(html.classList.contains("menu-open"))openMenu(false)}
 
   /* ---- tema claro/escuro (lembrado entre as páginas) ---- */
+  var darkMq=matchMedia("(prefers-color-scheme:dark)");
+  function curTheme(){return html.getAttribute("data-theme")||(darkMq.matches?"dark":"light")}
+  /* interruptor do topo: ligado = modo escuro */
+  function syncTheme(){
+    var tb=document.getElementById("theme");if(!tb)return;
+    var dark=curTheme()==="dark";tb.setAttribute("aria-checked",dark?"true":"false");
+    tb.title=dark?"Mudar para o modo claro":"Mudar para o modo escuro";
+  }
   function toggleTheme(){
-    var cur=html.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"),nx=cur==="dark"?"light":"dark";
+    var nx=curTheme()==="dark"?"light":"dark";
     html.setAttribute("data-theme",nx);try{localStorage.setItem("nz-theme",nx)}catch(_){}
+    syncTheme();
   }
   var tb=document.getElementById("theme");if(tb)tb.onclick=toggleTheme;
+  syncTheme();
+  if(tb)requestAnimationFrame(function(){requestAnimationFrame(function(){tb.classList.add("ready")})}); /* anima só nos cliques, não ao abrir a página */
+  /* sem escolha salva, segue o tema do aparelho quando ele muda */
+  if(darkMq.addEventListener)darkMq.addEventListener("change",syncTheme);
 
   function focusSearch(){go("noticias");setTimeout(function(){var q=document.querySelector(".search");if(q)q.focus({preventScroll:true})},smooth?450:0)}
   document.getElementById("side").addEventListener("click",function(e){
