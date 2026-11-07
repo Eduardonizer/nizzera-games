@@ -51,6 +51,11 @@ jobs:
         continue-on-error: true      # se o Liquipedia falhar, fica a lista anterior
         run: python nizzera-games/scripts/atualizar_eventos.py
 
+      - name: Rodar o script da galeria de GTA VI (imagens oficiais da Rockstar)
+        if: github.event_name != 'push'
+        continue-on-error: true      # se a Rockstar mudar a página, fica a lista anterior
+        run: python nizzera-games/scripts/atualizar_gta6.py
+
       - name: Rodar o script de notícias
         if: github.event_name != 'push'
         run: python nizzera-games/scripts/atualizar_noticias.py

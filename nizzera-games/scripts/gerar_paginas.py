@@ -534,6 +534,137 @@ def pagina_comunidade(c, site):
     return layout(c, nome, cab, corpo)
 
 
+# ---------------- GTA VI: galeria oficial (SITE/data/gta6.json, gravado por atualizar_gta6.py) ----------------
+# As fotos vêm direto do servidor da Rockstar, no tamanho pedido (imwidth): nada pesa no nosso servidor.
+GTA6_RESUMO = ("A Rockstar publicou em 5 de novembro uma nova leva de 38 screenshots de GTA VI, a duas semanas do "
+               "lançamento, marcado para 19 de novembro no PS5 e no Xbox Series X|S. As imagens mostram Jason e Lucia, "
+               "Vice City e outras regiões de Leonida, e quem olhou com calma achou detalhes como iguanas pelas ruas, "
+               "cenários debaixo d'água e referências a pontes abandonadas da vida real.")
+GTA6_NOVA_DIAS = 14
+GTA6_DESTAQUES = ["Jason and Lucia", "Vice City", "Lucia Caminos", "Jason Duval", "Leonida Keys", "Grassrivers",
+                  "Port Gellhorn", "Mount Kalaga National Park"]
+GRUPOS_GTA6 = ["Jogo", "Ultimate Edition", "Vintage Vice City"]
+
+
+def gta6_dados():
+    try:
+        with open(os.path.join(SITE, "data", "gta6.json"), encoding="utf-8") as f:
+            d = json.load(f)
+    except Exception:
+        return []
+    return [x for x in d.get("images", []) if re.match(r"^https://www\.rockstargames\.com/\S+$", x.get("src", ""))]
+
+
+def g6_img(x, w=480):
+    return f"{x['src']}?akim=1&imdensity=1&imwidth={w}"
+
+
+def g6_alt(x):
+    return f"GTA VI: {x['tag']}" + (f" ({x['group']})" if x["group"] != "Jogo" else "")
+
+
+def g6_nova(x):
+    try:
+        return (date.today() - date.fromisoformat(x.get("first") or "")).days <= GTA6_NOVA_DIAS
+    except ValueError:
+        return False
+
+
+def g6_thumb(x, i, grande=False, link="", ident=""):
+    """Miniatura. Na galeria abre a foto grande (o galeria.js mostra em tela cheia); na inicial, link = /gta6/#foto-N."""
+    w = 960 if grande else 480
+    srcset = ", ".join(f"{g6_img(x, v)} {v}w" for v in ((480, 960, 1280) if grande else (320, 480, 720)))
+    sizes = "(max-width:700px) 100vw, 50vw" if grande else "(max-width:560px) 50vw, (max-width:1000px) 33vw, 240px"
+    alvo = f'href="{e(link)}"' if link else f'href="{e(g6_img(x, 1920))}" target="_blank" rel="noopener"'
+    return (f'<a{(" id=" + chr(34) + ident + chr(34)) if ident else ""} class="g6-t{" big" if grande else ""}" {alvo} data-i="{i}" '
+            f'data-full="{e(g6_img(x, 1920))}" data-orig="{e(x["src"])}" data-tag="{e(x["tag"])}">'
+            f'<img src="{e(g6_img(x, w))}" srcset="{e(srcset)}" sizes="{sizes}" alt="{e(g6_alt(x))}" width="16" height="9" '
+            f'loading="lazy" decoding="async" referrerpolicy="no-referrer">'
+            + ('<span class="g6-new">Nova</span>' if g6_nova(x) else "") + "</a>")
+
+
+def g6_numeros(fotos):
+    cont = {g: sum(1 for x in fotos if x["group"] == g) for g in GRUPOS_GTA6}
+    partes = [f"<b>{len(fotos)}</b> imagens oficiais"] + [f"{n} {'do jogo' if g == 'Jogo' else g}" for g, n in cont.items() if n]
+    return " · ".join(partes)
+
+
+def gta6_home(fotos):
+    """Seção da página inicial (abaixo das reviews): resumo + 9 fotos (1 grande + 8, fecha a grade de 4) + link para a galeria."""
+    if not fotos:
+        return ""
+    escolhidas, vistos = [], set()
+    for tag in GTA6_DESTAQUES:  # uma foto de cada personagem/lugar, para variar
+        for i, x in enumerate(fotos):
+            if x["tag"] == tag and tag not in vistos:
+                escolhidas.append((i, x)); vistos.add(tag); break
+    for i, x in enumerate(fotos):
+        if len(escolhidas) >= 9:
+            break
+        if (i, x) not in escolhidas and x["group"] == "Jogo":
+            escolhidas.append((i, x))
+    mosaico = "".join(g6_thumb(x, i, grande=(k == 0), link=f"/gta6/#foto-{i}") for k, (i, x) in enumerate(escolhidas[:9]))
+    return (f'<div class="g6-box"><div class="g6-head"><span class="g6-kicker">Atualização da Rockstar</span>'
+            f'<h2 class="g6-title" id="g6h-t">GTA VI: as novas imagens oficiais</h2>'
+            f'<p class="g6-sum">{e(GTA6_RESUMO)}</p><p class="g6-nums">{g6_numeros(fotos)} · Lançamento em <b>19 de novembro</b></p>'
+            f'<a class="g6-cta" href="/gta6/">Ver todas as {len(fotos)} imagens →</a></div>'
+            f'<div class="g6-mosaic">{mosaico}</div>'
+            f'<p class="g6-credit">Imagens: <a href="https://www.rockstargames.com/VI/media/screenshots" target="_blank" rel="noopener">Rockstar Games</a></p></div>')
+
+
+def pagina_gta6(c, site, noticias):
+    nome = site.get("name") or "Nizzera Games"
+    fotos = gta6_dados()
+    url = SITE_URL + "/gta6/"
+    capa = g6_img(fotos[0], 1280) if fotos else ""
+    cab = meta_pagina(f"GTA VI: todas as imagens oficiais da Rockstar | {nome}",
+                      f"Galeria com as {len(fotos)} imagens oficiais de GTA VI: Jason, Lucia, Vice City, Leonida, "
+                      "Ultimate Edition e Vintage Vice City, com resumo das novidades.", url, nome, foto=capa)
+    # notícias do site sobre as imagens
+    rel = [n for n in noticias if re.search(r"gta ?(6|vi)|grand theft auto", (n.get("title", "") + " " + n.get("sum", "")).lower())
+           and re.search(r"imagens|screenshots|capturas", (n.get("title", "") + " " + n.get("sum", "")).lower())][:3]
+    chips = (f'<button class="chip" type="button" data-g6f="" aria-pressed="true">Todas ({len(fotos)})</button>'
+             + "".join(f'<button class="chip" type="button" data-g6f="{e(slugify(g))}" aria-pressed="false">'
+                       f'{e("Do jogo" if g == "Jogo" else g)} ({sum(1 for x in fotos if x["group"] == g)})</button>'
+                       for g in GRUPOS_GTA6 if any(x["group"] == g for x in fotos)))
+    blocos = []
+    for g in GRUPOS_GTA6:
+        do_grupo = [(i, x) for i, x in enumerate(fotos) if x["group"] == g]
+        if not do_grupo:
+            continue
+        tags = []
+        for _, x in do_grupo:
+            if x["tag"] not in tags:
+                tags.append(x["tag"])
+        partes = []
+        for t in tags:
+            itens = [(i, x) for i, x in do_grupo if x["tag"] == t]
+            partes.append(f'<div class="g6-tag"><h3>{e(t)} <small>{len(itens)}</small></h3><div class="g6-grid">'
+                          + "".join(g6_thumb(x, i, ident=f"foto-{i}") for i, x in itens)
+                          + "</div></div>")
+        blocos.append(f'<section class="g6-group" data-g6="{e(slugify(g))}"><h2 class="sec">{e("Imagens do jogo" if g == "Jogo" else g)}</h2>{"".join(partes)}</section>')
+    galeria = "".join(blocos) if blocos else '<p class="soon">A galeria não está disponível agora. Volte mais tarde.</p>'
+    leia = ('<section class="g6-news"><h2 class="sec">Leia no site</h2><div class="cards">' + "".join(card(n) for n in rel) + "</div></section>") if rel else ""
+    corpo = f"""<main class="wrap page g6p">
+  {trilha("GTA VI: imagens")}
+  <span class="g6-kicker">Atualização da Rockstar</span>
+  <h1 class="ph">GTA VI: todas as imagens oficiais</h1>
+  <p class="lead">{e(GTA6_RESUMO)} A galeria oficial reúne agora {len(fotos)} imagens, incluindo as da Ultimate Edition e do pacote Vintage Vice City. Clique em qualquer foto para ver em tela cheia.</p>
+  <p class="g6-nums">{g6_numeros(fotos) if fotos else ""}</p>
+  <div class="tools g6-tools" role="group" aria-label="Filtrar imagens">{chips if fotos else ""}</div>
+  {galeria}
+  {leia}
+  <p class="meta g6-src">Imagens oficiais © Rockstar Games, exibidas direto do <a href="https://www.rockstargames.com/VI/media/screenshots" target="_blank" rel="noopener">site oficial de GTA VI</a>. O {e(nome)} não tem ligação com a Rockstar Games.</p>
+</main>
+<div class="g6-lb" id="g6lb" role="dialog" aria-modal="true" aria-label="Imagem em tela cheia" hidden>
+  <button class="g6-x" type="button" data-lb="close" aria-label="Fechar">✕</button>
+  <button class="g6-nav prev" type="button" data-lb="prev" aria-label="Imagem anterior">‹</button>
+  <figure><img alt="" referrerpolicy="no-referrer"><figcaption><span class="g6-cap"></span><a class="g6-orig" target="_blank" rel="noopener">Abrir em alta resolução ↗</a></figcaption></figure>
+  <button class="g6-nav next" type="button" data-lb="next" aria-label="Próxima imagem">›</button>
+</div>"""
+    return layout(c, nome, cab, corpo, '<script src="/assets/js/galeria.js"></script>\n')
+
+
 def pagina_comentarios(c, site):
     nome = site.get("name") or "Nizzera Games"
     cab = meta_pagina(f"Comentários e feedback | {nome}",
@@ -1173,6 +1304,9 @@ def pagina_inicial(texto, dados, trend):
 
     # reviews (as 3 mais recentes)
     revs = sorted([r for r in dados.get("reviews", []) if r.get("game")], key=lambda r: r.get("date", ""), reverse=True)[:3]
+    g6 = gta6_home(gta6_dados())
+    texto = miolo(texto, "gta6home", g6)
+    texto = oculto(texto, "gta6", not g6)
     texto = miolo(texto, "rvgrid", "".join(rv_card(r) for r in revs))
     texto = trocar(texto, r'<section class="wrap rv-home" id="reviews"[^>]*>',
                    f'<section class="wrap rv-home" id="reviews" aria-labelledby="rvh-t" data-n="{len(revs)}"{"" if revs else " hidden"}>')
@@ -1203,6 +1337,7 @@ def sitemap(todas):
               f"  <url><loc>{SITE_URL}/maisjogados/</loc></url>",
               f"  <url><loc>{SITE_URL}/eventos/</loc></url>",
               f"  <url><loc>{SITE_URL}/comunidade/</loc></url>",
+              f"  <url><loc>{SITE_URL}/gta6/</loc></url>",
               f"  <url><loc>{SITE_URL}/comentarios/</loc></url>",
               f"  <url><loc>{SITE_URL}/sobre/</loc></url>",
               f"  <url><loc>{SITE_URL}/tierlist/</loc></url>",
@@ -1319,6 +1454,7 @@ def main():
     mudou += gravar(os.path.join(SITE, "maisjogados", "index.html"), pagina_maisjogados(c, site))
     mudou += gravar(os.path.join(SITE, "eventos", "index.html"), pagina_eventos(c, site))
     mudou += gravar(os.path.join(SITE, "comunidade", "index.html"), pagina_comunidade(c, site))
+    mudou += gravar(os.path.join(SITE, "gta6", "index.html"), pagina_gta6(c, site, todas))
     mudou += gravar(os.path.join(SITE, "comentarios", "index.html"), pagina_comentarios(c, site))
     mudou += gravar(os.path.join(SITE, "sobre", "index.html"), pagina_sobre(c, site))
     mudou += gravar(os.path.join(SITE, "tierlist", "index.html"), pagina_tierlist(c, site))

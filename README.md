@@ -228,3 +228,10 @@ diária quanto quando o painel admin publica, e posta no servidor do Discord só
 - Se o Discord falhar, o erro só aparece no log do Actions; o site é salvo do mesmo jeito.
 - Comandos: `python nizzera-games/scripts/discord_sync.py --teste` (mensagem de teste em #novidades-do-site),
   `--seco` (mostra o que seria postado, sem postar).
+
+## GTA VI: galeria oficial (/gta6/ e seção da página inicial)
+
+`scripts/atualizar_gta6.py` lê todo dia a galeria oficial (rockstargames.com/VI/media/screenshots) e grava
+`SITE/data/gta6.json` só com os endereços das fotos. **As fotos não são baixadas**: o site mostra direto do servidor
+da Rockstar, em miniatura (480px) e grande (1920px) só ao abrir, então nada pesa no servidor do site.
+Foto nova na galeria ganha a etiqueta "Nova" por 14 dias. O resumo fica em `GTA6_RESUMO` no `gerar_paginas.py`.
