@@ -616,7 +616,7 @@ html{-webkit-tap-highlight-color:transparent}
   /* ---- ofertas e grátis: duas colunas ---- */
   .deals{grid-template-columns:1fr 1fr;gap:12px}
   .deal{border-radius:12px}
-  .deal:only-child{grid-column:1/-1}
+  .deal:only-child,.gcard:only-child{grid-column:1/-1}
   .deal .dx{padding:9px 10px 11px;gap:6px}
   .deal b{font-size:.86rem;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .dp{gap:4px 6px}
@@ -917,3 +917,15 @@ html.g6-open{overflow:hidden}
 .dc-count{display:inline-flex;align-items:center;gap:8px;margin:14px 0 0;font-weight:700;font-size:.95rem;color:var(--muted)}
 .dc-count[hidden]{display:none}
 .dc-on{width:10px;height:10px;border-radius:50%;background:#23a55a;box-shadow:0 0 0 3px rgba(35,165,90,.25)}
+
+/* jogos grátis: botão de compartilhar em cada jogo (mesmos botões .shr-b das notícias) */
+.gcard{display:flex;flex-direction:column;background:var(--card);border-radius:14px;overflow:hidden;scroll-margin-top:80px;transition:box-shadow .3s}
+.gcard .deal{flex:1;border-radius:0}
+@media (hover:hover){.gcard .deal:hover{transform:none;box-shadow:none}.gcard:hover{box-shadow:6px 6px 0 var(--sun)}}
+.gshare{padding:0 14px 14px;display:grid;gap:10px}
+.gshare .gshr{justify-self:start}
+.gshr-bar{margin:0;gap:6px}
+.gshr-bar .shr-b{padding:6px 11px;font-size:.8rem}
+.gshr-bar .shr-b svg,.gshr svg{width:16px;height:16px}
+.gcard.gfoco{box-shadow:0 0 0 3px var(--sun),6px 6px 0 var(--sun)}
+@media (max-width:560px){.gshare{padding:0 10px 11px}.gshr-bar .shr-b span{display:none}.gshr-bar .shr-b{padding:8px}.gshare .gshr span{display:inline}}
